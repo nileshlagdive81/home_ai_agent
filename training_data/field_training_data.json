@@ -1,0 +1,447 @@
+{
+  "project_fields": {
+    "project_name": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "What is the name of this project?",
+        "Tell me the project name",
+        "What's this project called?",
+        "Project name please",
+        "What do they call this project?",
+        "Name of the project",
+        "What is the project title?",
+        "Project title please"
+      ],
+      "entities": ["PROJECT_NAME"],
+      "response": "The project name is {project_name}"
+    },
+    "developer_name": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "Who is the developer?",
+        "Tell me the developer name",
+        "Which company built this?",
+        "Developer company name",
+        "Who developed this project?",
+        "Name of the builder",
+        "Which builder made this?",
+        "Developer please"
+      ],
+      "entities": ["DEVELOPER"],
+      "response": "This project is developed by {developer_name}"
+    },
+    "locality": {
+      "intent": "FILTER_BY_LOCATION",
+      "examples": [
+        "Where is this project located?",
+        "What is the locality?",
+        "Which area is this in?",
+        "Location of the project",
+        "What locality is this?",
+        "Area name please",
+        "Which locality?",
+        "Where exactly is this?"
+      ],
+      "entities": ["LOCATION"],
+      "response": "This project is located in {locality_name}"
+    },
+    "city": {
+      "intent": "FILTER_BY_LOCATION",
+      "examples": [
+        "Which city is this in?",
+        "What city is this project?",
+        "City name please",
+        "Which city?",
+        "What's the city?",
+        "City of the project",
+        "In which city?",
+        "City please"
+      ],
+      "entities": ["LOCATION"],
+      "response": "This project is in {city_name}"
+    },
+    "property_type": {
+      "intent": "FILTER_BY_PROPERTY_TYPE",
+      "examples": [
+        "What type of property is this?",
+        "Is this an apartment or villa?",
+        "Property type please",
+        "What kind of property?",
+        "Type of property",
+        "Apartment or villa?",
+        "Which property type?",
+        "Property category"
+      ],
+      "entities": ["PROPERTY_TYPE"],
+      "response": "This is a {property_type} project"
+    },
+    "total_units": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "How many units are there?",
+        "Total number of units",
+        "How many flats in total?",
+        "Total units count",
+        "Number of units",
+        "How many units total?",
+        "Units count please",
+        "Total flats"
+      ],
+      "entities": ["QUANTITY"],
+      "response": "This project has {total_units} units in total"
+    },
+    "units_per_floor": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "How many units per floor?",
+        "Units on each floor",
+        "Flats per floor",
+        "How many per floor?",
+        "Units per floor count",
+        "Per floor units",
+        "How many on one floor?",
+        "Floor unit count"
+      ],
+      "entities": ["QUANTITY"],
+      "response": "There are {units_per_floor} units per floor"
+    },
+    "total_floors": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "How many floors?",
+        "Total number of floors",
+        "How many stories?",
+        "Floor count",
+        "Number of floors",
+        "How many floors total?",
+        "Total stories",
+        "Floor height"
+      ],
+      "entities": ["QUANTITY"],
+      "response": "This project has {total_floors} floors"
+    },
+    "project_status": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "What is the project status?",
+        "Is it ready to move?",
+        "Project completion status",
+        "When will it be ready?",
+        "Construction status",
+        "Is it completed?",
+        "Ready to move?",
+        "Status please"
+      ],
+      "entities": ["STATUS"],
+      "response": "The project status is {project_status}"
+    },
+    "possession_date": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "When can I move in?",
+        "Possession date",
+        "When will it be ready?",
+        "Move in date",
+        "Completion date",
+        "When can I get keys?",
+        "Ready date",
+        "Handover date"
+      ],
+      "entities": ["DATE"],
+      "response": "Possession date is {possession_date}"
+    },
+    "rera_number": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "What is the RERA number?",
+        "RERA number please",
+        "RERA registration number",
+        "RERA ID",
+        "RERA number",
+        "Registration number",
+        "RERA please",
+        "RERA details"
+      ],
+      "entities": ["RERA_NUMBER"],
+      "response": "The RERA number is {rera_number}"
+    },
+    "description": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "Tell me about this project",
+        "Project description",
+        "What is this project about?",
+        "Tell me more",
+        "Project details",
+        "What's special about this?",
+        "Project overview",
+        "Description please"
+      ],
+      "entities": ["DESCRIPTION"],
+      "response": "Project description: {description}"
+    },
+    "highlights": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "What are the highlights?",
+        "Project highlights",
+        "Special features",
+        "What's special?",
+        "Key features",
+        "Main attractions",
+        "What stands out?",
+        "Highlights please"
+      ],
+      "entities": ["FEATURES"],
+      "response": "Project highlights: {highlights}"
+    }
+  },
+  "property_unit_fields": {
+    "bhk": {
+      "intent": "FILTER_BY_BHK",
+      "examples": [
+        "How many BHK?",
+        "What is the BHK?",
+        "Bedroom count",
+        "How many bedrooms?",
+        "BHK please",
+        "Number of bedrooms",
+        "What BHK is this?",
+        "Bedroom count please"
+      ],
+      "entities": ["BHK"],
+      "response": "This is a {bhk} BHK unit"
+    },
+    "carpet_area": {
+      "intent": "GET_DETAILS",
+      "examples": [
+        "What is the carpet area?",
+        "Carpet area please",
+        "How big is it?",
+        "Area size",
+        "Square feet",
+        "What's the area?",
+        "Size of the flat",
+        "Area please"
+      ],
+      "entities": ["AREA"],
+      "response": "Carpet area is {carpet_area} sq ft"
+    },
+    "price": {
+      "intent": "PRICE_QUERY",
+      "examples": [
+        "What is the price?",
+        "How much does it cost?",
+        "Price please",
+        "Cost of the property",
+        "What's the price?",
+        "Total cost",
+        "How much?",
+        "Price details"
+      ],
+      "entities": ["PRICE"],
+      "response": "The price is {price}"
+    },
+    "price_per_sqft": {
+      "intent": "PRICE_QUERY",
+      "examples": [
+        "Price per square foot?",
+        "Rate per sq ft",
+        "Per sq ft price",
+        "Square foot rate",
+        "Price per sq ft please",
+        "Rate per square foot",
+        "Per sq ft cost",
+        "Square foot price"
+      ],
+      "entities": ["PRICE"],
+      "response": "Price per sq ft is {price_per_sqft}"
+    },
+    "booking_amount": {
+      "intent": "PRICE_QUERY",
+      "examples": [
+        "How much booking amount?",
+        "Booking amount please",
+        "Initial payment",
+        "How much to book?",
+        "Booking payment",
+        "Advance amount",
+        "Initial amount",
+        "Booking cost"
+      ],
+      "entities": ["PRICE"],
+      "response": "Booking amount is {booking_amount}"
+    }
+  },
+  "amenity_fields": {
+    "basic_amenities": {
+      "intent": "FILTER_BY_AMENITY",
+      "examples": [
+        "What basic amenities are there?",
+        "Basic facilities",
+        "Essential amenities",
+        "Basic features",
+        "What basic things?",
+        "Basic facilities list",
+        "Essential features",
+        "Basic amenities please"
+      ],
+      "entities": ["AMENITY"],
+      "response": "Basic amenities include: {basic_amenities}"
+    },
+    "luxury_amenities": {
+      "intent": "FILTER_BY_AMENITY",
+      "examples": [
+        "What luxury amenities?",
+        "Premium facilities",
+        "Luxury features",
+        "High-end amenities",
+        "Premium features",
+        "Luxury facilities",
+        "High-end features",
+        "Luxury amenities please"
+      ],
+      "entities": ["AMENITY"],
+      "response": "Luxury amenities include: {luxury_amenities}"
+    },
+    "security_features": {
+      "intent": "FILTER_BY_AMENITY",
+      "examples": [
+        "What security features?",
+        "Security amenities",
+        "Safety features",
+        "Security facilities",
+        "What security?",
+        "Safety amenities",
+        "Security please",
+        "Security features list"
+      ],
+      "entities": ["AMENITY"],
+      "response": "Security features include: {security_features}"
+    }
+  },
+  "nearby_places": {
+    "metro_station": {
+      "intent": "FILTER_BY_AMENITY",
+      "examples": [
+        "Is there metro nearby?",
+        "Metro station distance",
+        "How far is metro?",
+        "Near metro station?",
+        "Metro accessibility",
+        "Metro nearby?",
+        "Metro station please",
+        "Metro distance"
+      ],
+      "entities": ["LOCATION", "DISTANCE"],
+      "response": "Metro station is {distance} km away"
+    },
+    "hospital": {
+      "intent": "FILTER_BY_AMENITY",
+      "examples": [
+        "Is there hospital nearby?",
+        "Hospital distance",
+        "How far is hospital?",
+        "Near hospital?",
+        "Hospital accessibility",
+        "Hospital nearby?",
+        "Hospital please",
+        "Hospital distance"
+      ],
+      "entities": ["LOCATION", "DISTANCE"],
+      "response": "Hospital is {distance} km away"
+    },
+    "school": {
+      "intent": "FILTER_BY_AMENITY",
+      "examples": [
+        "Is there school nearby?",
+        "School distance",
+        "How far is school?",
+        "Near school?",
+        "School accessibility",
+        "School nearby?",
+        "School please",
+        "School distance"
+      ],
+      "entities": ["LOCATION", "DISTANCE"],
+      "response": "School is {distance} km away"
+    },
+    "shopping_mall": {
+      "intent": "FILTER_BY_AMENITY",
+      "examples": [
+        "Is there mall nearby?",
+        "Mall distance",
+        "How far is mall?",
+        "Near shopping mall?",
+        "Mall accessibility",
+        "Mall nearby?",
+        "Shopping mall please",
+        "Mall distance"
+      ],
+      "entities": ["LOCATION", "DISTANCE"],
+      "response": "Shopping mall is {distance} km away"
+    }
+  },
+  "simple_search_queries": {
+    "by_location": {
+      "intent": "SEARCH_PROPERTY",
+      "examples": [
+        "Show me projects in Mumbai",
+        "Properties in Delhi",
+        "Flats in Bangalore",
+        "Houses in Pune",
+        "Projects in Hyderabad",
+        "Properties in Chennai",
+        "Flats in Kolkata",
+        "Houses in Ahmedabad"
+      ],
+      "entities": ["LOCATION"],
+      "response": "Here are properties in {location}"
+    },
+    "by_bhk": {
+      "intent": "SEARCH_PROPERTY",
+      "examples": [
+        "Show me 2BHK properties",
+        "3BHK flats",
+        "1BHK apartments",
+        "4BHK houses",
+        "2BHK projects",
+        "3BHK properties",
+        "1BHK flats",
+        "4BHK apartments"
+      ],
+      "entities": ["BHK"],
+      "response": "Here are {bhk} BHK properties"
+    },
+    "by_price_range": {
+      "intent": "SEARCH_PROPERTY",
+      "examples": [
+        "Properties under 50 lakhs",
+        "Flats under 1 crore",
+        "Houses under 2 crores",
+        "Properties under 100 lakhs",
+        "Affordable properties",
+        "Budget properties",
+        "Cheap properties",
+        "Low cost properties"
+      ],
+      "entities": ["PRICE"],
+      "response": "Here are properties under {price}"
+    },
+    "by_status": {
+      "intent": "SEARCH_PROPERTY",
+      "examples": [
+        "Ready to move properties",
+        "Under construction projects",
+        "Completed projects",
+        "New projects",
+        "Ready properties",
+        "Construction projects",
+        "Finished projects",
+        "New properties"
+      ],
+      "entities": ["STATUS"],
+      "response": "Here are {status} properties"
+    }
+  }
+}

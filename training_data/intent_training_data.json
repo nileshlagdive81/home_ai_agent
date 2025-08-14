@@ -1,0 +1,183 @@
+{
+  "intents": {
+    "SEARCH_PROPERTY": {
+      "examples": [
+        "I want a 2BHK flat in Mumbai",
+        "Show me available properties in Bangalore",
+        "Looking for 3BHK apartments in Pune",
+        "Find houses in Delhi",
+        "Need a flat in Hyderabad",
+        "Search for properties in Chennai",
+        "Available flats in Kolkata",
+        "Show me 1BHK properties",
+        "Looking for 4BHK houses",
+        "Find apartments in Ahmedabad",
+        "Properties for sale in Noida",
+        "Show available units in this project",
+        "I need a property in this area",
+        "Find me a flat near my office",
+        "Show properties within my budget"
+      ],
+      "responses": [
+        "I'll help you find properties matching your criteria.",
+        "Here are the available properties in your preferred location.",
+        "Let me search for properties that meet your requirements."
+      ]
+    },
+    "FILTER_BY_AMENITY": {
+      "examples": [
+        "Show me properties near metro station",
+        "Properties close to hospital",
+        "Flats near good schools",
+        "Houses near shopping mall",
+        "Properties within walking distance to office",
+        "Show projects near railway station",
+        "Flats near park or garden",
+        "Properties near airport",
+        "Houses close to bus stand",
+        "Show me projects near market",
+        "Properties near gym or fitness center",
+        "Flats near restaurants",
+        "Houses near bank or ATM",
+        "Properties near temple or religious place",
+        "Show projects near entertainment center"
+      ],
+      "responses": [
+        "I'll filter properties based on nearby amenities.",
+        "Here are properties located near your preferred amenities.",
+        "Let me show you properties with the amenities you want."
+      ]
+    },
+    "COMPARE_PROPERTIES": {
+      "examples": [
+        "Compare these two projects",
+        "Which project is better",
+        "Show me the difference between projects",
+        "Compare prices of these properties",
+        "Which one has better amenities",
+        "Compare location advantages",
+        "Show me pros and cons",
+        "Which project offers better value",
+        "Compare completion dates",
+        "Which one is more suitable for me",
+        "Show me a comparison table",
+        "What are the differences",
+        "Which project should I choose",
+        "Compare the features",
+        "Show me side by side comparison"
+      ],
+      "responses": [
+        "I'll help you compare the properties side by side.",
+        "Here's a detailed comparison of the projects.",
+        "Let me show you the differences between these properties."
+      ]
+    },
+    "BOOK_VIEWING": {
+      "examples": [
+        "Book a site visit for tomorrow",
+        "Schedule an appointment to see the property",
+        "I want to visit this project",
+        "Book a viewing for next week",
+        "Schedule a tour of the property",
+        "I'd like to see the flat in person",
+        "Book an appointment with the agent",
+        "Schedule a property visit",
+        "I want to tour the project",
+        "Book a site inspection",
+        "Schedule a walkthrough",
+        "I'd like to visit tomorrow",
+        "Book a viewing appointment",
+        "Schedule a property tour",
+        "I want to see the house"
+      ],
+      "responses": [
+        "I'll help you schedule a property viewing.",
+        "Let me book an appointment for you to visit the property.",
+        "I'll arrange a site visit at your preferred time."
+      ]
+    },
+    "GET_DETAILS": {
+      "examples": [
+        "What's the price of this property",
+        "Tell me more about this project",
+        "What are the amenities available",
+        "What's the completion date",
+        "How many floors does this project have",
+        "What's the carpet area",
+        "Tell me about the developer",
+        "What's the RERA number",
+        "What are the payment plans",
+        "Tell me about the location",
+        "What's the project status",
+        "How many units are available",
+        "What's the booking amount",
+        "Tell me about the neighborhood",
+        "What are the highlights of this project"
+      ],
+      "responses": [
+        "Here are the detailed information about the property.",
+        "Let me provide you with all the project details.",
+        "I'll share comprehensive information about this property."
+      ]
+    },
+    "PRICE_QUERY": {
+      "examples": [
+        "What's the price per square foot",
+        "How much does this property cost",
+        "What's the total price",
+        "What's my budget range",
+        "Show me affordable properties",
+        "What are the price options",
+        "How much booking amount required",
+        "What's the cost breakdown",
+        "Show me properties under 50 lakhs",
+        "What's the price range for 2BHK",
+        "How much for 3BHK in this area",
+        "What's the market price",
+        "Show me budget-friendly options",
+        "What are the payment terms",
+        "How much down payment needed"
+      ],
+      "responses": [
+        "Here are the pricing details for the property.",
+        "Let me show you the cost breakdown and payment options.",
+        "I'll provide you with pricing information and budget options."
+      ]
+    }
+  },
+  "entities": {
+    "LOCATION": {
+      "cities": [
+        "Mumbai", "Delhi", "Bangalore", "Pune", "Hyderabad", 
+        "Chennai", "Kolkata", "Ahmedabad", "Noida", "Gurgaon"
+      ],
+      "localities": [
+        "Bandra", "Andheri", "Powai", "Thane", "Navi Mumbai",
+        "Whitefield", "Electronic City", "Hinjewadi", "Baner",
+        "Koregaon Park", "Jubilee Hills", "Gachibowli"
+      ],
+      "landmarks": [
+        "Metro Station", "Railway Station", "Airport", "Hospital",
+        "School", "Mall", "Park", "Office", "Market", "Temple"
+      ]
+    },
+    "PROPERTY_TYPE": {
+      "bhk": ["1BHK", "2BHK", "3BHK", "4BHK", "5BHK", "1 BHK", "2 BHK", "3 BHK"],
+      "types": ["Flat", "Apartment", "House", "Villa", "Penthouse", "Studio"]
+    },
+    "AMENITY": {
+      "basic": ["Parking", "Lift", "Security", "Water Supply", "Power Backup"],
+      "luxury": ["Swimming Pool", "Gym", "Clubhouse", "Garden", "Playground"],
+      "security": ["CCTV", "Security Guard", "Gated Community", "24x7 Security"],
+      "recreation": ["Park", "Playground", "Clubhouse", "Community Hall"]
+    },
+    "PRICE": {
+      "ranges": ["Under 50 Lakhs", "50-100 Lakhs", "1-2 Crores", "Above 2 Crores"],
+      "units": ["Lakhs", "Crores", "Per Sq Ft", "Square Feet"]
+    },
+    "TEMPORAL": {
+      "dates": ["Today", "Tomorrow", "Next Week", "This Month", "Next Month"],
+      "time": ["Morning", "Afternoon", "Evening", "9 AM", "2 PM"]
+    }
+  }
+}
