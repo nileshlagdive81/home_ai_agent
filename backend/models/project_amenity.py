@@ -10,8 +10,8 @@ class ProjectAmenity(Base, TimestampMixin):
     amenity_id = Column(String, ForeignKey("amenities.id"), nullable=False)
     is_available = Column(Boolean, default=True)
     
-    # Relationships
-    project = relationship("Project", back_populates="project_amenities")
+    # Relationships - using backref to avoid circular dependency
+    amenity = relationship("Amenity", backref="project_amenities")
     
     def __repr__(self):
         return f"<ProjectAmenity(project_id={self.project_id}, amenity_id={self.amenity_id})>"

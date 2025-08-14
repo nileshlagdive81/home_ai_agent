@@ -12,6 +12,7 @@ class ExtractedEntity:
     start: int
     end: int
     confidence: float
+    context: Dict  # Additional context like operator, value, unit
 
 @dataclass
 class QueryIntent:
@@ -21,7 +22,7 @@ class QueryIntent:
     entities: List[ExtractedEntity]
 
 class RealEstateNLPEngine:
-    """NLP Engine for Real Estate queries using spaCy"""
+    """INTENT-DRIVEN NLP Engine for Real Estate queries using spaCy"""
     
     def __init__(self, model_name: str = "en_core_web_sm"):
         """Initialize the NLP engine with spaCy model"""
@@ -32,69 +33,102 @@ class RealEstateNLPEngine:
             print(f"❌ Model {model_name} not found. Please install it with: python -m spacy download {model_name}")
             raise
         
-        # Define real estate specific intents
+        # INTENT-DRIVEN: Define intents based on semantic meaning, not keywords
         self.intents = {
-            "SEARCH_PROPERTY": [
-                "find", "search", "looking for", "want", "need", "show me", "get me",
-                "available", "properties", "flats", "houses", "apartments"
-            ],
-            "FILTER_BY_AMENITY": [
-                "near", "close to", "nearby", "within", "distance", "metro", "hospital",
-                "school", "office", "station", "mall", "park", "garden"
-            ],
-            "COMPARE_PROPERTIES": [
-                "compare", "difference", "vs", "versus", "better", "best", "which one"
-            ],
-            "BOOK_VIEWING": [
-                "book", "schedule", "appointment", "visit", "viewing", "tour", "see",
-                "tomorrow", "next week", "this weekend"
-            ],
-            "GET_DETAILS": [
-                "what", "details", "information", "tell me", "how much", "price",
-                "area", "bhk", "floor", "status", "completion"
-            ],
-            "PRICE_QUERY": [
-                "price", "cost", "budget", "affordable", "expensive", "cheap",
-                "per sq ft", "total cost", "booking amount"
-            ]
-        }
-        
-        # Define entity patterns for real estate domain
-        self.entity_patterns = {
-            "LOCATION": {
-                "cities": ["mumbai", "delhi", "bangalore", "pune", "hyderabad", "chennai", "kolkata", "ahmedabad"],
-                "localities": ["bandra", "andheri", "powai", "thane", "navi mumbai", "gurgaon", "noida"],
-                "landmarks": ["airport", "metro", "railway", "bus stand", "mall", "hospital", "school"]
+            "SEARCH_PROPERTY": {
+                "description": "User wants to find properties based on criteria",
+                "semantic_indicators": ["find", "search", "looking for", "want", "need", "show me", "get me", "available"],
+                "context_indicators": ["properties", "flats", "houses", "apartments", "real estate"]
             },
-            "PROPERTY_TYPE": {
-                "bhk": ["1bhk", "2bhk", "3bhk", "4bhk", "5bhk", "1 bhk", "2 bhk", "3 bhk"],
-                "property_types": ["flat", "apartment", "house", "villa", "penthouse", "studio"]
+            "FILTER_BY_AMENITY": {
+                "description": "User wants properties with specific amenities or near landmarks",
+                "semantic_indicators": ["near", "close to", "nearby", "within", "distance"],
+                "context_indicators": ["metro", "hospital", "school", "office", "station", "mall", "park", "garden"]
             },
-            "AMENITY": {
-                "basic": ["parking", "lift", "security", "water", "power"],
-                "luxury": ["swimming pool", "gym", "clubhouse", "garden", "playground"],
-                "security": ["cctv", "guard", "gated", "24x7 security"],
-                "recreation": ["park", "playground", "clubhouse", "community hall"]
+            "COMPARE_PROPERTIES": {
+                "description": "User wants to compare different properties",
+                "semantic_indicators": ["compare", "difference", "vs", "versus", "better", "best", "which one"],
+                "context_indicators": ["properties", "projects", "buildings"]
             },
-            "PRICE": {
-                "ranges": ["under 50 lakhs", "50-100 lakhs", "1-2 crores", "above 2 crores"],
-                "units": ["lakhs", "crores", "per sq ft", "sq ft"]
+            "BOOK_VIEWING": {
+                "description": "User wants to schedule a property viewing",
+                "semantic_indicators": ["book", "schedule", "appointment", "visit", "viewing", "tour", "see"],
+                "context_indicators": ["tomorrow", "next week", "this weekend", "today"]
             },
-            "TEMPORAL": {
-                "dates": ["today", "tomorrow", "next week", "this month", "next month"],
-                "time": ["morning", "afternoon", "evening", "9am", "2pm"]
+            "GET_DETAILS": {
+                "description": "User wants specific information about properties",
+                "semantic_indicators": ["what", "details", "information", "tell me", "how much"],
+                "context_indicators": ["price", "area", "bhk", "floor", "status", "completion"]
+            },
+            "PRICE_QUERY": {
+                "description": "User is asking about pricing information",
+                "semantic_indicators": ["price", "cost", "budget", "affordable", "expensive", "cheap"],
+                "context_indicators": ["per sq ft", "total cost", "booking amount", "lakhs", "crores"]
             }
         }
     
-    def extract_entities(self, text: str) -> List[ExtractedEntity]:
-        """Extract entities from the query text"""
+    def extract_entities_with_context(self, text: str) -> List[ExtractedEntity]:
+        """INTENT-DRIVEN: Extract entities with full semantic context"""
         entities = []
         text_lower = text.lower()
         
-        # Process with spaCy
-        doc = self.nlp(text_lower)
+        print(f"🔍 INTENT-DRIVEN: Analyzing semantic meaning of: '{text}'")
         
-        # Extract named entities
+        # Process with spaCy for linguistic understanding
+        doc = self.nlp(text)
+        
+        # INTENT-DRIVEN: Extract entities based on semantic understanding, not just patterns
+        
+        # 1. LOCATION entities (cities, localities, landmarks)
+        self._extract_location_entities(doc, entities, text_lower)
+        
+        # 2. BHK entities with semantic context
+        self._extract_bhk_entities(doc, entities, text_lower)
+        
+        # 3. PRICE entities with semantic context (MOST IMPORTANT)
+        self._extract_price_entities_with_context(doc, entities, text_lower)
+        
+        # 4. CARPET AREA entities with semantic context
+        self._extract_area_entities_with_context(doc, entities, text_lower)
+        
+        # 5. AMENITY entities with semantic context
+        self._extract_amenity_entities(doc, entities, text_lower)
+        
+        print(f"🔍 INTENT-DRIVEN: Total entities with context: {len(entities)}")
+        for entity in entities:
+            print(f"🔍 INTENT-DRIVEN: Entity: {entity.label} = '{entity.text}' with context: {entity.context}")
+        
+        return entities
+    
+    def _extract_location_entities(self, doc, entities, text_lower):
+        """Extract location entities using spaCy's NER and common Indian cities"""
+        # First, check for common Indian cities in the text
+        indian_cities = [
+            "mumbai", "delhi", "bangalore", "hyderabad", "chennai", "kolkata", "pune", 
+            "ahmedabad", "jaipur", "lucknow", "kanpur", "nagpur", "indore", "thane",
+            "bhopal", "visakhapatnam", "patna", "vadodara", "ghaziabad", "ludhiana",
+            "agra", "nashik", "faridabad", "meerut", "rajkot", "kalyan", "vasai",
+            "vashi", "navi mumbai", "gurgaon", "noida", "greater noida", "faridabad"
+        ]
+        
+        # Check for city mentions in the text
+        for city in indian_cities:
+            if city in text_lower:
+                # Check if it's actually being requested as a location
+                context_words = self._get_context_words(text_lower, text_lower.find(city), text_lower.find(city) + len(city), 10)
+                if any(word in context_words for word in ["in", "at", "near", "from", "of", "within", "around"]):
+                    entities.append(ExtractedEntity(
+                        text=city,
+                        label="LOCATION",
+                        start=text_lower.find(city),
+                        end=text_lower.find(city) + len(city),
+                        confidence=0.9,
+                        context={"type": "city", "full_text": city, "semantic_meaning": "required_location"}
+                    ))
+                    print(f"🔍 INTENT-DRIVEN: Found LOCATION entity: '{city}' (Indian city)")
+                    return  # Exit after finding first city
+        
+        # Fallback to spaCy's NER for other location entities
         for ent in doc.ents:
             if ent.label_ in ["GPE", "LOC", "FAC"]:  # Location entities
                 entities.append(ExtractedEntity(
@@ -102,156 +136,383 @@ class RealEstateNLPEngine:
                     label="LOCATION",
                     start=ent.start_char,
                     end=ent.end_char,
-                    confidence=0.9
+                    confidence=0.8,
+                    context={"type": ent.label_, "full_text": ent.text}
                 ))
-        
-        # Extract custom entities using patterns
-        for entity_type, patterns in self.entity_patterns.items():
-            for category, values in patterns.items():
-                for value in values:
-                    if value in text_lower:
-                        start = text_lower.find(value)
-                        if start != -1:
-                            entities.append(ExtractedEntity(
-                                text=value,
-                                label=entity_type,
-                                start=start,
-                                end=start + len(value),
-                                confidence=0.8
-                            ))
-        
-        # Extract numbers (BHK, price, area) with improved context
-        numbers = re.findall(r'\d+(?:\.\d+)?', text)
-        for num in numbers:
-            # Check if it's BHK - look for context around the number
-            num_start = text.find(num)
-            num_end = num_start + len(num)
-            
-            # Look for BHK context in a window around the number
-            context_start = max(0, num_start - 10)
-            context_end = min(len(text), num_end + 10)
-            context = text[context_start:context_end].lower()
-            
-            if any(bhk in context for bhk in ["bhk", "bedroom", "bed room"]):
-                entities.append(ExtractedEntity(
-                    text=num,
-                    label="BHK",
-                    start=num_start,
-                    end=num_end,
-                    confidence=0.9
-                ))
-        
-        # Extract price ranges with comprehensive patterns
-        price_patterns = [
-            # Under/Below/Less than patterns
-            r'under\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'below\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'less\s+than\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'<=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'<=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            
-            # Above/Over/More than patterns
-            r'above\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'more\s+than\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'over\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'>=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'>=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            
-            # Range patterns
-            r'(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'(\d+(?:\.\d+)?)\s*to\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'between\s+(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|crore|crores)\s*to\s*(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|crore|crores)',
-            
-            # Exact patterns
-            r'equal\s+to\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            
-            # Greater/Less than with symbols
-            r'>\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'<\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)'
-        ]
-        
-        for pattern in price_patterns:
-            matches = re.finditer(pattern, text_lower)
-            for match in matches:
-                entities.append(ExtractedEntity(
-                    text=match.group(0),
-                    label="PRICE",
-                    start=match.start(),
-                    end=match.end(),
-                    confidence=0.95
-                ))
-        
-        # Extract BHK with comparison operators
+                print(f"🔍 INTENT-DRIVEN: Found LOCATION entity: '{ent.text}' ({ent.label_})")
+    
+    def _extract_bhk_entities(self, doc, entities, text_lower):
+        """Extract BHK entities with semantic understanding"""
+        # Look for BHK patterns in the context of property specifications
         bhk_patterns = [
-            r'bhk\s*>=?\s*(\d+(?:\.\d+)?)',      # BHK >= X
-            r'bhk\s*<=?\s*(\d+(?:\.\d+)?)',      # BHK <= X
-            r'bhk\s*>\s*(\d+(?:\.\d+)?)',        # BHK > X
-            r'bhk\s*<\s*(\d+(?:\.\d+)?)',        # BHK < X
-            r'(\d+(?:\.\d+)?)\s*bhk',            # X BHK
-            r'(\d+(?:\.\d+)?)\s*bedroom',        # X bedroom
-            r'(\d+(?:\.\d+)?)\s*bed\s*room',     # X bed room
+            r'(\d+(?:\.\d+)?)\s*bhk',
+            r'(\d+(?:\.\d+)?)\s*bedroom',
+            r'(\d+(?:\.\d+)?)\s*bed\s*room'
         ]
         
         for pattern in bhk_patterns:
             matches = re.finditer(pattern, text_lower)
             for match in matches:
-                entities.append(ExtractedEntity(
-                    text=match.group(0),
-                    label="BHK",
-                    start=match.start(),
-                    end=match.end(),
-                    confidence=0.9
-                ))
+                # INTENT-DRIVEN: Check if this is actually about property BHK, not just a number
+                context_words = self._get_context_words(text_lower, match.start(), match.end(), 10)
+                if any(word in context_words for word in ["property", "flat", "apartment", "house", "real estate", "bhk"]):
+                    entities.append(ExtractedEntity(
+                        text=match.group(0),
+                        label="BHK",
+                        start=match.start(),
+                        end=match.end(),
+                        confidence=0.9,
+                        context={"value": float(match.group(1)), "operator": "=", "unit": "bhk"}
+                    ))
+                    print(f"🔍 INTENT-DRIVEN: Found BHK entity: '{match.group(0)}' in property context")
+    
+    def _extract_price_entities_with_context(self, doc, entities, text_lower):
+        """INTENT-DRIVEN: Extract price entities with full semantic context"""
+        print(f"🔍 INTENT-DRIVEN: Analyzing price context in: '{text_lower}'")
         
-        # Extract carpet area with comparison operators
-        carpet_area_patterns = [
-            r'carpet\s+area\s+(?:under|below|less\s+than)\s+(\d+)\s*sqft',
-            r'carpet\s+area\s+(?:above|over|more\s+than)\s+(\d+)\s*sqft',
-            r'carpet\s+area\s+between\s+(\d+)\s*(?:to|-)\s*(\d+)\s*sqft',
-            r'carpet\s+area\s*>=?\s*(\d+)\s*sqft',
-            r'carpet\s+area\s*<=?\s*(\d+)\s*sqft',
-            r'carpet\s+area\s*>\s*(\d+)\s*sqft',
-            r'carpet\s+area\s*<\s*(\d+)\s*sqft',
-            r'area\s+(?:under|below|less\s+than)\s+(\d+)\s*sqft',
-            r'area\s+(?:above|over|more\s+than)\s+(\d+)\s*sqft',
-            r'area\s+between\s+(\d+)\s*(?:to|-)\s*(\d+)\s*sqft',
-            r'area\s*>=?\s*(\d+)\s*sqft',
-            r'area\s*<=?\s*(\d+)\s*sqft',
-            r'area\s*>\s*(\d+)\s*sqft',
-            r'area\s*<\s*(\d+)\s*sqft',
-            r'(\d+)\s*sqft\s+(?:and\s+)?(?:above|below|under|over)',
-            r'(\d+)\s*sqft\s+to\s+(\d+)\s*sqft'
+        # INTENT-DRIVEN: First, understand the semantic structure of the query
+        # Look for price-related semantic patterns
+        
+        # Pattern 1: "under X crore/lakh" - semantic understanding
+        under_patterns = [
+            r'(under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)\s+(?:or\s+)?(?:less|below|under)',
+            r'price\s+(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'budget\s+(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'cost\s+(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            # Additional patterns for common variations
+            r'properties?\s+(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'flats?\s+(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'houses?\s+(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'apartments?\s+(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            # More comprehensive patterns
+            r'(?:properties?|flats?|houses?|apartments?)\s+(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)\s+(?:under|below|less\s+than)'
         ]
         
-        for pattern in carpet_area_patterns:
+        # Pattern 2: "above X crore/lakh" - semantic understanding
+        above_patterns = [
+            r'(above|over|more\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)\s+(?:or\s+)?(?:more|above|over)',
+            r'price\s+(?:above|over|more\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'budget\s+(?:above|over|more\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'cost\s+(?:above|over|more\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            # Additional patterns for common variations
+            r'properties?\s+(?:above|over|more\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'flats?\s+(?:above|over|more\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'houses?\s+(?:above|over|more\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'apartments?\s+(?:above|over|more\s+than)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)'
+        ]
+        
+        # Pattern 3: Exact price - semantic understanding
+        exact_patterns = [
+            r'(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)\s+(?:exactly|precisely|exact)',
+            r'price\s+(?:is|of)\s+(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)',
+            r'(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)\s+(?:flat|apartment|property)',
+            # Additional patterns for exact matches
+            r'(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)\s*[=]\s*(\d+(?:\.\d+)?)',
+            r'(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)\s+(?:flat|apartment|property|bhk)'
+        ]
+        
+        # INTENT-DRIVEN: Check each pattern with semantic validation
+        found_price = False
+        
+        # Check "under" patterns first (most common in real estate)
+        for pattern in under_patterns:
+            if not found_price:
+                matches = re.finditer(pattern, text_lower)
+                for match in matches:
+                    # INTENT-DRIVEN: Validate this is actually about price, not area or other attributes
+                    if self._is_price_context(text_lower, match.start(), match.end()):
+                        value = float(match.group(2))
+                        unit = match.group(3)
+                        price_in_rupees = self._convert_to_rupees(value, unit)
+                        
+                        entities.append(ExtractedEntity(
+                            text=match.group(0),
+                            label="PRICE",
+                            start=match.start(),
+                            end=match.end(),
+                            confidence=0.95,
+                            context={
+                                "value": price_in_rupees,
+                                "operator": "<",
+                                "unit": unit,
+                                "original_value": value,
+                                "semantic_meaning": "less_than"
+                            }
+                        ))
+                        print(f"🔍 INTENT-DRIVEN: Found PRICE entity (under): '{match.group(0)}' = < {price_in_rupees} rupees")
+                        found_price = True
+                        break
+        
+        # Check "above" patterns
+        for pattern in above_patterns:
+            if not found_price:
+                matches = re.finditer(pattern, text_lower)
+                for match in matches:
+                    if self._is_price_context(text_lower, match.start(), match.end()):
+                        value = float(match.group(2))
+                        unit = match.group(3)
+                        price_in_rupees = self._convert_to_rupees(value, unit)
+                        
+                        entities.append(ExtractedEntity(
+                            text=match.group(0),
+                            label="PRICE",
+                            start=match.start(),
+                            end=match.end(),
+                            confidence=0.95,
+                            context={
+                                "value": price_in_rupees,
+                                "operator": ">",
+                                "unit": unit,
+                                "original_value": value,
+                                "semantic_meaning": "more_than"
+                            }
+                        ))
+                        print(f"🔍 INTENT-DRIVEN: Found PRICE entity (above): '{match.group(0)}' = > {price_in_rupees} rupees")
+                        found_price = True
+                        break
+        
+        # Check exact price patterns
+        for pattern in exact_patterns:
+            if not found_price:
+                matches = re.finditer(pattern, text_lower)
+                for match in matches:
+                    if self._is_price_context(text_lower, match.start(), match.end()):
+                        value = float(match.group(1))
+                        unit = match.group(2)
+                        price_in_rupees = self._convert_to_rupees(value, unit)
+                        
+                        entities.append(ExtractedEntity(
+                            text=match.group(0),
+                            label="PRICE",
+                            start=match.start(),
+                            end=match.end(),
+                            confidence=0.95,
+                            context={
+                                "value": price_in_rupees,
+                                "operator": "=",
+                                "unit": unit,
+                                "original_value": value,
+                                "semantic_meaning": "exact"
+                            }
+                        ))
+                        print(f"🔍 INTENT-DRIVEN: Found PRICE entity (exact): '{match.group(0)}' = = {price_in_rupees} rupees")
+                        found_price = True
+                        break
+        
+        # FALLBACK: If no price entity found, try to extract any price-related information
+        if not found_price:
+            self._extract_price_fallback(text_lower, entities)
+    
+    def _extract_area_entities_with_context(self, doc, entities, text_lower):
+        """INTENT-DRIVEN: Extract carpet area entities with semantic context"""
+        # INTENT-DRIVEN: Look for area-related semantic patterns
+        area_patterns = [
+            # Patterns with sqft
+            r'carpet\s+area\s+(?:under|below|less\s+than)\s+(\d{3,5})\s*sqft',
+            r'carpet\s+area\s+(?:above|over|more\s+than)\s+(\d{3,5})\s*sqft',
+            r'carpet\s+area\s+(\d{3,5})\s*sqft',
+            r'(\d{3,5})\s*sqft\s+(?:carpet\s+)?area',
+            r'area\s+(?:under|below|less\s+than)\s+(\d{3,5})\s*sqft',
+            r'area\s+(?:above|over|more\s+than)\s+(\d{3,5})\s*sqft',
+            # Patterns without sqft (common in natural language)
+            r'carpet\s+area\s+(?:under|below|less\s+than)\s+(\d{3,5})',
+            r'carpet\s+area\s+(?:above|over|more\s+than)\s+(\d{3,5})',
+            r'carpet\s+area\s+(\d{3,5})',
+            r'area\s+(?:under|below|less\s+than)\s+(\d{3,5})',
+            r'area\s+(?:above|over|more\s+than)\s+(\d{3,5})',
+            # Direct number patterns for area
+            r'(\d{3,5})\s+(?:sqft|square\s+feet)\s+(?:carpet\s+)?area'
+        ]
+        
+        for pattern in area_patterns:
             matches = re.finditer(pattern, text_lower)
             for match in matches:
-                entities.append(ExtractedEntity(
-                    text=match.group(0),
-                    label="CARPET_AREA",
-                    start=match.start(),
-                    end=match.end(),
-                    confidence=0.9
-                ))
+                # INTENT-DRIVEN: Validate this is about area, not price
+                if self._is_area_context(text_lower, match.start(), match.end()):
+                    value = int(match.group(1))
+                    operator = self._extract_area_operator(match.group(0))
+                    
+                    entities.append(ExtractedEntity(
+                        text=match.group(0),
+                        label="CARPET_AREA",
+                        start=match.start(),
+                        end=match.end(),
+                        confidence=0.9,
+                        context={
+                            "value": value,
+                            "operator": operator,
+                            "unit": "sqft",
+                            "semantic_meaning": "carpet_area"
+                        }
+                    ))
+                    print(f"🔍 INTENT-DRIVEN: Found CARPET_AREA entity: '{match.group(0)}' = {operator} {value} sqft")
+    
+    def _extract_amenity_entities(self, doc, entities, text_lower):
+        """INTENT-DRIVEN: Extract amenity entities with semantic context"""
+        amenity_keywords = [
+            "gym", "swimming pool", "parking", "lift", "security", "garden", 
+            "playground", "clubhouse", "hospital", "school", "metro", "railway", "airport", "mall", "park"
+        ]
         
-        return entities
+        for amenity in amenity_keywords:
+            if amenity in text_lower:
+                # INTENT-DRIVEN: Check if this amenity is actually being requested
+                context_words = self._get_context_words(text_lower, text_lower.find(amenity), text_lower.find(amenity) + len(amenity), 15)
+                if any(word in context_words for word in ["with", "having", "including", "near", "close", "nearby"]):
+                    entities.append(ExtractedEntity(
+                        text=amenity,
+                        label="AMENITY",
+                        start=text_lower.find(amenity),
+                        end=text_lower.find(amenity) + len(amenity),
+                        confidence=0.85,
+                        context={"type": "amenity", "semantic_meaning": "required_feature"}
+                    ))
+                    print(f"🔍 INTENT-DRIVEN: Found AMENITY entity: '{amenity}'")
+    
+    def _is_price_context(self, text_lower, start, end):
+        """INTENT-DRIVEN: Determine if the matched text is actually about price"""
+        # Get surrounding context
+        context_start = max(0, start - 20)
+        context_end = min(len(text_lower), end + 20)
+        context = text_lower[context_start:context_end]
+        
+        # Price indicators
+        price_indicators = ["price", "cost", "budget", "lakh", "crore", "rupee", "rs", "₹"]
+        
+        # Area indicators (to avoid confusion)
+        area_indicators = ["sqft", "square feet", "area", "carpet", "built-up"]
+        
+        # Check if context contains price indicators
+        has_price_context = any(indicator in context for indicator in price_indicators)
+        
+        # Check if context contains area indicators (conflicting)
+        has_area_context = any(indicator in context for indicator in area_indicators)
+        
+        # INTENT-DRIVEN: If it has price context and NO area context, it's about price
+        return has_price_context and not has_area_context
+    
+    def _is_area_context(self, text_lower, start, end):
+        """INTENT-DRIVEN: Determine if the matched text is actually about area"""
+        context_start = max(0, start - 20)
+        context_end = min(len(text_lower), end + 20)
+        context = text_lower[context_start:context_end]
+        
+        area_indicators = ["sqft", "square feet", "area", "carpet", "built-up", "size"]
+        price_indicators = ["price", "cost", "budget", "lakh", "crore", "rupee"]
+        
+        has_area_context = any(indicator in context for indicator in area_indicators)
+        has_price_context = any(indicator in context for indicator in price_indicators)
+        
+        return has_area_context and not has_price_context
+    
+    def _extract_area_operator(self, text):
+        """INTENT-DRIVEN: Extract operator from area text"""
+        if any(word in text for word in ["under", "below", "less than"]):
+            return "<"
+        elif any(word in text for word in ["above", "over", "more than"]):
+            return ">"
+        else:
+            return "="
+    
+    def _get_context_words(self, text_lower, start, end, window_size):
+        """Get words around a match for context analysis"""
+        context_start = max(0, start - window_size)
+        context_end = min(len(text_lower), end + window_size)
+        return text_lower[context_start:context_end]
+    
+    def _convert_to_rupees(self, value, unit):
+        """Convert price to rupees based on unit"""
+        if 'lakh' in unit:
+            return value * 100000
+        elif 'crore' in unit or 'cr' in unit:
+            return value * 10000000
+        elif 'thousand' in unit:
+            return value * 1000
+        else:
+            return value
+    
+    def _extract_price_fallback(self, text_lower: str, entities: List[ExtractedEntity]):
+        """FALLBACK: Extract price information using simpler pattern matching"""
+        print(f"🔍 FALLBACK: Attempting to extract price from: '{text_lower}'")
+        
+        # Simple fallback patterns for common price expressions
+        fallback_patterns = [
+            # "under X crore/lakh" variations
+            r'(?:under|below|less\s+than)\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
+            # "above X crore/lakh" variations  
+            r'(?:above|over|more\s+than)\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
+            # "X crore/lakh" (exact)
+            r'(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)'
+        ]
+        
+        for i, pattern in enumerate(fallback_patterns):
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                try:
+                    value = float(match.group(1))
+                    unit = match.group(0).split()[-1]  # Get the unit from the matched text
+                    
+                    # Determine operator based on pattern index
+                    if i == 0:  # under/below/less than
+                        operator = "<"
+                        semantic_meaning = "less_than"
+                    elif i == 1:  # above/over/more than
+                        operator = ">"
+                        semantic_meaning = "more_than"
+                    else:  # exact
+                        operator = "="
+                        semantic_meaning = "exact"
+                    
+                    price_in_rupees = self._convert_to_rupees(value, unit)
+                    
+                    entities.append(ExtractedEntity(
+                        text=match.group(0),
+                        label="PRICE",
+                        start=text_lower.find(match.group(0)),
+                        end=text_lower.find(match.group(0)) + len(match.group(0)),
+                        confidence=0.8,  # Lower confidence for fallback
+                        context={
+                            "value": price_in_rupees,
+                            "operator": operator,
+                            "unit": unit,
+                            "original_value": value,
+                            "semantic_meaning": semantic_meaning
+                        }
+                    ))
+                    print(f"🔍 FALLBACK: Found PRICE entity: '{match.group(0)}' = {operator} {price_in_rupees} rupees")
+                    return  # Exit after first successful match
+                    
+                except (ValueError, IndexError) as e:
+                    print(f"🔍 FALLBACK: Error parsing fallback pattern: {e}")
+                    continue
     
     def classify_intent(self, text: str) -> Tuple[str, float]:
-        """Classify the intent of the query"""
+        """INTENT-DRIVEN: Classify intent based on semantic understanding"""
         text_lower = text.lower()
         
-        # Calculate confidence scores for each intent
+        # INTENT-DRIVEN: Calculate confidence based on semantic indicators, not just keyword counting
         intent_scores = {}
         
-        for intent, keywords in self.intents.items():
+        for intent_name, intent_info in self.intents.items():
             score = 0
-            for keyword in keywords:
-                if keyword in text_lower:
-                    score += 1
+            
+            # Check semantic indicators (primary)
+            for indicator in intent_info["semantic_indicators"]:
+                if indicator in text_lower:
+                    score += 2  # Higher weight for semantic indicators
+            
+            # Check context indicators (secondary)
+            for indicator in intent_info["context_indicators"]:
+                if indicator in text_lower:
+                    score += 1  # Lower weight for context indicators
             
             if score > 0:
-                intent_scores[intent] = score / len(keywords)
+                # Normalize score
+                intent_scores[intent_name] = min(score / (len(intent_info["semantic_indicators"]) + len(intent_info["context_indicators"])), 1.0)
         
         if not intent_scores:
             return "UNKNOWN", 0.0
@@ -261,11 +522,11 @@ class RealEstateNLPEngine:
         return best_intent[0], best_intent[1]
     
     def process_query(self, query: str) -> QueryIntent:
-        """Process a natural language query and return intent and entities"""
-        # Extract entities
-        entities = self.extract_entities(query)
+        """INTENT-DRIVEN: Process query with semantic understanding"""
+        # Extract entities with full context
+        entities = self.extract_entities_with_context(query)
         
-        # Classify intent
+        # Classify intent semantically
         intent, confidence = self.classify_intent(query)
         
         return QueryIntent(
@@ -275,7 +536,7 @@ class RealEstateNLPEngine:
         )
     
     def get_search_criteria(self, query: str) -> Dict:
-        """Convert NLP query to search criteria with improved operator handling"""
+        """INTENT-DRIVEN: Convert semantically understood query to search criteria"""
         intent_result = self.process_query(query)
         
         criteria = {
@@ -284,144 +545,28 @@ class RealEstateNLPEngine:
             "filters": {}
         }
         
-        # Extract filters from entities
+        # INTENT-DRIVEN: Extract filters from entities with their semantic context
         for entity in intent_result.entities:
             if entity.label == "LOCATION":
                 criteria["filters"]["location"] = entity.text
             elif entity.label == "BHK":
-                # Extract BHK value and operator
-                bhk_info = self.extract_bhk_with_operator(entity.text)
-                if bhk_info:
-                    criteria["filters"]["bhk"] = bhk_info["value"]
-                    criteria["filters"]["bhk_operator"] = bhk_info["operator"]
-            elif entity.label == "PROPERTY_TYPE":
-                criteria["filters"]["property_type"] = entity.text
+                criteria["filters"]["bhk"] = entity.context["value"]
+                criteria["filters"]["bhk_operator"] = entity.context["operator"]
             elif entity.label == "PRICE":
-                # Extract price with operator
-                price_info = self.extract_price_with_operator(entity.text)
-                if price_info:
-                    criteria["filters"]["price_range"] = price_info["text"]
-                    criteria["filters"]["price_operator"] = price_info["operator"]
-                    criteria["filters"]["price_value"] = price_info["value"]
+                # Use the semantic context directly - no need for separate extraction
+                criteria["filters"]["price_range"] = entity.text
+                criteria["filters"]["price_operator"] = entity.context["operator"]
+                criteria["filters"]["price_value"] = entity.context["value"]
             elif entity.label == "CARPET_AREA":
-                # Extract carpet area with operator
-                area_info = self.extract_area_with_operator(entity.text)
-                if area_info:
-                    criteria["filters"]["carpet_area"] = area_info["text"]
-                    criteria["filters"]["area_operator"] = area_info["operator"]
-                    criteria["filters"]["area_value"] = area_info["value"]
+                criteria["filters"]["carpet_area"] = entity.text
+                criteria["filters"]["area_operator"] = entity.context["operator"]
+                criteria["filters"]["area_value"] = entity.context["value"]
             elif entity.label == "AMENITY":
                 if "amenities" not in criteria["filters"]:
                     criteria["filters"]["amenities"] = []
                 criteria["filters"]["amenities"].append(entity.text)
         
         return criteria
-    
-    def extract_bhk_with_operator(self, text: str) -> Optional[Dict]:
-        """Extract BHK value and comparison operator"""
-        text_lower = text.lower()
-        
-        # Patterns for BHK with operators
-        patterns = [
-            (r'bhk\s*>=?\s*(\d+(?:\.\d+)?)', '>='),
-            (r'bhk\s*<=?\s*(\d+(?:\.\d+)?)', '<='),
-            (r'bhk\s*>\s*(\d+(?:\.\d+)?)', '>'),
-            (r'bhk\s*<\s*(\d+(?:\.\d+)?)', '<'),
-            (r'(\d+(?:\.\d+)?)\s*bhk', '='),
-            (r'(\d+(?:\.\d+)?)\s*bedroom', '='),
-            (r'(\d+(?:\.\d+)?)\s*bed\s*room', '='),
-        ]
-        
-        for pattern, operator in patterns:
-            match = re.search(pattern, text_lower)
-            if match:
-                try:
-                    value = float(match.group(1))
-                    return {
-                        "value": value,
-                        "operator": operator,
-                        "text": text
-                    }
-                except ValueError:
-                    continue
-        
-        return None
-    
-    def extract_price_with_operator(self, text: str) -> Optional[Dict]:
-        """Extract price value and comparison operator"""
-        text_lower = text.lower()
-        
-        # Patterns for price with operators
-        patterns = [
-            (r'under\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '<'),
-            (r'below\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '<'),
-            (r'less\s+than\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '<'),
-            (r'<=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '<='),
-            (r'above\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '>'),
-            (r'more\s+than\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '>'),
-            (r'over\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '>'),
-            (r'>=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '>='),
-            (r'>\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '>'),
-            (r'<\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '<'),
-            (r'equal\s+to\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '='),
-            (r'=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', '='),
-        ]
-        
-        for pattern, operator in patterns:
-            match = re.search(pattern, text_lower)
-            if match:
-                try:
-                    value = float(match.group(1))
-                    # Convert to rupees
-                    if 'lakh' in text_lower:
-                        value = value * 100000
-                    elif 'crore' in text_lower or 'cr' in text_lower:
-                        value = value * 10000000
-                    
-                    return {
-                        "value": value,
-                        "operator": operator,
-                        "text": text
-                    }
-                except ValueError:
-                    continue
-        
-        return None
-    
-    def extract_area_with_operator(self, text: str) -> Optional[Dict]:
-        """Extract carpet area value and comparison operator"""
-        text_lower = text.lower()
-        
-        # Patterns for carpet area with operators
-        patterns = [
-            (r'carpet\s+area\s+(?:under|below|less\s+than)\s+(\d+)\s*sqft', '<'),
-            (r'carpet\s+area\s+(?:above|over|more\s+than)\s+(\d+)\s*sqft', '>'),
-            (r'carpet\s+area\s*>=?\s*(\d+)\s*sqft', '>='),
-            (r'carpet\s+area\s*<=?\s*(\d+)\s*sqft', '<='),
-            (r'carpet\s+area\s*>\s*(\d+)\s*sqft', '>'),
-            (r'carpet\s+area\s*<\s*(\d+)\s*sqft', '<'),
-            (r'area\s+(?:under|below|less\s+than)\s+(\d+)\s*sqft', '<'),
-            (r'area\s+(?:above|over|more\s+than)\s+(\d+)\s*sqft', '>'),
-            (r'area\s*>=?\s*(\d+)\s*sqft', '>='),
-            (r'area\s*<=?\s*(\d+)\s*sqft', '<='),
-            (r'area\s*>\s*(\d+)\s*sqft', '>'),
-            (r'area\s*<\s*(\d+)\s*sqft', '<'),
-        ]
-        
-        for pattern, operator in patterns:
-            match = re.search(pattern, text_lower)
-            if match:
-                try:
-                    value = int(match.group(1))
-                    return {
-                        "value": value,
-                        "operator": operator,
-                        "text": text
-                    }
-                except ValueError:
-                    continue
-        
-        return None
     
     def get_suggestions(self, partial_query: str) -> List[str]:
         """Get search suggestions based on partial query"""
@@ -452,7 +597,7 @@ if __name__ == "__main__":
         "Compare these two projects"
     ]
     
-    print("Testing NLP Engine:")
+    print("Testing INTENT-DRIVEN NLP Engine:")
     print("=" * 50)
     
     for query in test_queries:

@@ -37,7 +37,7 @@ def get_db():
 def create_tables():
     try:
         # Import models at function level to avoid circular imports
-        import models
+        from backend.models import Base
         Base.metadata.create_all(bind=engine)
         print("✅ Database tables created successfully!")
     except Exception as e:
@@ -47,7 +47,7 @@ def create_tables():
 def drop_tables():
     try:
         # Import models at function level to avoid circular imports
-        import models
+        from backend.models import Base
         Base.metadata.drop_all(bind=engine)
         print("✅ Database tables dropped successfully!")
     except Exception as e:
