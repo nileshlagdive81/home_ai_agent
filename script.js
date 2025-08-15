@@ -329,6 +329,17 @@ function createPropertyCard(property) {
         }
     };
     
+    // Global price formatting function for consistency
+    window.formatPriceForDisplay = (sellPrice) => {
+        if (!sellPrice || sellPrice === 0) return 'Price on request';
+        const priceInLakhs = sellPrice / 100000; // Convert rupees to lakhs
+        if (priceInLakhs >= 100) {
+            return `₹${(priceInLakhs / 100).toFixed(1)} Cr`;
+        } else {
+            return `₹${priceInLakhs.toFixed(0)} Lakh`;
+        }
+    };
+    
     // Format price per carpet area
     const formatPricePerCarpetArea = (pricePerSqft) => {
         if (!pricePerSqft || pricePerSqft === 0) return 'Price/carpet area on request';
@@ -409,9 +420,41 @@ function updateFiltersFromQuery(query, extractedEntities) {
     const filters = document.querySelectorAll('.filter-value');
     const queryLower = query.toLowerCase();
     
-    // BHK detection
-    if (extractedEntities && extractedEntities.BHK) {
-        filters[2].textContent = extractedEntities.BHK;
+    console.log('Updating filters with extracted entities:', extractedEntities);
+    
+    // City detection (filter[0])
+    if (extractedEntities && extractedEntities.city) {
+        filters[0].textContent = extractedEntities.city.charAt(0).toUpperCase() + extractedEntities.city.slice(1);
+    } else if (queryLower.includes('pune') || queryLower.includes('mumbai') || queryLower.includes('bangalore')) {
+        const cityMatch = queryLower.match(/(pune|mumbai|bangalore)/i);
+        if (cityMatch) {
+            filters[0].textContent = cityMatch[0].charAt(0).toUpperCase() + cityMatch[0].slice(1);
+        }
+    }
+    
+    // Locality detection (filter[1])
+    if (extractedEntities && extractedEntities.locality) {
+        // Capitalize first letter of each word in locality
+        const localityWords = extractedEntities.locality.split(' ');
+        const capitalizedLocality = localityWords.map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+        filters[1].textContent = capitalizedLocality;
+    } else if (queryLower.includes('baner') || queryLower.includes('hinjewadi') || queryLower.includes('wakad') || 
+               queryLower.includes('thane west') || queryLower.includes('bandra west') || queryLower.includes('viman nagar')) {
+        const localityMatch = queryLower.match(/(baner|hinjewadi|wakad|thane west|bandra west|viman nagar)/i);
+        if (localityMatch) {
+            const localityWords = localityMatch[0].split(' ');
+            const capitalizedLocality = localityWords.map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
+            filters[1].textContent = capitalizedLocality;
+        }
+    }
+    
+    // BHK detection (filter[2])
+    if (extractedEntities && extractedEntities.bhk) {
+        filters[2].textContent = `${extractedEntities.bhk} BHK`;
     } else if (queryLower.includes('2-bedroom') || queryLower.includes('2 bed') || queryLower.includes('2bhk')) {
         filters[2].textContent = '2 BHK';
     } else if (queryLower.includes('3-bedroom') || queryLower.includes('3 bed') || queryLower.includes('3bhk')) {
@@ -422,9 +465,86 @@ function updateFiltersFromQuery(query, extractedEntities) {
         filters[2].textContent = '4 BHK';
     }
     
-    // Enhanced price intent detection
-    if (extractedEntities && extractedEntities.Price) {
-        filters[3].textContent = extractedEntities.Price;
+    // Price detection (filter[3]) - Convert to readable format
+    if (extractedEntities && extractedEntities.price_range) {
+        const priceText = extractedEntities.price_range.toLowerCase();
+        if (priceText.includes('under') || priceText.includes('below') || priceText.includes('less than')) {
+            // Extract price value and convert to readable format
+            const priceMatch = priceText.match(/(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)/i);
+            if (priceMatch) {
+                const amount = parseFloat(priceMatch[1]);
+                const unit = priceMatch[2].toLowerCase();
+                
+                if (unit === 'cr' || unit === 'crore' || unit === 'crores') {
+                    filters[3].textContent = `Under ₹${amount} Cr`;
+                } else {
+                    // Convert lakhs to crores if > 100 lakhs
+                    if (amount >= 100) {
+                        const crores = (amount / 100).toFixed(1);
+                        filters[3].textContent = `Under ₹${crores} Cr`;
+                    } else {
+                        filters[3].textContent = `Under ₹${amount} Lakh`;
+                    }
+                }
+            } else {
+                filters[3].textContent = 'Price Filter Applied';
+            }
+        } else if (priceText.includes('above') || priceText.includes('more than') || priceText.includes('over')) {
+            const priceMatch = priceText.match(/(\d+(?:\.\d+)?)\s*(cr|crore|crores|lakh|lakhs)/i);
+            if (priceMatch) {
+                const amount = parseFloat(priceMatch[1]);
+                const unit = priceMatch[2].toLowerCase();
+                
+                if (unit === 'cr' || unit === 'crore' || unit === 'crores') {
+                    filters[3].textContent = `Above ₹${amount} Cr`;
+                } else {
+                    // Convert lakhs to crores if > 100 lakhs
+                    if (amount >= 100) {
+                        const crores = (amount / 100).toFixed(1);
+                        filters[3].textContent = `Above ₹${crores} Cr`;
+                    } else {
+                        filters[3].textContent = `Above ₹${amount} Lakh`;
+                    }
+                }
+            } else {
+                filters[3].textContent = 'Price Filter Applied';
+            }
+        } else if (priceText.includes('between') || priceText.includes('range')) {
+            filters[3].textContent = 'Price Range Applied';
+        } else {
+            filters[3].textContent = 'Price Filter Applied';
+        }
+    } else if (extractedEntities && extractedEntities.price_value) {
+        // Handle price_value if price_range is not available
+        const priceValue = extractedEntities.price_value;
+        const priceOperator = extractedEntities.price_operator || '=';
+        
+        if (priceOperator === '<') {
+            // Convert price_value (in rupees) to readable format
+            const priceInLakhs = priceValue / 100000;
+            if (priceInLakhs >= 100) {
+                const crores = (priceInLakhs / 100).toFixed(1);
+                filters[3].textContent = `Under ₹${crores} Cr`;
+            } else {
+                filters[3].textContent = `Under ₹${priceInLakhs.toFixed(0)} Lakh`;
+            }
+        } else if (priceOperator === '>') {
+            const priceInLakhs = priceValue / 100000;
+            if (priceInLakhs >= 100) {
+                const crores = (priceInLakhs / 100).toFixed(1);
+                filters[3].textContent = `Above ₹${crores} Cr`;
+            } else {
+                filters[3].textContent = `Above ₹${priceInLakhs.toFixed(0)} Lakh`;
+            }
+        } else {
+            const priceInLakhs = priceValue / 100000;
+            if (priceInLakhs >= 100) {
+                const crores = (priceInLakhs / 100).toFixed(1);
+                filters[3].textContent = `₹${crores} Cr`;
+            } else {
+                filters[3].textContent = `₹${priceInLakhs.toFixed(0)} Lakh`;
+            }
+        }
     } else if (queryLower.includes('under') || queryLower.includes('below') || queryLower.includes('less than')) {
         // Extract price from query
         const priceMatch = queryLower.match(/(\d+(?:\.\d+)?)\s*(lakh|lac|cr|crore|million|k)/i);
@@ -432,18 +552,23 @@ function updateFiltersFromQuery(query, extractedEntities) {
             const amount = parseFloat(priceMatch[1]);
             const unit = priceMatch[2].toLowerCase();
             
-            let priceInLakhs;
             if (unit === 'cr' || unit === 'crore') {
-                priceInLakhs = amount * 100;
+                filters[3].textContent = `Under ₹${amount} Cr`;
             } else if (unit === 'million') {
-                priceInLakhs = amount * 10;
+                const crores = (amount / 10).toFixed(1);
+                filters[3].textContent = `Under ₹${crores} Cr`;
             } else if (unit === 'k') {
-                priceInLakhs = amount / 100;
+                const lakhs = (amount / 100).toFixed(1);
+                filters[3].textContent = `Under ₹${lakhs} Lakh`;
             } else {
-                priceInLakhs = amount;
+                // Convert lakhs to crores if > 100 lakhs
+                if (amount >= 100) {
+                    const crores = (amount / 100).toFixed(1);
+                    filters[3].textContent = `Under ₹${crores} Cr`;
+                } else {
+                    filters[3].textContent = `Under ₹${amount} Lakh`;
+                }
             }
-            
-            filters[3].textContent = `Under ₹${priceInLakhs} Lakh`;
         } else {
             filters[3].textContent = 'Price Filter Applied';
         }
@@ -453,18 +578,23 @@ function updateFiltersFromQuery(query, extractedEntities) {
             const amount = parseFloat(priceMatch[1]);
             const unit = priceMatch[2].toLowerCase();
             
-            let priceInLakhs;
             if (unit === 'cr' || unit === 'crore') {
-                priceInLakhs = amount * 100;
+                filters[3].textContent = `Above ₹${amount} Cr`;
             } else if (unit === 'million') {
-                priceInLakhs = amount * 10;
+                const crores = (amount / 10).toFixed(1);
+                filters[3].textContent = `Above ₹${crores} Cr`;
             } else if (unit === 'k') {
-                priceInLakhs = amount / 100;
+                const lakhs = (amount / 100).toFixed(1);
+                filters[3].textContent = `Above ₹${lakhs} Lakh`;
             } else {
-                priceInLakhs = amount;
+                // Convert lakhs to crores if > 100 lakhs
+                if (amount >= 100) {
+                    const crores = (amount / 100).toFixed(1);
+                    filters[3].textContent = `Above ₹${crores} Cr`;
+                } else {
+                    filters[3].textContent = `Above ₹${amount} Lakh`;
+                }
             }
-            
-            filters[3].textContent = `Above ₹${priceInLakhs} Lakh`;
         } else {
             filters[3].textContent = 'Price Filter Applied';
         }
@@ -472,27 +602,77 @@ function updateFiltersFromQuery(query, extractedEntities) {
         filters[3].textContent = 'Price Range Applied';
     }
     
-    // Property type detection
-    if (extractedEntities && extractedEntities.PropertyType) {
-        filters[4].textContent = extractedEntities.PropertyType;
+    // Property type detection (filter[4])
+    if (extractedEntities && extractedEntities.property_type) {
+        filters[4].textContent = extractedEntities.property_type.charAt(0).toUpperCase() + extractedEntities.property_type.slice(1);
+    } else if (extractedEntities && extractedEntities.amenities && extractedEntities.amenities.length > 0) {
+        // If amenities are specified, it's likely an apartment
+        filters[4].textContent = 'Apartment';
     } else if (queryLower.includes('apartment') || queryLower.includes('flat')) {
-        // Could add property type filter here
+        filters[4].textContent = 'Apartment';
     } else if (queryLower.includes('house') || queryLower.includes('villa')) {
-        // Could add property type filter here
+        filters[4].textContent = 'House';
     }
     
-    // Location detection
-    if (extractedEntities && extractedEntities.Location) {
-        filters[0].textContent = extractedEntities.Location;
-    } else if (queryLower.includes('pune') || queryLower.includes('mumbai') || queryLower.includes('bangalore')) {
-        filters[0].textContent = queryLower.match(/(pune|mumbai|bangalore)/i)[0];
+    // Carpet area detection (filter[4]) - Convert to readable format
+    if (extractedEntities && extractedEntities.carpet_area) {
+        const areaText = extractedEntities.carpet_area.toLowerCase();
+        if (areaText.includes('less than') || areaText.includes('under') || areaText.includes('below')) {
+            // Extract area value and convert to readable format
+            const areaMatch = areaText.match(/(\d+)\s*sqft/i);
+            if (areaMatch) {
+                const areaValue = parseInt(areaMatch[1]);
+                filters[4].textContent = `Under ${areaValue} sq ft`;
+            } else {
+                filters[4].textContent = 'Area Filter Applied';
+            }
+        } else if (areaText.includes('more than') || areaText.includes('above') || areaText.includes('over')) {
+            const areaMatch = areaText.match(/(\d+)\s*sqft/i);
+            if (areaMatch) {
+                const areaValue = parseInt(areaMatch[1]);
+                filters[4].textContent = `Above ${areaValue} sq ft`;
+            } else {
+                filters[4].textContent = 'Area Filter Applied';
+            }
+        } else if (areaText.includes('between') || areaText.includes('range')) {
+            filters[4].textContent = 'Area Range Applied';
+        } else {
+            filters[4].textContent = 'Area Filter Applied';
+        }
+    } else if (extractedEntities && extractedEntities.area_value) {
+        // Handle area_value if carpet_area is not available
+        const areaValue = extractedEntities.area_value;
+        const areaOperator = extractedEntities.area_operator || '=';
+        
+        if (areaOperator === '<') {
+            filters[4].textContent = `Under ${areaValue} sq ft`;
+        } else if (areaOperator === '>') {
+            filters[4].textContent = `Above ${areaValue} sq ft`;
+        } else {
+            filters[4].textContent = `${areaValue} sq ft`;
+        }
     }
     
-    if (extractedEntities && extractedEntities.Locality) {
-        filters[1].textContent = extractedEntities.Locality;
-    } else if (queryLower.includes('baner') || queryLower.includes('hinjewadi') || queryLower.includes('wakad')) {
-        filters[1].textContent = queryLower.match(/(baner|hinjewadi|wakad)/i)[0];
+    // Property type detection (filter[5]) - moved to accommodate carpet area
+    if (extractedEntities && extractedEntities.property_type) {
+        filters[5].textContent = extractedEntities.property_type.charAt(0).toUpperCase() + extractedEntities.property_type.slice(1);
+    } else if (extractedEntities && extractedEntities.amenities && extractedEntities.amenities.length > 0) {
+        // If amenities are specified, it's likely an apartment
+        filters[5].textContent = 'Apartment';
+    } else if (queryLower.includes('apartment') || queryLower.includes('flat')) {
+        filters[5].textContent = 'Apartment';
+    } else if (queryLower.includes('house') || queryLower.includes('villa')) {
+        filters[5].textContent = 'House';
     }
+    
+    // Status detection (filter[6]) - if available
+    if (filters.length > 6) {
+        if (extractedEntities && extractedEntities.status) {
+            filters[6].textContent = extractedEntities.status.charAt(0).toUpperCase() + extractedEntities.status.slice(1);
+        }
+    }
+    
+    console.log('Filters updated successfully');
 }
 
 // Show property details (placeholder for future enhancement)
