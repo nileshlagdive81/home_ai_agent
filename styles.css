@@ -30,10 +30,11 @@ body {
     border-right: 1px solid #2a2a3e;
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 0;
     position: fixed;
     height: 100vh;
     overflow-y: hidden;
+    z-index: 1000;
 }
 
 .sidebar > * {
@@ -42,7 +43,7 @@ body {
 
 .new-query-section {
     padding: 20px;
-    border-top: 1px solid #2a2a3e;
+    border-bottom: 1px solid #2a2a3e;
     background: #0f0f23;
     width: 100%;
     margin: 0;
@@ -119,18 +120,19 @@ body {
 
 /* Chat Container - Unified Component */
 .chat-container {
-    margin: 0;
+    margin: 20px;
     border: 2px solid #2a2a3e;
     border-radius: 12px;
     background: #1a1a2e;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    height: calc(100vh - 40px);
-    max-height: calc(100vh - 40px);
-    min-height: 600px;
+    height: calc(100vh - 120px);
+    max-height: calc(100vh - 120px);
+    min-height: 500px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    width: 100%;
+    width: calc(100% - 40px);
+    flex: 1;
 }
 
 .assistant-message {
@@ -197,7 +199,7 @@ body {
     z-index: 10;
     background: transparent;
     border: none;
-    padding: 20px;
+    padding: 10px;
     height: auto;
     width: 100%;
 }
@@ -303,6 +305,8 @@ body {
     background: #0f0f23;
     min-height: 100vh;
     padding-top: 100px;
+    position: relative;
+    z-index: 100;
 }
 
 .header {
@@ -325,6 +329,18 @@ body {
     margin-bottom: 30px;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
 .header h1 {
     font-family: 'FreightDisplayProBook', serif;
     font-size: 32px;
@@ -343,10 +359,7 @@ body {
     color: #2563eb;
 }
 
-.ai-badges {
-    display: flex;
-    gap: 12px;
-}
+/* ai-badges class removed - replaced with header-left and header-right */
 
 .ai-badge {
     background: #1e40af;
@@ -361,20 +374,30 @@ body {
     gap: 6px;
 }
 
-.ai-badge.contact-btn {
-    background: #10b981;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.ai-badge.contact-btn:hover {
-    background: #059669;
-}
-
 .ai-badge i {
     font-size: 10px;
+}
+
+.header-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.header-link:hover {
+    color: #e5e7eb;
+    background: rgba(156, 163, 175, 0.1);
+}
+
+.header-link i {
+    font-size: 16px;
 }
 
 .message-icon .fa-lightbulb {
@@ -712,7 +735,7 @@ body {
     background: #0f0f23;
     border-top: 1px solid #2a2a3e;
     padding: 20px 0;
-    z-index: 1000;
+    z-index: 999;
 }
 
 .footer-links {
@@ -756,6 +779,26 @@ body {
     
     .suggested-searches {
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+/* Ensure sidebar is always visible */
+.sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    z-index: 1000 !important;
+}
+
+/* Ensure main content doesn't overlap sidebar */
+.main-content {
+    margin-left: 320px !important;
+}
+
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 280px !important;
     }
 }
 
