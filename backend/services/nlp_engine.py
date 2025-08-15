@@ -229,6 +229,25 @@ class RealEstateNLPEngine:
                     confidence=0.95
                 ))
         
+        # Extract localities specifically (NEW ADDITION)
+        locality_patterns = [
+            # Mumbai Localities
+            r'\b(bandra west|bandra east|andheri west|andheri east|powai|thane west|thane east|navi mumbai|vashi|nerul|belapur|panvel|dadar|worli|lower parel|upper worli|juhu|versova|lokhandwala|kandivali west|kandivali east|borivali west|borivali east|malad west|malad east|goregaon west|goregaon east|mulund west|mulund east|bhandup west|bhandup east|vikroli west|vikroli east|kanjurmarg|chembur|tilak nagar|sion|matunga|dadar west|dadar east|mahim|bandra kurla complex|kurla west|kurla east|santacruz west|santacruz east|vile parle west|vile parle east|jogeshwari west|jogeshwari east|goregaon|andheri|powai|airoli|ghansoli|koparkhairane|rabale|turbhe|nerul|seawoods|belapur|kharghar|kalamboli|panvel|ulwe|dronagiri|taloja|khopoli|karjat|badlapur|ambarnath|kalyan|dombivli|thane|mulund|bhandup|vikroli|kanjurmarg|chembur|tilak nagar|sion|matunga|dadar|mahim|bandra kurla complex|kurla|santacruz|vile parle|jogeshwari)\b',
+            # Pune Localities
+            r'\b(koregaon park|kalyani nagar|viman nagar|kharadi|wagholi|hinjewadi|wakad|baner|aundh|koregaon park|kalyani nagar|viman nagar|kharadi|wagholi|hinjewadi|wakad|baner|aundh|pashan|sus|katraj|dhankawadi|sahakarnagar|warje|karvenagar|kothrud|deccan|fc road|law college road|university road|prabhat road|tilak road|sassoon road|mg road|fc road|law college road|university road|prabhat road|tilak road|sassoon road|mg road|camp|pune cantonment|khadki|dapodi|bhosari|pimpri|chinchwad|nigdi|akurdi|ravet|moshi|chakan|rajgurunagar|lonavala|khandala|kamshet|pawana|mulshi|lavasa|lonavala|khandala|kamshet|pawana|mulshi|lavasa)\b'
+        ]
+        
+        for pattern in locality_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                entities.append(ExtractedEntity(
+                    text=match.group(0),
+                    label="LOCALITY",
+                    start=match.start(),
+                    end=match.end(),
+                    confidence=0.9
+                ))
+        
         # Extract carpet area with comparison operators
         carpet_area_patterns = [
             r'carpet\s+area\s+(?:under|below|less\s+than)\s+(\d+)\s*sqft',
@@ -311,7 +330,10 @@ class RealEstateNLPEngine:
         
         # Extract filters from entities
         for entity in intent_result.entities:
-            if entity.label == "LOCATION":
+            if entity.label == "LOCALITY":
+                # Locality takes precedence over city and general location
+                criteria["filters"]["locality"] = entity.text
+            elif entity.label == "LOCATION":
                 criteria["filters"]["location"] = entity.text
             elif entity.label == "CITY":
                 # City takes precedence over general location

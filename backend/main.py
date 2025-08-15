@@ -91,7 +91,13 @@ async def nlp_search(
         query_params = {}
         
         # Apply location filter
-        if "city" in search_criteria["filters"]:
+        if "locality" in search_criteria["filters"]:
+            # Locality takes precedence over city and general location
+            locality = search_criteria["filters"]["locality"]
+            where_conditions.append("l.locality ILIKE :locality")
+            query_params["locality"] = f"%{locality}%"
+            print(f"✅ Applied locality filter: {locality}")
+        elif "city" in search_criteria["filters"]:
             # City takes precedence over general location
             city = search_criteria["filters"]["city"]
             where_conditions.append("l.city ILIKE :city")
