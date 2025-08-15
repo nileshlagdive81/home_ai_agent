@@ -102,95 +102,15 @@ class RealEstateNLPEngine:
                     label="LOCATION",
                     start=ent.start_char,
                     end=ent.end_char,
-                    confidence=0.9
+                    confidence=0.8
                 ))
         
-        # Extract custom entities using patterns
-        for entity_type, patterns in self.entity_patterns.items():
-            for category, values in patterns.items():
-                for value in values:
-                    if value in text_lower:
-                        start = text_lower.find(value)
-                        if start != -1:
-                            entities.append(ExtractedEntity(
-                                text=value,
-                                label=entity_type,
-                                start=start,
-                                end=start + len(value),
-                                confidence=0.8
-                            ))
-        
-        # Extract numbers (BHK, price, area) with improved context
-        numbers = re.findall(r'\d+(?:\.\d+)?', text)
-        for num in numbers:
-            # Check if it's BHK - look for context around the number
-            num_start = text.find(num)
-            num_end = num_start + len(num)
-            
-            # Look for BHK context in a window around the number
-            context_start = max(0, num_start - 10)
-            context_end = min(len(text), num_end + 10)
-            context = text[context_start:context_end].lower()
-            
-            if any(bhk in context for bhk in ["bhk", "bedroom", "bed room"]):
-                entities.append(ExtractedEntity(
-                    text=num,
-                    label="BHK",
-                    start=num_start,
-                    end=num_end,
-                    confidence=0.9
-                ))
-        
-        # Extract price ranges with comprehensive patterns
-        price_patterns = [
-            # Under/Below/Less than patterns
-            r'under\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'below\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'less\s+than\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'<=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'<=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            
-            # Above/Over/More than patterns
-            r'above\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'more\s+than\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'over\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'>=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'>=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            
-            # Range patterns
-            r'(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'(\d+(?:\.\d+)?)\s*to\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'between\s+(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|crore|crores)\s*to\s*(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|crore|crores)',
-            
-            # Exact patterns
-            r'equal\s+to\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'=\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            
-            # Greater/Less than with symbols
-            r'>\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)',
-            r'<\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)'
-        ]
-        
-        for pattern in price_patterns:
-            matches = re.finditer(pattern, text_lower)
-            for match in matches:
-                entities.append(ExtractedEntity(
-                    text=match.group(0),
-                    label="PRICE",
-                    start=match.start(),
-                    end=match.end(),
-                    confidence=0.95
-                ))
-        
-        # Extract BHK with comparison operators
+        # Extract BHK information
         bhk_patterns = [
-            r'bhk\s*>=?\s*(\d+(?:\.\d+)?)',      # BHK >= X
-            r'bhk\s*<=?\s*(\d+(?:\.\d+)?)',      # BHK <= X
-            r'bhk\s*>\s*(\d+(?:\.\d+)?)',        # BHK > X
-            r'bhk\s*<\s*(\d+(?:\.\d+)?)',        # BHK < X
-            r'(\d+(?:\.\d+)?)\s*bhk',            # X BHK
-            r'(\d+(?:\.\d+)?)\s*bedroom',        # X bedroom
-            r'(\d+(?:\.\d+)?)\s*bed\s*room',     # X bed room
+            r'(\d+(?:\.\d+)?)\s*bhk',
+            r'(\d+(?:\.\d+)?)\s*bedroom',
+            r'(\d+(?:\.\d+)?)\s*bed\s*room',
+            r'bhk\s*(\d+(?:\.\d+)?)'
         ]
         
         for pattern in bhk_patterns:
@@ -202,6 +122,111 @@ class RealEstateNLPEngine:
                     start=match.start(),
                     end=match.end(),
                     confidence=0.9
+                ))
+        
+        # Extract property types
+        property_patterns = [
+            r'apartment',
+            r'flat',
+            r'house',
+            r'villa',
+            r'penthouse',
+            r'studio'
+        ]
+        
+        for pattern in property_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                entities.append(ExtractedEntity(
+                    text=match.group(0),
+                    label="PROPERTY_TYPE",
+                    start=match.start(),
+                    end=match.end(),
+                    confidence=0.9
+                ))
+        
+        # Extract amenities
+        amenity_patterns = [
+            r'gym',
+            r'swimming\s+pool',
+            r'parking',
+            r'garden',
+            r'clubhouse',
+            r'playground',
+            r'security',
+            r'lift'
+        ]
+        
+        for pattern in amenity_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                entities.append(ExtractedEntity(
+                    text=match.group(0),
+                    label="AMENITY",
+                    start=match.start(),
+                    end=match.end(),
+                    confidence=0.9
+                ))
+        
+        # Extract price patterns (NEW ADDITION)
+        price_patterns = [
+            r'above\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)',
+            r'over\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)',
+            r'more\s+than\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)',
+            r'under\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)',
+            r'below\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)',
+            r'less\s+than\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)',
+            r'(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)\s+and\s+above',
+            r'(\d+(?:\.\d+)?)\s*(?:cr|crore|crores)\s+and\s+below'
+        ]
+        
+        for pattern in price_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                entities.append(ExtractedEntity(
+                    text=match.group(0),
+                    label="PRICE",
+                    start=match.start(),
+                    end=match.end(),
+                    confidence=0.9
+                ))
+        
+        # Extract nearby place constraints (NEW ADDITION)
+        nearby_patterns = [
+            r'within\s+(\d+(?:\.\d+)?)\s*km\s+of\s+(\w+(?:\s+\w+)*)',
+            r'within\s+(\d+(?:\.\d+)?)\s*kilometer\s+of\s+(\w+(?:\s+\w+)*)',
+            r'near\s+(\w+(?:\s+\w+)*)\s+within\s+(\d+(?:\.\d+)?)\s*km',
+            r'(\d+(?:\.\d+)?)\s*km\s+from\s+(\w+(?:\s+\w+)*)',
+            r'(\d+(?:\.\d+)?)\s*kilometer\s+from\s+(\w+(?:\s+\w+)*)',
+            r'(\w+(?:\s+\w+)*)\s+within\s+(\d+(?:\.\d+)?)\s*kms?',
+            r'(\w+(?:\s+\w+)*)\s+within\s+(\d+(?:\.\d+)?)\s*kilometers?'
+        ]
+        
+        for pattern in nearby_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                entities.append(ExtractedEntity(
+                    text=match.group(0),
+                    label="NEARBY_PLACE",
+                    start=match.start(),
+                    end=match.end(),
+                    confidence=0.9
+                ))
+        
+        # Extract city names specifically (NEW ADDITION)
+        city_patterns = [
+            r'\b(pune|mumbai|delhi|bangalore|hyderabad|chennai|kolkata|ahmedabad)\b'
+        ]
+        
+        for pattern in city_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                entities.append(ExtractedEntity(
+                    text=match.group(1),
+                    label="CITY",
+                    start=match.start(),
+                    end=match.end(),
+                    confidence=0.95
                 ))
         
         # Extract carpet area with comparison operators
@@ -288,6 +313,9 @@ class RealEstateNLPEngine:
         for entity in intent_result.entities:
             if entity.label == "LOCATION":
                 criteria["filters"]["location"] = entity.text
+            elif entity.label == "CITY":
+                # City takes precedence over general location
+                criteria["filters"]["city"] = entity.text
             elif entity.label == "BHK":
                 # Extract BHK value and operator
                 bhk_info = self.extract_bhk_with_operator(entity.text)
@@ -314,6 +342,13 @@ class RealEstateNLPEngine:
                 if "amenities" not in criteria["filters"]:
                     criteria["filters"]["amenities"] = []
                 criteria["filters"]["amenities"].append(entity.text)
+            elif entity.label == "NEARBY_PLACE":
+                # Extract nearby place constraint (NEW ADDITION)
+                nearby_info = self.extract_nearby_place_constraint(entity.text)
+                if nearby_info:
+                    criteria["filters"]["nearby_place"] = nearby_info["place_type"]
+                    criteria["filters"]["nearby_distance"] = nearby_info["distance"]
+                    criteria["filters"]["nearby_operator"] = nearby_info["operator"]
         
         return criteria
     
@@ -400,25 +435,71 @@ class RealEstateNLPEngine:
             (r'carpet\s+area\s*<=?\s*(\d+)\s*sqft', '<='),
             (r'carpet\s+area\s*>\s*(\d+)\s*sqft', '>'),
             (r'carpet\s+area\s*<\s*(\d+)\s*sqft', '<'),
-            (r'area\s+(?:under|below|less\s+than)\s+(\d+)\s*sqft', '<'),
-            (r'area\s+(?:above|over|more\s+than)\s+(\d+)\s*sqft', '>'),
-            (r'area\s*>=?\s*(\d+)\s*sqft', '>='),
-            (r'area\s*<=?\s*(\d+)\s*sqft', '<='),
-            (r'area\s*>\s*(\d+)\s*sqft', '>'),
-            (r'area\s*<\s*(\d+)\s*sqft', '<'),
+            (r'(\d+)\s*sqft\s+(?:and\s+)?(?:above|below|under|over)', '>'),
+            (r'(\d+)\s*sqft\s+to\s+(\d+)\s*sqft', '=')
         ]
         
         for pattern, operator in patterns:
             match = re.search(pattern, text_lower)
             if match:
                 try:
-                    value = int(match.group(1))
+                    value = float(match.group(1))
                     return {
                         "value": value,
                         "operator": operator,
                         "text": text
                     }
                 except ValueError:
+                    continue
+        
+        return None
+    
+    def extract_nearby_place_constraint(self, text: str) -> Optional[Dict]:
+        """Extract nearby place constraint with distance and place type"""
+        text_lower = text.lower()
+        
+        # Patterns for nearby place constraints
+        patterns = [
+            (r'within\s+(\d+(?:\.\d+)?)\s*km\s+of\s+(\w+(?:\s+\w+)*)', '<=', 1, 2),
+            (r'within\s+(\d+(?:\.\d+)?)\s*kilometer\s+of\s+(\w+(?:\s+\w+)*)', '<=', 1, 2),
+            (r'near\s+(\w+(?:\s+\w+)*)\s+within\s+(\d+(?:\.\d+)?)\s*km', '<=', 2, 1),
+            (r'(\d+(?:\.\d+)?)\s*km\s+from\s+(\w+(?:\s+\w+)*)', '<=', 1, 2),
+            (r'(\d+(?:\.\d+)?)\s*kilometer\s+from\s+(\w+(?:\s+\w+)*)', '<=', 1, 2),
+            (r'(metro(?:\s+station)?)\s+within\s+(\d+(?:\.\d+)?)\s*kms?', '<=', 2, 1),
+            (r'(metro(?:\s+station)?)\s+within\s+(\d+(?:\.\d+)?)\s*kilometers?', '<=', 2, 1)
+        ]
+        
+        for pattern, operator, distance_idx, place_idx in patterns:
+            match = re.search(pattern, text_lower)
+            if match:
+                try:
+                    distance = float(match.group(distance_idx))
+                    place_type = match.group(place_idx).strip()
+                    
+                    # Map place types to standardized names
+                    place_mapping = {
+                        'metro': 'METRO STATION',
+                        'metro station': 'METRO STATION',
+                        'railway': 'RAILWAY STATION',
+                        'railway station': 'RAILWAY STATION',
+                        'airport': 'AIRPORT',
+                        'hospital': 'HOSPITAL',
+                        'school': 'SCHOOL',
+                        'mall': 'SHOPPING MALL',
+                        'shopping mall': 'SHOPPING MALL',
+                        'park': 'PARK',
+                        'garden': 'PARK'
+                    }
+                    
+                    standardized_place = place_mapping.get(place_type.lower(), place_type.upper())
+                    
+                    return {
+                        "distance": distance,
+                        "place_type": standardized_place,
+                        "operator": operator,
+                        "text": text
+                    }
+                except (ValueError, IndexError):
                     continue
         
         return None

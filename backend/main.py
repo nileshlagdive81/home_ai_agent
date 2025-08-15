@@ -91,7 +91,13 @@ async def nlp_search(
         query_params = {}
         
         # Apply location filter
-        if "location" in search_criteria["filters"]:
+        if "city" in search_criteria["filters"]:
+            # City takes precedence over general location
+            city = search_criteria["filters"]["city"]
+            where_conditions.append("l.city ILIKE :city")
+            query_params["city"] = f"%{city}%"
+            print(f"✅ Applied city filter: {city}")
+        elif "location" in search_criteria["filters"]:
             location = search_criteria["filters"]["location"]
             where_conditions.append("(l.city ILIKE :location OR l.locality ILIKE :location)")
             query_params["location"] = f"%{location}%"
@@ -203,11 +209,48 @@ async def nlp_search(
             # Handle case where NLP engine returns amenities as a list
             amenity_name = search_criteria["filters"]["amenities"][0]  # Take first amenity
         
+        # Apply nearby place filter (NEW ADDITION)
+        nearby_place_filter = None
+        if "nearby_place" in search_criteria["filters"]:
+            nearby_place_filter = {
+                "place_type": search_criteria["filters"]["nearby_place"],
+                "distance": search_criteria["filters"]["nearby_distance"],
+                "operator": search_criteria["filters"]["nearby_operator"]
+            }
+            print(f"✅ Applied nearby place filter: {nearby_place_filter['place_type']} {nearby_place_filter['operator']} {nearby_place_filter['distance']}km")
+        
         # Build the WHERE clause for non-amenity filters
         where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
         
-        # Build the complete SQL query with conditional JOIN for amenities
-        if amenity_name:
+        # Build the complete SQL query with conditional JOIN for amenities and nearby places
+        if amenity_name and nearby_place_filter:
+            print(f"✅ Applying both amenity and nearby place filters")
+            # Use direct JOIN with DISTINCT and nearby places
+            sql_query = f"""
+                SELECT DISTINCT ON (pr.id) pr.id, pr.bhk_count, pr.carpet_area_sqft, pr.sell_price, pr.floor_number,
+                       pr.property_type, pr.facing, pr.status,
+                       p.id as project_id, p.name as project_name, p.developer_id, p.project_status,
+                       p.total_units, p.total_floors, p.possession_date, p.rera_number, p.description, p.project_type,
+                       l.city, l.locality
+                FROM properties pr
+                JOIN projects p ON pr.project_id = p.id
+                JOIN project_locations pl ON p.id = pl.project_id
+                JOIN locations l ON pl.location_id = l.id
+                JOIN project_amenities pa ON p.id = pa.project_id
+                JOIN amenities a ON pa.amenity_id = a.id
+                JOIN nearby_places np ON p.id = np.project_id
+                WHERE a.name ILIKE :amenity_name
+                AND np.place_type = :nearby_place_type
+                AND np.distance_km {nearby_place_filter['operator']} :nearby_distance
+                AND {where_clause}
+                ORDER BY pr.id, pr.sell_price
+                LIMIT 20
+            """
+            query_params["amenity_name"] = f"%{amenity_name}%"
+            query_params["nearby_place_type"] = nearby_place_filter["place_type"]
+            query_params["nearby_distance"] = nearby_place_filter["distance"]
+            print(f"✅ Applied amenity + nearby place filters")
+        elif amenity_name:
             print(f"✅ Applying amenity filter: {amenity_name}")
             # Use direct JOIN with DISTINCT to avoid duplicate properties
             sql_query = f"""
@@ -229,8 +272,31 @@ async def nlp_search(
             """
             query_params["amenity_name"] = f"%{amenity_name}%"
             print(f"✅ Applied amenity filter with direct JOIN: {amenity_name}")
+        elif nearby_place_filter:
+            print(f"✅ Applying nearby place filter only")
+            # Use nearby places filter without amenities
+            sql_query = f"""
+                SELECT DISTINCT ON (pr.id) pr.id, pr.bhk_count, pr.carpet_area_sqft, pr.sell_price, pr.floor_number,
+                       pr.property_type, pr.facing, pr.status,
+                       p.id as project_id, p.name as project_name, p.developer_id, p.project_status,
+                       p.total_units, p.total_floors, p.possession_date, p.rera_number, p.description, p.project_type,
+                       l.city, l.locality
+                FROM properties pr
+                JOIN projects p ON pr.project_id = p.id
+                JOIN project_locations pl ON p.id = pl.project_id
+                JOIN locations l ON pl.location_id = l.id
+                JOIN nearby_places np ON p.id = np.project_id
+                WHERE np.place_type = :nearby_place_type
+                AND np.distance_km {nearby_place_filter['operator']} :nearby_distance
+                AND {where_clause}
+                ORDER BY pr.id, pr.sell_price
+                LIMIT 20
+            """
+            query_params["nearby_place_type"] = nearby_place_filter["place_type"]
+            query_params["nearby_distance"] = nearby_place_filter["distance"]
+            print(f"✅ Applied nearby place filter only")
         else:
-            # No amenity filter - use simpler query
+            # No amenity or nearby place filter - use simpler query
             sql_query = f"""
                 SELECT pr.id, pr.bhk_count, pr.carpet_area_sqft, pr.sell_price, pr.floor_number,
                        pr.property_type, pr.facing, pr.status,
