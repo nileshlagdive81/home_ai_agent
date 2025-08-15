@@ -251,20 +251,20 @@ class RealEstateNLPEngine:
         # Extract carpet area with comparison operators
         carpet_area_patterns = [
             r'carpet\s+area\s+(?:under|below|less\s+than)\s+(\d+)\s*sqft',
-            r'carpet\s+area\s+(?:above|over|more\s+than)\s+(\d+)\s*sqft',
+            r'carpet\s+area\s+(?:above|over|more\s+than|greater\s+than)\s+(\d+)\s*sqft',
             r'carpet\s+area\s+between\s+(\d+)\s*(?:to|-)\s*(\d+)\s*sqft',
             r'carpet\s+area\s*>=?\s*(\d+)\s*sqft',
             r'carpet\s+area\s*<=?\s*(\d+)\s*sqft',
             r'carpet\s+area\s*>\s*(\d+)\s*sqft',
             r'carpet\s+area\s*<\s*(\d+)\s*sqft',
             r'area\s+(?:under|below|less\s+than)\s+(\d+)\s*sqft',
-            r'area\s+(?:above|over|more\s+than)\s+(\d+)\s*sqft',
+            r'area\s+(?:above|over|more\s+than|greater\s+than)\s+(\d+)\s*sqft',
             r'area\s+between\s+(\d+)\s*(?:to|-)\s*(\d+)\s*sqft',
             r'area\s*>=?\s*(\d+)\s*sqft',
             r'area\s*<=?\s*(\d+)\s*sqft',
             r'area\s*>\s*(\d+)\s*sqft',
             r'area\s*<\s*(\d+)\s*sqft',
-            r'(\d+)\s*sqft\s+(?:and\s+)?(?:above|below|under|over)',
+            r'(\d+)\s*sqft\s+(?:and\s+)?(?:above|below|under|over|greater)',
             r'(\d+)\s*sqft\s+to\s+(\d+)\s*sqft'
         ]
         
@@ -452,12 +452,12 @@ class RealEstateNLPEngine:
         # Patterns for carpet area with operators
         patterns = [
             (r'carpet\s+area\s+(?:under|below|less\s+than)\s+(\d+)\s*sqft', '<'),
-            (r'carpet\s+area\s+(?:above|over|more\s+than)\s+(\d+)\s*sqft', '>'),
+            (r'carpet\s+area\s+(?:above|over|more\s+than|greater\s+than)\s+(\d+)\s*sqft', '>'),
             (r'carpet\s+area\s*>=?\s*(\d+)\s*sqft', '>='),
             (r'carpet\s+area\s*<=?\s*(\d+)\s*sqft', '<='),
             (r'carpet\s+area\s*>\s*(\d+)\s*sqft', '>'),
             (r'carpet\s+area\s*<\s*(\d+)\s*sqft', '<'),
-            (r'(\d+)\s*sqft\s+(?:and\s+)?(?:above|below|under|over)', '>'),
+            (r'(\d+)\s*sqft\s+(?:and\s+)?(?:above|below|under|over|greater)', '>'),
             (r'(\d+)\s*sqft\s+to\s+(\d+)\s*sqft', '=')
         ]
         
