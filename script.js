@@ -7,6 +7,7 @@ const sampleProperties = [
         imageCount: "1/4",
         sellPrice: 8500000, // in rupees (85 lakhs)
         pricePerSqft: 8500, // in rupees per sqft
+        carpetArea: 1200, // in sq ft
         specs: "2 BHK • 2 Bath • 1,200 sq ft • Apartment",
         locality: "Baner",
         city: "Pune",
@@ -21,6 +22,7 @@ const sampleProperties = [
         imageCount: "1/4",
         sellPrice: 12000000, // in rupees (120 lakhs)
         pricePerSqft: 9200, // in rupees per sqft
+        carpetArea: 1800, // in sq ft
         specs: "3 BHK • 2 Bath • 1,800 sq ft • House",
         locality: "Hinjewadi",
         city: "Pune",
@@ -35,6 +37,7 @@ const sampleProperties = [
         imageCount: "1/5",
         sellPrice: 25000000, // in rupees (250 lakhs)
         pricePerSqft: 12500, // in rupees per sqft
+        carpetArea: 2500, // in sq ft
         specs: "3 BHK • 3 Bath • 2,500 sq ft • Penthouse",
         locality: "Koregaon Park",
         city: "Pune",
@@ -49,6 +52,7 @@ const sampleProperties = [
         imageCount: "1/3",
         sellPrice: 6500000, // in rupees (65 lakhs)
         pricePerSqft: 7200, // in rupees per sqft
+        carpetArea: 800, // in sq ft
         specs: "1 BHK • 1 Bath • 800 sq ft • Studio",
         locality: "Wakad",
         city: "Pune",
@@ -63,6 +67,7 @@ const sampleProperties = [
         imageCount: "1/6",
         sellPrice: 18000000, // in rupees (180 lakhs)
         pricePerSqft: 9800, // in rupees per sqft
+        carpetArea: 2200, // in sq ft
         specs: "4 BHK • 3 Bath • 2,200 sq ft • Townhouse",
         locality: "Baner",
         city: "Pune",
@@ -276,10 +281,42 @@ function createPropertyCard(property) {
     const pricePerSqft = property.price_per_sqft || property.pricePerSqft || 0;
     const propertyType = property.property_type || property.propertyType || 'Property';
     const bhkCount = property.bhk_count || property.bhkCount || 0;
-    const locality = property.locality || 'Unknown';
-    const city = property.city || 'Unknown';
-    const projectName = property.project_name || property.project || 'Unknown';
+    const carpetArea = property.carpet_area_sqft || property.carpetArea || 0;
+    
+    // Handle nested location structure from API
+    let locality, city;
+    if (property.location && property.location.locality) {
+        locality = property.location.locality;
+        city = property.location.city;
+    } else {
+        locality = property.locality || 'Unknown';
+        city = property.city || 'Unknown';
+    }
+    
+    const projectName = property.project_name || (property.project ? property.project.name : 'Unknown') || property.project || 'Unknown';
     const status = property.status || 'Available';
+    
+    // Use actual amenities from data if available, otherwise generate
+    let allAmenities;
+    if (property.amenities && Array.isArray(property.amenities) && property.amenities.length > 0) {
+        allAmenities = property.amenities;
+    } else {
+        // Generate amenities based on property type and BHK
+        const generatedAmenities = [];
+        if (bhkCount >= 2) generatedAmenities.push('Parking');
+        if (bhkCount >= 3) generatedAmenities.push('Gym', 'Garden');
+        if (propertyType && propertyType.toLowerCase().includes('apartment')) {
+            generatedAmenities.push('Lift', 'Security');
+        }
+        if (propertyType && propertyType.toLowerCase().includes('villa')) {
+            generatedAmenities.push('Garden', 'Parking', 'Security');
+        }
+        if (generatedAmenities.length === 0) generatedAmenities.push('Basic Amenities');
+        allAmenities = generatedAmenities;
+    }
+    
+    const visibleAmenities = allAmenities.slice(0, 3);
+    const hiddenAmenities = allAmenities.slice(3);
     
     // Format price in Indian format (lakhs/crores) from sellPrice in rupees
     const formatPrice = (sellPrice) => {
@@ -292,9 +329,9 @@ function createPropertyCard(property) {
         }
     };
     
-    // Format price per sqft in lakhs
-    const formatPricePerSqft = (pricePerSqft) => {
-        if (!pricePerSqft || pricePerSqft === 0) return 'Price/sq ft on request';
+    // Format price per carpet area
+    const formatPricePerCarpetArea = (pricePerSqft) => {
+        if (!pricePerSqft || pricePerSqft === 0) return 'Price/carpet area on request';
         const priceInLakhs = pricePerSqft / 100000; // Convert to lakhs
         if (priceInLakhs >= 1) {
             return `₹${priceInLakhs.toFixed(2)} Lakh/sq ft`;
@@ -317,14 +354,19 @@ function createPropertyCard(property) {
     
     // Create specs string from API data
     const createSpecs = () => {
-        if (bhkCount && propertyType) {
-            return `${bhkCount} BHK • ${propertyType}`;
-        } else if (bhkCount) {
-            return `${bhkCount} BHK`;
-        } else if (propertyType) {
-            return propertyType;
+        let specs = '';
+        if (bhkCount) {
+            specs += `${bhkCount} BHK`;
         }
-        return 'Specifications not available';
+        if (carpetArea && carpetArea > 0) {
+            if (specs) specs += ' | ';
+            specs += `${carpetArea} sq ft`;
+        }
+        if (propertyType && propertyType !== 'Property') {
+            if (specs) specs += ' | ';
+            specs += propertyType;
+        }
+        return specs || 'Specifications not available';
     };
     
     card.innerHTML = `
@@ -336,16 +378,21 @@ function createPropertyCard(property) {
             <div class="image-counter">1/1</div>
         </div>
         <div class="property-details">
+            <div class="project-name" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 16px;">${createProjectName(projectName)}</div>
             <div class="property-price">
                 <div class="price-main">${formatPrice(sellPrice)}</div>
-                <div class="price-per-sqft">${formatPricePerSqft(pricePerSqft)}</div>
+                <div class="price-per-sqft">${formatPricePerCarpetArea(pricePerSqft)}</div>
             </div>
             <div class="property-specs">${createSpecs()}</div>
             <div class="property-locality">${locality}, ${city}</div>
             <div class="property-amenities">
-                <span class="amenity-tag">Basic Amenities</span>
+                ${visibleAmenities.map(amenity => `<span class="amenity-tag">${amenity}</span>`).join('')}
+                ${hiddenAmenities.length > 0 ? `
+                    <span class="amenity-count" onclick="toggleAmenities(this, ${JSON.stringify(hiddenAmenities).replace(/"/g, '&quot;')})" style="cursor: pointer; color: #3b82f6;">
+                        +${hiddenAmenities.length} more
+                    </span>
+                ` : ''}
             </div>
-            <div class="project-name" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">${createProjectName(projectName)}</div>
         </div>
     `;
     
@@ -484,5 +531,31 @@ document.querySelector('.new-chat-btn').addEventListener('click', function() {
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
+// Toggle amenities visibility
+function toggleAmenities(element, hiddenAmenities) {
+    if (element.textContent.includes('more')) {
+        // Show all amenities
+        const amenitiesContainer = element.parentElement;
+        hiddenAmenities.forEach(amenity => {
+            const amenityTag = document.createElement('span');
+            amenityTag.className = 'amenity-tag';
+            amenityTag.textContent = amenity;
+            amenitiesContainer.insertBefore(amenityTag, element);
+        });
+        element.textContent = 'Show less';
+        element.style.color = '#ef4444';
+    } else {
+        // Hide additional amenities
+        const amenitiesContainer = element.parentElement;
+        const amenityTags = amenitiesContainer.querySelectorAll('.amenity-tag');
+        // Keep only first 3 amenities
+        for (let i = 3; i < amenityTags.length; i++) {
+            amenityTags[i].remove();
+        }
+        element.textContent = `+${hiddenAmenities.length} more`;
+        element.style.color = '#3b82f6';
+    }
+}
 
 

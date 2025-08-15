@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 
 # Import our modules
-from backend.database import get_db, create_tables
-from backend.services.nlp_engine import RealEstateNLPEngine
-from backend.models import *
+from database import get_db, create_tables
+from services.nlp_engine import RealEstateNLPEngine
+from models import *
 
 load_dotenv()
 
@@ -83,64 +83,44 @@ async def nlp_search(
         # db.add(search_query)
         # db.commit()
         
-        # Build database query based on extracted criteria
-        db_query = db.query(Property, Project, Location).join(Project).join(ProjectLocation).join(Location)
+        # Build the complete SQL query using raw SQL for better control
+        from sqlalchemy import text
         
-        # Apply filters based on extracted entities
+        # Start building the WHERE conditions
+        where_conditions = []
+        query_params = {}
+        
+        # Apply location filter
         if "location" in search_criteria["filters"]:
             location = search_criteria["filters"]["location"]
-            # Search in cities and localities
-            db_query = db_query.filter(
-                (Location.city.ilike(f"%{location}%")) | 
-                (Location.locality.ilike(f"%{location}%"))
-            )
+            where_conditions.append("(l.city ILIKE :location OR l.locality ILIKE :location)")
+            query_params["location"] = f"%{location}%"
             print(f"✅ Applied location filter: {location}")
         
+        # Apply BHK filter
         if "bhk" in search_criteria["filters"]:
             bhk = search_criteria["filters"]["bhk"]
             bhk_operator = search_criteria["filters"].get("bhk_operator", "=")
-            
-            # Apply BHK filter with operator
-            if bhk_operator == "=":
-                db_query = db_query.filter(Property.bhk_count == bhk)
-            elif bhk_operator == ">":
-                db_query = db_query.filter(Property.bhk_count > bhk)
-            elif bhk_operator == "<":
-                db_query = db_query.filter(Property.bhk_count < bhk)
-            elif bhk_operator == ">=":
-                db_query = db_query.filter(Property.bhk_count >= bhk)
-            elif bhk_operator == "<=":
-                db_query = db_query.filter(Property.bhk_count <= bhk)
-            
+            where_conditions.append(f"pr.bhk_count {bhk_operator} :bhk")
+            query_params["bhk"] = bhk
             print(f"✅ Applied BHK filter: {bhk_operator} {bhk}")
         
+        # Apply property type filter
         if "property_type" in search_criteria["filters"]:
             prop_type = search_criteria["filters"]["property_type"]
-            db_query = db_query.filter(Property.property_type.ilike(f"%{prop_type}%"))
+            where_conditions.append("pr.property_type ILIKE :property_type")
+            query_params["property_type"] = f"%{prop_type}%"
             print(f"✅ Applied property type filter: {prop_type}")
         
-        # Apply price filters from NLP extraction with operators
+        # Apply price filter
         if "price_range" in search_criteria["filters"]:
             price_operator = search_criteria["filters"].get("price_operator", "=")
             price_value = search_criteria["filters"].get("price_value")
             
             if price_value is not None:
-                # Apply price filter using the sell_price column from properties table
-                if price_operator == "<":
-                    db_query = db_query.filter(Property.sell_price < price_value)
-                    print(f"✅ Applied price filter: < ₹{price_value:,} (using sell_price column)")
-                elif price_operator == ">":
-                    db_query = db_query.filter(Property.sell_price > price_value)
-                    print(f"✅ Applied price filter: > ₹{price_value:,} (using sell_price column)")
-                elif price_operator == "<=":
-                    db_query = db_query.filter(Property.sell_price <= price_value)
-                    print(f"✅ Applied price filter: <= ₹{price_value:,} (using sell_price column)")
-                elif price_operator == ">=":
-                    db_query = db_query.filter(Property.sell_price >= price_value)
-                    print(f"✅ Applied price filter: >= ₹{price_value:,} (using sell_price column)")
-                elif price_operator == "=":
-                    db_query = db_query.filter(Property.sell_price == price_value)
-                    print(f"✅ Applied price filter: = ₹{price_value:,} (using sell_price column)")
+                where_conditions.append(f"pr.sell_price {price_operator} :price_value")
+                query_params["price_value"] = price_value
+                print(f"✅ Applied price filter: {price_operator} ₹{price_value:,}")
             else:
                 # Fallback to old pattern matching for backward compatibility
                 price_text = search_criteria["filters"]["price_range"].lower()
@@ -154,8 +134,9 @@ async def nlp_search(
                     elif 'crore' in price_text or 'cr' in price_text:
                         max_price = max_price * 10000000  # Convert crores to rupees
                     
-                    db_query = db_query.filter(Property.sell_price < max_price)
-                    print(f"✅ Applied price filter: under ₹{max_price:,} (using sell_price column)")
+                    where_conditions.append("pr.sell_price < :max_price")
+                    query_params["max_price"] = max_price
+                    print(f"✅ Applied price filter: under ₹{max_price:,}")
                 
                 # Pattern for "above X crore/lakhs"
                 above_match = re.search(r'above\s+(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', price_text)
@@ -166,8 +147,9 @@ async def nlp_search(
                     elif 'crore' in price_text or 'cr' in price_text:
                         min_price = min_price * 10000000  # Convert crores to rupees
                     
-                    db_query = db_query.filter(Property.sell_price > min_price)
-                    print(f"✅ Applied price filter: above ₹{min_price:,} (using sell_price column)")
+                    where_conditions.append("pr.sell_price > :min_price")
+                    query_params["min_price"] = min_price
+                    print(f"✅ Applied price filter: above ₹{min_price:,}")
                 
                 # Pattern for range "X-Y crore/lakhs"
                 range_match = re.search(r'(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*(?:cr|crore|crores|lakh|lakhs)', price_text)
@@ -181,11 +163,10 @@ async def nlp_search(
                         min_price = min_price * 10000000
                         max_price = max_price * 10000000
                     
-                    db_query = db_query.filter(
-                        Property.sell_price >= min_price,
-                        Property.sell_price <= max_price
-                    )
-                    print(f"✅ Applied price filter: ₹{min_price:,} - ₹{max_price:,} (using sell_price column)")
+                    where_conditions.append("pr.sell_price >= :min_price AND pr.sell_price <= :max_price")
+                    query_params["min_price"] = min_price
+                    query_params["max_price"] = max_price
+                    print(f"✅ Applied price filter: ₹{min_price:,} - ₹{max_price:,}")
                 
                 # Pattern for "between X to Y crore/lakhs"
                 between_match = re.search(r'between\s+(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|crore|crores)\s*to\s*(\d+(?:\.\d+)?)\s*(?:lakh|lakhs|crore|crores)', price_text)
@@ -199,72 +180,142 @@ async def nlp_search(
                         min_price = min_price * 10000000
                         max_price = max_price * 10000000
                     
-                    db_query = db_query.filter(
-                        Property.sell_price >= min_price,
-                        Property.sell_price <= max_price
-                    )
-                    print(f"✅ Applied price filter: between ₹{min_price:,} - ₹{max_price:,} (using sell_price column)")
+                    where_conditions.append("pr.sell_price >= :min_price AND pr.sell_price <= :max_price")
+                    query_params["min_price"] = min_price
+                    query_params["max_price"] = max_price
+                    print(f"✅ Applied price filter: between ₹{min_price:,} - ₹{max_price:,}")
         
-        # Apply carpet area filters with operators
+        # Apply carpet area filter
         if "carpet_area" in search_criteria["filters"]:
             area_operator = search_criteria["filters"].get("area_operator", "=")
             area_value = search_criteria["filters"].get("area_value")
             
             if area_value is not None:
-                # Apply carpet area filter
-                if area_operator == "<":
-                    db_query = db_query.filter(Property.carpet_area_sqft < area_value)
-                    print(f"✅ Applied carpet area filter: < {area_value} sqft")
-                elif area_operator == ">":
-                    db_query = db_query.filter(Property.carpet_area_sqft > area_value)
-                    print(f"✅ Applied carpet area filter: > {area_value} sqft")
-                elif area_operator == "<=":
-                    db_query = db_query.filter(Property.carpet_area_sqft <= area_value)
-                    print(f"✅ Applied carpet area filter: <= {area_value} sqft")
-                elif area_operator == ">=":
-                    db_query = db_query.filter(Property.carpet_area_sqft >= area_value)
-                    print(f"✅ Applied carpet area filter: >= {area_value} sqft")
-                elif area_operator == "=":
-                    db_query = db_query.filter(Property.carpet_area_sqft == area_value)
-                    print(f"✅ Applied carpet area filter: = {area_value} sqft")
+                where_conditions.append(f"pr.carpet_area_sqft {area_operator} :area_value")
+                query_params["area_value"] = area_value
+                print(f"✅ Applied carpet area filter: {area_operator} {area_value} sqft")
         
-        # Execute the query
-        query_results = db_query.limit(20).all()
+        # Apply amenity filter
+        amenity_name = None
+        if "amenity" in search_criteria["filters"]:
+            amenity_name = search_criteria["filters"]["amenity"]
+        elif "amenities" in search_criteria["filters"] and search_criteria["filters"]["amenities"]:
+            # Handle case where NLP engine returns amenities as a list
+            amenity_name = search_criteria["filters"]["amenities"][0]  # Take first amenity
+        
+        # Build the WHERE clause for non-amenity filters
+        where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
+        
+        # Build the complete SQL query with conditional JOIN for amenities
+        if amenity_name:
+            print(f"✅ Applying amenity filter: {amenity_name}")
+            # Use direct JOIN with DISTINCT to avoid duplicate properties
+            sql_query = f"""
+                SELECT DISTINCT ON (pr.id) pr.id, pr.bhk_count, pr.carpet_area_sqft, pr.sell_price, pr.floor_number,
+                       pr.property_type, pr.facing, pr.status,
+                       p.id as project_id, p.name as project_name, p.developer_id, p.project_status,
+                       p.total_units, p.total_floors, p.possession_date, p.rera_number, p.description, p.project_type,
+                       l.city, l.locality
+                FROM properties pr
+                JOIN projects p ON pr.project_id = p.id
+                JOIN project_locations pl ON p.id = pl.project_id
+                JOIN locations l ON pl.location_id = l.id
+                JOIN project_amenities pa ON p.id = pa.project_id
+                JOIN amenities a ON pa.amenity_id = a.id
+                WHERE a.name ILIKE :amenity_name
+                AND {where_clause}
+                ORDER BY pr.id, pr.sell_price
+                LIMIT 20
+            """
+            query_params["amenity_name"] = f"%{amenity_name}%"
+            print(f"✅ Applied amenity filter with direct JOIN: {amenity_name}")
+        else:
+            # No amenity filter - use simpler query
+            sql_query = f"""
+                SELECT pr.id, pr.bhk_count, pr.carpet_area_sqft, pr.sell_price, pr.floor_number,
+                       pr.property_type, pr.facing, pr.status,
+                       p.id as project_id, p.name as project_name, p.developer_id, p.project_status,
+                       p.total_units, p.total_floors, p.possession_date, p.rera_number, p.description, p.project_type,
+                       l.city, l.locality
+                FROM properties pr
+                JOIN projects p ON pr.project_id = p.id
+                JOIN project_locations pl ON p.id = pl.project_id
+                JOIN locations l ON pl.location_id = l.id
+                WHERE {where_clause}
+                ORDER BY pr.sell_price
+                LIMIT 20
+            """
+        
+        # DETAILED LOGGING - Let's see exactly what's happening
+        print("\n" + "="*80)
+        print("🔍 DETAILED SQL DEBUGGING")
+        print("="*80)
+        print(f"📊 Total filters applied: {len(where_conditions)}")
+        print(f"🔍 Where conditions array: {where_conditions}")
+        print(f"🔍 Where clause (joined): {where_clause}")
+        print(f"🔍 Query parameters: {query_params}")
+        print(f"🔍 Parameter count: {len(query_params)}")
+        print("\n🔍 COMPLETE SQL QUERY:")
+        print("-" * 40)
+        print(sql_query)
+        print("-" * 40)
+        
+        try:
+            # Execute the raw SQL query
+            print(f"\n🚀 Executing SQL query...")
+            query_results = db.execute(text(sql_query), query_params).fetchall()
+            print(f"✅ SQL execution successful! Found {len(query_results)} results")
+            
+        except Exception as e:
+            print(f"❌ SQL execution failed with error: {e}")
+            print(f"❌ Error type: {type(e).__name__}")
+            print(f"❌ Full error details: {str(e)}")
+            # Return empty results if SQL fails
+            query_results = []
+        
+        print("="*80)
         
         # Update search results count (temporarily disabled)
         # search_query.search_results_count = len(query_results)
         # db.commit()
         
-        # Format results
+        # Format results from raw SQL
         results = []
-        for property_item, project, location in query_results:
+        for row in query_results:
             project_data = {
-                "id": str(property_item.id),
-                "bhk_count": float(property_item.bhk_count) if property_item.bhk_count else None,
-                "carpet_area_sqft": float(property_item.carpet_area_sqft) if property_item.carpet_area_sqft else None,
-                "sell_price": float(property_item.sell_price) if property_item.sell_price else None,
-                "floor_number": property_item.floor_number,
-                "property_type": property_item.property_type,
-                "facing": property_item.facing,
-                "status": property_item.status,
+                "id": str(row[0]),  # pr.id
+                "bhk_count": float(row[1]) if row[1] else None,  # pr.bhk_count
+                "carpet_area_sqft": float(row[2]) if row[2] else None,  # pr.carpet_area_sqft
+                "sell_price": float(row[3]) if row[3] else None,  # pr.sell_price
+                "floor_number": row[4],  # pr.floor_number
+                "property_type": row[5],  # pr.property_type
+                "facing": row[6],  # pr.facing
+                "status": row[7],  # pr.status
                 "project": {
-                    "id": str(project.id),
-                    "name": project.name,
-                    "developer_id": str(project.developer_id) if project.developer_id else None,
-                    "project_status": project.project_status,
-                    "total_units": project.total_units,
-                    "total_floors": project.total_floors,
-                    "possession_date": str(project.possession_date) if project.possession_date else None,
-                    "rera_number": project.rera_number,
-                    "description": project.description,
-                    "project_type": project.project_type
-                } if project else None,
+                    "id": str(row[8]),  # p.id
+                    "name": row[9],  # p.name
+                    "developer_id": str(row[10]) if row[10] else None,  # p.developer_id
+                    "project_status": row[11],  # p.project_status
+                    "total_units": row[12],  # p.total_units
+                    "total_floors": row[13],  # p.total_floors
+                    "possession_date": str(row[14]) if row[14] else None,  # p.possession_date
+                    "rera_number": row[15],  # p.rera_number
+                    "description": row[16],  # p.description
+                    "project_type": row[17]  # p.project_type
+                },
                 "location": {
-                    "city": location.city if location else None,
-                    "locality": location.locality if location else None
-                } if location else None
+                    "city": row[18],  # l.city
+                    "locality": row[19]  # l.locality
+                }
             }
             results.append(project_data)
+        
+        # Final logging
+        print(f"\n📊 FINAL RESULTS:")
+        print(f"   - Raw SQL results: {len(query_results)} rows")
+        print(f"   - Formatted results: {len(results)} properties")
+        print(f"   - Results being returned: {len(results)}")
+        print("="*80)
         
         return {
             "query": query,
