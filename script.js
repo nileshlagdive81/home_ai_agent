@@ -91,6 +91,126 @@ const sampleProperties = [
     }
 ];
 
+// Dynamic search queries organized by header categories - Pune focused
+const dynamicSearchQueries = {
+    size: [
+        {
+            title: "Size",
+            query: "2 BHK apartments under 1 crore in Pune",
+            description: "2 BHK apartments under 1 crore in Pune"
+        },
+        {
+            title: "Size",
+            query: "1 BHK apartments under 50 lakhs in Wakad, Pune",
+            description: "1 BHK apartments under 50 lakhs in Wakad, Pune"
+        },
+        {
+            title: "Size",
+            query: "3 BHK apartments above 1.5 crore in Baner, Pune",
+            description: "3 BHK apartments above 1.5 crore in Baner, Pune"
+        },
+        {
+            title: "Size",
+            query: "4 BHK houses under 2 crore in Pune",
+            description: "4 BHK houses under 2 crore in Pune"
+        },
+        {
+            title: "Size",
+            query: "Studio apartments under 40 lakhs in Wakad, Pune",
+            description: "Studio apartments under 40 lakhs in Wakad, Pune"
+        }
+    ],
+    budget: [
+        {
+            title: "Budget",
+            query: "Properties under 50 lakhs in Pune",
+            description: "Properties under 50 lakhs in Pune"
+        },
+        {
+            title: "Budget",
+            query: "Homes under 1 crore in Baner, Pune",
+            description: "Homes under 1 crore in Baner, Pune"
+        },
+        {
+            title: "Budget",
+            query: "Flats under 75 lakhs in Hinjewadi, Pune",
+            description: "Flats under 75 lakhs in Hinjewadi, Pune"
+        },
+        {
+            title: "Budget",
+            query: "2 BHK under 80 lakhs in Wakad, Pune",
+            description: "2 BHK under 80 lakhs in Wakad, Pune"
+        },
+        {
+            title: "Budget",
+            query: "Affordable homes under 60 lakhs in Pune",
+            description: "Affordable homes under 60 lakhs in Pune"
+        }
+    ],
+    locality: [
+        {
+            title: "Locality",
+            query: "Properties in Baner, Pune",
+            description: "Properties in Baner, Pune"
+        },
+        {
+            title: "Locality",
+            query: "Homes in Hinjewadi, Pune",
+            description: "Homes in Hinjewadi, Pune"
+        },
+        {
+            title: "Locality",
+            query: "Flats in Wakad, Pune",
+            description: "Flats in Wakad, Pune"
+        },
+        {
+            title: "Locality",
+            query: "Apartments in Koregaon Park, Pune",
+            description: "Apartments in Koregaon Park, Pune"
+        },
+        {
+            title: "Locality",
+            query: "Houses in Viman Nagar, Pune",
+            description: "Houses in Viman Nagar, Pune"
+        }
+    ],
+    status: [
+        {
+            title: "Status",
+            query: "Ready to move properties in Pune",
+            description: "Ready to move properties in Pune"
+        },
+        {
+            title: "Status",
+            query: "Under construction projects in Baner, Pune",
+            description: "Under construction projects in Baner, Pune"
+        },
+        {
+            title: "Status",
+            query: "New launch properties in Hinjewadi, Pune",
+            description: "New launch properties in Hinjewadi, Pune"
+        },
+        {
+            title: "Status",
+            query: "Premium properties above 2 crore in Pune",
+            description: "Premium properties above 2 crore in Pune"
+        },
+        {
+            title: "Status",
+            query: "Luxury homes above 3 crore in Baner, Pune",
+            description: "Luxury homes above 3 crore in Baner, Pune"
+        }
+    ]
+};
+
+// Current query indices for rotation
+let currentQueryIndices = {
+    size: 0,
+    budget: 0,
+    locality: 0,
+    status: 0
+};
+
 // DOM elements
 const landingContent = document.getElementById('landingContent');
 const searchResults = document.getElementById('searchResults');
@@ -125,10 +245,17 @@ window.addEventListener('scroll', () => {
 document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners
     sendBtn.addEventListener('click', handleChatMessage);
-    chatInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+    chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // Prevent new line
             handleChatMessage();
         }
+    });
+    
+    // Auto-resize textarea
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
     });
 
     // Add focus/blur event listeners for suggestive placeholder
@@ -144,27 +271,78 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Add click handlers for search cards
-    document.querySelectorAll('.search-card').forEach(card => {
-        card.addEventListener('click', function() {
-            const searchText = this.querySelector('p').textContent;
-            searchProperties(searchText);
-        });
-    });
+    // Initialize dynamic search boxes
+    initializeDynamicSearchBoxes();
+    
+    // Start query rotation timer
+    startQueryRotation();
 
     // Add click handler for New Query button
     document.querySelector('.new-chat-btn').addEventListener('click', function() {
         handleNewQuery();
     });
 
-    // Add click handler for contact button
-    document.querySelector('.contact-btn').addEventListener('click', function() {
-        handleContactClick();
-    });
+    // Contact button handler removed - element doesn't exist in HTML
     
     // Set initial suggestive placeholder
     updateSuggestivePlaceholder();
 });
+
+// Initialize dynamic search boxes with current queries
+function initializeDynamicSearchBoxes() {
+    updateSearchBoxContent('size');
+    updateSearchBoxContent('budget');
+    updateSearchBoxContent('locality');
+    updateSearchBoxContent('status');
+}
+
+// Update search box content with current query
+function updateSearchBoxContent(category) {
+    const searchCards = document.querySelectorAll('.search-card');
+    let targetCard;
+    
+    switch(category) {
+        case 'size':
+            targetCard = searchCards[0];
+            break;
+        case 'budget':
+            targetCard = searchCards[1];
+            break;
+        case 'locality':
+            targetCard = searchCards[2];
+            break;
+        case 'status':
+            targetCard = searchCards[3];
+            break;
+    }
+    
+    if (targetCard) {
+        const currentQuery = dynamicSearchQueries[category][currentQueryIndices[category]];
+        targetCard.querySelector('h3').textContent = currentQuery.title;
+        targetCard.querySelector('p').textContent = currentQuery.description;
+        
+        // Update onclick to use current query
+        targetCard.onclick = () => searchProperties(currentQuery.query);
+    }
+}
+
+// Start query rotation timer
+function startQueryRotation() {
+    // Rotate queries every 10 seconds
+    setInterval(() => {
+        rotateQueries();
+    }, 10000);
+}
+
+// Rotate to next query for each category
+function rotateQueries() {
+    Object.keys(currentQueryIndices).forEach(category => {
+        currentQueryIndices[category] = (currentQueryIndices[category] + 1) % dynamicSearchQueries[category].length;
+        updateSearchBoxContent(category);
+    });
+    
+    console.log('🔄 Search queries rotated:', currentQueryIndices);
+}
 
 // Function to update the suggestive placeholder
 function updateSuggestivePlaceholder() {
@@ -185,8 +363,21 @@ function handleChatMessage() {
 }
 
 // Simulate AI response and search
-function simulateAIResponse(message) {
+async function simulateAIResponse(message) {
     const messageLower = message.toLowerCase().trim();
+    
+    // Check if message contains system-generated text that should not be processed
+    const systemGeneratedPatterns = [
+        'found', 'properties', 'matching', 'criteria', 'searching', 'processing',
+        'knowledge base', 'knowledge base - all available queries', 'complete knowledge base'
+    ];
+    
+    // Check if this is a system-generated message that shouldn't be processed
+    const isSystemGenerated = systemGeneratedPatterns.some(pattern => messageLower.includes(pattern));
+    if (isSystemGenerated) {
+        console.log('🚫 Ignoring system-generated text:', message);
+        return; // Don't process system-generated text
+    }
     
     // Check if message is a casual greeting or non-property query
     const casualMessages = [
@@ -195,29 +386,378 @@ function simulateAIResponse(message) {
         'ok', 'okay', 'yes', 'no', 'maybe', 'sure', 'alright'
     ];
     
-    // Check if message contains property-related keywords
-    const propertyKeywords = [
-        'bhk', 'bedroom', 'apartment', 'house', 'property', 'flat', 'villa',
-        'pune', 'mumbai', 'bangalore', 'baner', 'hinjewadi', 'wakad', 'thane',
-        'price', 'crore', 'lakh', 'sqft', 'sq ft', 'square feet',
-        'gym', 'parking', 'pool', 'garden', 'security', 'lift',
-        'available', 'luxury', 'premium', 'new', 'ready', 'under construction'
-    ];
-    
+    // Check message characteristics
     const isCasualMessage = casualMessages.some(casual => messageLower === casual);
-    const hasPropertyKeywords = propertyKeywords.some(keyword => messageLower.includes(keyword));
     
-    if (isCasualMessage && !hasPropertyKeywords) {
+    if (isCasualMessage) {
         // Handle casual messages with friendly responses
-        addAIMessage(`Hello! 👋 I'm here to help you find your perfect property. Try asking me about properties, like:<br>
+        addAIMessage(`Hello! 👋 I'm here to help you find your perfect property. Try asking me:<br><br>
+<strong>🏠 Property Search Examples:</strong><br>
 • "2 BHK apartments in Pune"<br>
 • "Properties under 1 crore"<br>
-• "Homes with gym facility"`);
+• "Homes with gym facility"<br>
+• "3 BHK houses in Baner"<br>
+• "Luxury properties above 2 crore"`);
     } else {
-        // Search properties for property-related queries
+        // All other messages are treated as property searches
+        console.log('🏠 Processing as Property Search:', message);
         searchProperties(message);
     }
 }
+
+// Handle knowledge base queries - COMMENTED OUT FOR NOW
+/*
+async function handleKnowledgeQuery(message) {
+    try {
+        // Show typing indicator
+        addAIMessage(`
+            <div class="typing-indicator">🤔 Let me search my knowledge base...</div>
+        `);
+        
+        console.log('🔍 Calling knowledge base API for:', message);
+        
+        // Call the knowledge base API
+        const formData = new FormData();
+        formData.append('query', message);
+        
+        const apiUrl = 'http://localhost:8000/api/v1/knowledge/query';
+        console.log('🌐 API URL:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: formData
+        });
+        
+        console.log('📡 API Response Status:', response.status);
+        console.log('📡 API Response Headers:', response.headers);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('📊 API Response Data:', result);
+        
+        // Remove typing indicator
+        removeTypingIndicator();
+        
+        if (result.success) {
+            // Display knowledge answer in the right panel
+            displayKnowledgeInRightPanel(result);
+        } else {
+            // Display suggestions if no exact match found
+            addAIMessage(`
+                <div class="knowledge-no-match">
+                    <p>${result.message}</p>
+                    <div class="knowledge-suggestions">
+                        <strong>💡 Try asking about:</strong><br>
+                        ${result.suggestions.map(q => `• "${q}"`).join('<br>')}
+                    </div>
+                </div>
+            `);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error querying knowledge base:', error);
+        console.error('❌ Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        
+        removeTypingIndicator();
+        addAIMessage(`
+            <div class="knowledge-error">
+                <p><strong>❌ Error Details:</strong> ${error.message}</p>
+                <p>This usually means:</p>
+                <ul>
+                    <li>Backend server is not running</li>
+                    <li>Network connectivity issue</li>
+                    <li>API endpoint changed</li>
+                </ul>
+                <p><strong>💡 Troubleshooting:</strong></p>
+                <ul>
+                    <li>Make sure backend server is running on port 8000</li>
+                    <li>Check if you can access <a href="http://localhost:8000/docs" target="_blank">http://localhost:8000/docs</a></li>
+                    <li>Try refreshing the page</li>
+                </ul>
+            </div>
+        `);
+    }
+}
+*/
+
+// Remove typing indicator - COMMENTED OUT FOR NOW
+/*
+function removeTypingIndicator() {
+    const typingIndicator = document.querySelector('.typing-indicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
+}
+
+// Show knowledge modal
+function showKnowledgeModal(result) {
+    const modal = document.getElementById('knowledgeModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    
+    // Set modal title
+    modalTitle.textContent = `${result.category.replace('_', ' ').toUpperCase()} - ${Math.round(result.confidence * 100)}% Match`;
+    
+    // Set modal content
+    modalBody.innerHTML = `
+        <div class="knowledge-content">
+            ${result.answer}
+        </div>
+        <div class="knowledge-suggestions">
+            <strong>💡 Related questions you might ask:</strong><br>
+            • "What is built up area?"<br>
+            • "How to buy property in India?"<br>
+            • "What is ROI in real estate?"<br>
+            • "Tell me about RERA"
+        </div>
+    `;
+    
+    // Show modal
+    modal.style.display = 'block';
+    
+    // Knowledge answer is now displayed directly in chat, no need for additional message
+}
+
+// Close knowledge modal
+function closeKnowledgeModal() {
+    const modal = document.getElementById('knowledgeModal');
+    modal.style.display = 'none';
+}
+
+// Display knowledge answer in the right panel
+function displayKnowledgeInRightPanel(result) {
+    // Hide landing content and show search results
+    const landingContent = document.getElementById('landingContent');
+    const searchResults = document.getElementById('searchResults');
+    const propertyGrid = document.getElementById('propertyGrid');
+    const resultCount = document.getElementById('resultCount');
+    const filtersBar = document.getElementById('filtersBar');
+    
+    if (!landingContent || !searchResults || !propertyGrid) return;
+    
+    // Hide landing page and show search results area
+    landingContent.style.display = 'none';
+    searchResults.style.display = 'block';
+    
+    // Hide the filters bar for knowledge queries
+    if (filtersBar) {
+        filtersBar.style.display = 'none';
+    }
+    
+    // Clear the result count text for knowledge queries
+    if (resultCount) {
+        resultCount.textContent = '';
+    }
+    
+    // Clear existing content and show knowledge
+    propertyGrid.innerHTML = '';
+    
+    // Create knowledge display
+    const knowledgeDiv = document.createElement('div');
+    knowledgeDiv.className = 'knowledge-display';
+    knowledgeDiv.innerHTML = `
+        <div class="knowledge-panel">
+            <div class="knowledge-panel-header">
+                <h3>📚 Knowledge Base</h3>
+                <span class="knowledge-category-badge">${result.category.replace('_', ' ').toUpperCase()}</span>
+            </div>
+            <div class="knowledge-panel-content">
+                ${result.answer}
+            </div>
+            <div class="knowledge-panel-footer">
+                <button class="btn btn-secondary" onclick="showMoreKnowledgeTopics()">
+                    <i class="fas fa-arrow-left"></i> Back to Topics
+                </button>
+                <button class="btn btn-primary" onclick="clearKnowledgeDisplay()">
+                    <i class="fas fa-search"></i> Back to Property Search
+                </button>
+            </div>
+        </div>
+    `;
+    
+    propertyGrid.appendChild(knowledgeDiv);
+}
+
+// Clear knowledge display and show property search
+function clearKnowledgeDisplay() {
+    const landingContent = document.getElementById('landingContent');
+    const searchResults = document.getElementById('searchResults');
+    const propertyGrid = document.getElementById('propertyGrid');
+    const filtersBar = document.getElementById('filtersBar');
+    
+    if (!landingContent || !searchResults || !propertyGrid) return;
+    
+    // Show landing page
+    landingContent.style.display = 'block';
+    searchResults.style.display = 'none';
+    
+    // Clear any knowledge content
+    propertyGrid.innerHTML = '';
+    
+    // Show filters bar when returning to property search
+    if (filtersBar) {
+        filtersBar.style.display = 'flex';
+    }
+}
+
+// Show more knowledge topics
+function showMoreKnowledgeTopics() {
+    const propertyGrid = document.getElementById('propertyGrid');
+    const resultCount = document.getElementById('resultCount');
+    const filtersBar = document.getElementById('filtersBar');
+    if (!propertyGrid) return;
+    
+    // Hide the filters bar for knowledge topics
+    if (filtersBar) {
+        filtersBar.style.display = 'none';
+    }
+    
+    // Clear the result count text for knowledge topics
+    if (resultCount) {
+        resultCount.textContent = '';
+    }
+    
+    propertyGrid.innerHTML = `
+        <div class="knowledge-topics">
+            <h3>📚 Complete Knowledge Base - All Available Queries</h3>
+            <p class="knowledge-intro">Click on any question to get detailed answers from our comprehensive real estate knowledge base.</p>
+            
+            <div class="knowledge-categories">
+                <!-- Terminology Section -->
+                <div class="knowledge-category">
+                    <h4><i class="fas fa-book"></i> 📖 Terminology & Definitions</h4>
+                    <div class="query-list">
+                        <div class="query-item" onclick="askKnowledgeQuestion('What is carpet area?')">
+                            <i class="fas fa-question-circle"></i>
+                            What is carpet area?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('What is built up area?')">
+                            <i class="fas fa-question-circle"></i>
+                            What is built up area?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('What is super built up area?')">
+                            <i class="fas fa-question-circle"></i>
+                            What is super built up area?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('What is BHK?')">
+                            <i class="fas fa-question-circle"></i>
+                            What is BHK?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('What is ROI in real estate?')">
+                            <i class="fas fa-question-circle"></i>
+                            What is ROI in real estate?
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legal & Regulatory Section -->
+                <div class="knowledge-category">
+                    <h4><i class="fas fa-gavel"></i> ⚖️ Legal & Regulatory</h4>
+                    <div class="query-list">
+                        <div class="query-item" onclick="askKnowledgeQuestion('What is RERA?')">
+                            <i class="fas fa-question-circle"></i>
+                            What is RERA?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('What documents needed for home loan?')">
+                            <i class="fas fa-question-circle"></i>
+                            What documents needed for home loan?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('What is stamp duty?')">
+                            <i class="fas fa-question-circle"></i>
+                            What is stamp duty?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('What is GST in real estate?')">
+                            <i class="fas fa-question-circle"></i>
+                            What is GST in real estate?
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Processes Section -->
+                <div class="knowledge-category">
+                    <h4><i class="fas fa-cogs"></i> 🔄 Processes & Procedures</h4>
+                    <div class="query-list">
+                        <div class="query-item" onclick="askKnowledgeQuestion('How to buy property in India?')">
+                            <i class="fas fa-question-circle"></i>
+                            How to buy property in India?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('How to apply for home loan?')">
+                            <i class="fas fa-question-circle"></i>
+                            How to apply for home loan?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('How to check property documents?')">
+                            <i class="fas fa-question-circle"></i>
+                            How to check property documents?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('What document to check for buying a flat?')">
+                            <i class="fas fa-question-circle"></i>
+                            What document to check for buying a flat?
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Investment Section -->
+                <div class="knowledge-category">
+                    <h4><i class="fas fa-chart-line"></i> 💰 Investment & Analysis</h4>
+                    <div class="query-list">
+                        <div class="query-item" onclick="askKnowledgeQuestion('Is real estate good investment?')">
+                            <i class="fas fa-question-circle"></i>
+                            Is real estate good investment?
+                        </div>
+                        <div class="query-item" onclick="askKnowledgeQuestion('How to calculate rental yield?')">
+                            <i class="fas fa-question-circle"></i>
+                            How to calculate rental yield?
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="knowledge-footer">
+                <button class="btn btn-primary" onclick="clearKnowledgeDisplay()">
+                    <i class="fas fa-search"></i> Back to Property Search
+                </button>
+                <p class="knowledge-note">💡 <strong>Pro Tip:</strong> You can also ask these questions in natural language in the chat box!</p>
+            </div>
+        </div>
+    `;
+}
+
+// Ask a knowledge question from topic cards
+function askKnowledgeQuestion(question) {
+    // Add user message to chat
+    addUserMessage(question);
+    
+    // Process the knowledge query
+    handleKnowledgeQuery(question);
+}
+*/
+
+// Close modal when clicking outside - COMMENTED OUT FOR NOW
+/*
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('knowledgeModal');
+    
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeKnowledgeModal();
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && modal.style.display === 'block') {
+            closeKnowledgeModal();
+        }
+    });
+});
+*/
 
 // Filter state management functions
 function updateFilterState(newFilters) {
@@ -349,6 +889,43 @@ function generateAISuggestions(query, filterState) {
     return suggestions;
 }
 
+// Check if query has meaningful filters or search criteria
+function hasMeaningfulFilters(query) {
+    if (!query || query.trim() === '') return false;
+    
+    const queryLower = query.toLowerCase().trim();
+    
+    // Check for location terms
+    const locationTerms = ['pune', 'mumbai', 'bangalore', 'baner', 'hinjewadi', 'wakad', 'thane', 'bandra', 'viman nagar'];
+    const hasLocation = locationTerms.some(term => queryLower.includes(term));
+    
+    // Check for property type terms
+    const propertyTypeTerms = ['bhk', 'bedroom', 'apartment', 'house', 'flat', 'villa', 'property'];
+    const hasPropertyType = propertyTypeTerms.some(term => queryLower.includes(term));
+    
+    // Check for price terms
+    const priceTerms = ['price', 'crore', 'lakh', 'budget', 'under', 'above', 'less than', 'more than'];
+    const hasPrice = priceTerms.some(term => queryLower.includes(term));
+    
+    // Check for size terms
+    const sizeTerms = ['sqft', 'sq ft', 'square feet', 'carpet area', 'built up', 'super built up'];
+    const hasSize = sizeTerms.some(term => queryLower.includes(term));
+    
+    // Check for amenity terms
+    const amenityTerms = ['gym', 'parking', 'pool', 'garden', 'security', 'lift', 'swimming', 'concierge', 'spa'];
+    const hasAmenity = amenityTerms.some(term => queryLower.includes(term));
+    
+    // Check for status terms
+    const statusTerms = ['available', 'ready', 'under construction', 'new launch', 'premium', 'luxury'];
+    const hasStatus = statusTerms.some(term => queryLower.includes(term));
+    
+    // Check for specific numbers (BHK, price, area)
+    const hasNumbers = /\d+/.test(queryLower);
+    
+    // Return true if at least one meaningful filter is present
+    return hasLocation || hasPropertyType || hasPrice || hasSize || hasAmenity || hasStatus || hasNumbers;
+}
+
 // Generate AI-powered suggestive queries for input placeholder
 function generateSuggestiveQueries(filterState) {
     const suggestions = [];
@@ -450,12 +1027,7 @@ function handleNewQuery() {
 function addAIMessage(message) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'assistant-message';
-    messageDiv.innerHTML = `
-        <div class="message-icon">
-            <i class="fas fa-check"></i>
-        </div>
-        <p>${message}</p>
-    `;
+    messageDiv.innerHTML = `<p>${message}</p>`;
     
     const aiAssistant = document.querySelector('.ai-assistant');
     aiAssistant.appendChild(messageDiv);
@@ -481,6 +1053,45 @@ function addUserMessage(message) {
 
 // Search properties function
 async function searchProperties(query) {
+    // Check if there are any meaningful filters or search criteria
+    const hasValidFilters = hasMeaningfulFilters(query);
+    
+    if (!hasValidFilters) {
+        // Show message that at least one parameter is needed
+        propertyGrid.innerHTML = `
+            <div class="no-filters-message">
+                <i class="fas fa-info-circle"></i>
+                <h3>Please specify search criteria</h3>
+                <p>To search for properties, please provide at least one of the following:</p>
+                <ul>
+                    <li><strong>Location:</strong> City, locality, or area</li>
+                    <li><strong>Property Type:</strong> BHK, apartment, house, villa</li>
+                    <li><strong>Price Range:</strong> Budget in lakhs or crores</li>
+                    <li><strong>Size:</strong> Carpet area in sq ft</li>
+                    <li><strong>Amenities:</strong> Gym, parking, pool, etc.</li>
+                </ul>
+                <p><strong>Examples:</strong></p>
+                <ul>
+                    <li>"2 BHK apartments in Pune"</li>
+                    <li>"Properties under 1 crore"</li>
+                    <li>"Homes with gym in Baner"</li>
+                    <li>"3 BHK above 50 lakhs"</li>
+                </ul>
+            </div>
+        `;
+        
+        // Hide filters bar and result count for no-filter searches
+        document.getElementById('filtersBar').style.display = 'none';
+        if (resultCount) {
+            resultCount.textContent = '';
+        }
+        
+        // Show search results area but with the no-filters message
+        landingContent.style.display = 'none';
+        searchResults.style.display = 'block';
+        return;
+    }
+    
     // Hide landing content and show search results
     landingContent.style.display = 'none';
     searchResults.style.display = 'block';
@@ -513,17 +1124,17 @@ async function searchProperties(query) {
         
         const data = await response.json();
         
-        // Update result count with actual results
-        resultCount.textContent = data.results_count;
-        
         // Display the actual results from the API
         if (data.results && data.results.length > 0) {
+            // Update result count with actual results
+            resultCount.textContent = `Found ${data.results_count} properties matching your criteria`;
             displayProperties(data.results);
             
             // Update filters based on extracted entities and maintain state
             updateFiltersFromQuery(query, data.extracted_entities);
         } else {
-            // No results found - provide AI-powered suggestions
+            // No results found - hide result count completely and provide AI-powered suggestions
+            resultCount.style.display = 'none';
             const suggestions = generateAISuggestions(query, globalFilterState);
             propertyGrid.innerHTML = `
                 <div class="no-results">
@@ -575,6 +1186,11 @@ async function searchProperties(query) {
 // Display properties in the grid
 function displayProperties(properties) {
     propertyGrid.innerHTML = '';
+    
+    // Ensure result count is visible when showing properties
+    if (resultCount) {
+        resultCount.style.display = 'block';
+    }
     
     properties.forEach(property => {
         const propertyCard = createPropertyCard(property);
@@ -956,11 +1572,7 @@ function showPropertyDetails(property) {
     // In a real application, this would open a modal or navigate to a detail page
 }
 
-// Handle contact button click
-function handleContactClick() {
-    // You can customize this to show contact form, open modal, or navigate to contact page
-    alert('Contact Us\n\nPhone: +91 98765 43210\nEmail: info@prontohomes.com\nAddress: Pune, Maharashtra\n\nWe\'ll get back to you within 24 hours!');
-}
+
 
 // New chat functionality
 document.querySelector('.new-chat-btn').addEventListener('click', function() {

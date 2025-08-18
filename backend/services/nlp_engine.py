@@ -40,6 +40,11 @@ class RealEstateNLPEngine:
                 "semantic_indicators": ["find", "search", "looking for", "want", "need", "show me", "get me", "available"],
                 "context_indicators": ["properties", "flats", "houses", "apartments", "real estate"]
             },
+            "KNOWLEDGE_QUERY": {
+                "description": "User wants information about real estate knowledge, processes, or terminology",
+                "semantic_indicators": ["what is", "what are", "explain", "tell me about", "how to", "what does", "meaning of", "definition of", "process", "steps", "documents", "requirements"],
+                "context_indicators": ["rera", "carpet area", "built up area", "super built up area", "home loan", "documents", "process", "buying", "selling", "registration", "stamp duty", "gst", "roi", "investment", "legal", "regulations", "terminology", "terms"]
+            },
             "FILTER_BY_AMENITY": {
                 "description": "User wants properties with specific amenities or near landmarks",
                 "semantic_indicators": ["near", "close to", "nearby", "within", "distance"],

@@ -12,6 +12,7 @@ from sqlalchemy import or_
 # Import our modules
 from database import get_db, create_tables
 from services.nlp_engine import RealEstateNLPEngine
+from services.knowledge_base import RealEstateKnowledgeBase
 from models import Base, Amenity, ProjectAmenity, Project, ProjectLocation, Property, Location
 
 load_dotenv()
@@ -32,8 +33,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize NLP engine
+# Initialize NLP engine and knowledge base
 nlp_engine = RealEstateNLPEngine()
+knowledge_base = RealEstateKnowledgeBase()
 
 @app.on_event("startup")
 async def startup_event():
@@ -416,6 +418,65 @@ async def get_properties(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching properties: {str(e)}")
+
+@app.post("/api/v1/knowledge/query")
+async def knowledge_query(
+    query: str = Form(..., description="Knowledge query about real estate"),
+):
+    """
+    Knowledge base query endpoint
+    Processes knowledge queries and returns relevant information
+    """
+    try:
+        # Search the knowledge base
+        result = knowledge_base.search_knowledge(query)
+        
+        if result:
+            return {
+                "success": True,
+                "query": query,
+                "category": result["category"],
+                "question": result["question"],
+                "answer": result["answer"],
+                "confidence": result["confidence"]
+            }
+        else:
+            return {
+                "success": False,
+                "query": query,
+                "message": "I couldn't find specific information about that. Try asking about real estate terms, processes, legal aspects, or investment topics.",
+                "suggestions": knowledge_base.get_suggested_questions()
+            }
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing knowledge query: {str(e)}")
+
+@app.get("/api/v1/knowledge/categories")
+async def get_knowledge_categories():
+    """Get available knowledge base categories"""
+    try:
+        categories = knowledge_base.get_knowledge_categories()
+        return {
+            "success": True,
+            "categories": categories,
+            "total_categories": len(categories)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching knowledge categories: {str(e)}")
+
+@app.get("/api/v1/knowledge/suggestions")
+async def get_knowledge_suggestions(category: Optional[str] = Query(None, description="Category to get suggestions for")):
+    """Get suggested knowledge questions"""
+    try:
+        suggestions = knowledge_base.get_suggested_questions(category)
+        return {
+            "success": True,
+            "category": category,
+            "suggestions": suggestions,
+            "total_suggestions": len(suggestions)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching knowledge suggestions: {str(e)}")
 
 @app.get("/api/v1/cities")
 async def get_cities(db: Session = Depends(get_db)):
