@@ -21,5 +21,12 @@ class Project(Base, TimestampMixin):
     project_locations = relationship("ProjectLocation", back_populates="project", cascade="all, delete-orphan")
     project_amenities = relationship("ProjectAmenity", backref="project", cascade="all, delete-orphan")
     
+    # New relationships for project details
+    construction_specs = relationship("ProjectConstructionSpec", back_populates="project", cascade="all, delete-orphan")
+    environmental_features = relationship("ProjectEnvironmentalFeature", back_populates="project", cascade="all, delete-orphan")
+    expert_reviews = relationship("ProjectExpertReview", back_populates="project", cascade="all, delete-orphan")
+    safety_features = relationship("ProjectSafetyFeature", back_populates="project", cascade="all, delete-orphan")
+    milestones = relationship("ProjectMilestone", back_populates="project", cascade="all, delete-orphan")
+    
     def __repr__(self):
         return f"<Project(id={self.id}, name='{self.name}', status='{self.project_status}')>"

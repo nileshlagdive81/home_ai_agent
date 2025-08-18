@@ -129,150 +129,7 @@ body {
     opacity: 0 !important;
 }
 
-/* Chat Container - Unified Component */
-.chat-container {
-    margin: 20px;
-    border: 2px solid #2a2a3e;
-    border-radius: 12px;
-    background: #1a1a2e;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    height: calc(100vh - 80px);
-    max-height: calc(100vh - 80px);
-    min-height: 600px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    width: calc(100% - 40px);
-    flex: 1;
-}
-
-.assistant-message {
-    background: transparent;
-    border-radius: 0;
-    padding: 8px 0;
-    display: block;
-    margin-bottom: 6px;
-    border: none;
-    box-shadow: none;
-}
-
-.assistant-message p {
-    color: #e5e7eb;
-    font-size: 14px;
-    line-height: 1.5;
-    margin: 0;
-}
-
-/* User Message Styles */
-.user-message {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 6px;
-    align-items: flex-start;
-    padding: 0 20px;
-}
-
-.user-message p {
-    background: #3b82f6;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    line-height: 1.4;
-    margin: 0;
-    max-width: 80%;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
-}
-
-.user-avatar-small {
-    width: 24px;
-    height: 24px;
-    background: #3b82f6;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 12px;
-}
-
-.message-input {
-    margin: 0;
-    position: relative;
-    flex-shrink: 0;
-    flex: none;
-    order: 2;
-    z-index: 10;
-    background: transparent;
-    border: none;
-    padding: 10px;
-    height: auto;
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-.message-input::before {
-    display: none;
-}
-
-.message-input textarea {
-    width: 100%;
-    padding: 12px 40px 12px 16px;
-    background: rgba(45, 55, 72, 0.95);
-    border: 2px solid #4a5568;
-    border-radius: 12px;
-    color: #e5e7eb;
-    font-size: 14px;
-    font-family: inherit;
-    min-height: 60px;
-    max-height: 200px;
-    line-height: 1.5;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-    resize: none;
-    overflow-y: auto;
-}
-
-.message-input textarea:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
-    background: rgba(45, 55, 72, 1);
-}
-
-.message-input textarea::placeholder {
-    color: #9ca3af;
-    font-style: italic;
-}
-
-.send-btn {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #3b82f6;
-    border: none;
-    border-radius: 8px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.send-btn:hover {
-    background: #2563eb;
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
-}
+/* Chat styles moved to chat-component.css for reusability */
 
 .user-avatar {
     display: flex;
@@ -320,18 +177,32 @@ body {
     z-index: 100;
 }
 
-.header {
-    position: relative;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    margin: 0;
+.search-header {
+    background: #1f2937;
+    border-bottom: 1px solid #374151;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-bottom: 30px;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-header h1 {
+    font-family: 'FreightDisplayProBook', serif;
+    font-size: 32px;
+    line-height: 36px;
+    font-weight: 400;
+    color: #fff;
+    letter-spacing: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-header h1 i {
+    font-size: 28px;
+    color: #2563eb;
 }
 
 .header.scrolled {
@@ -352,6 +223,30 @@ body {
     display: flex;
     align-items: center;
     gap: 24px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.project-details-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #2563eb;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 1px solid #2563eb;
+    border-radius: 6px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.project-details-link:hover {
+    background: #2563eb;
+    color: white;
 }
 
 .header h1 {

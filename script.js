@@ -243,6 +243,9 @@ window.addEventListener('scroll', () => {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    // Check for search parameter in URL (for redirects from project details page)
+    checkURLSearchParameter();
+    
     // Add event listeners
     sendBtn.addEventListener('click', handleChatMessage);
     chatInput.addEventListener('keydown', function(e) {
@@ -287,6 +290,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set initial suggestive placeholder
     updateSuggestivePlaceholder();
 });
+
+// Check for search parameter in URL and perform search if found
+function checkURLSearchParameter() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search');
+    
+    if (searchQuery) {
+        console.log('Found search parameter in URL:', searchQuery);
+        
+        // Set the search query in the chat input
+        chatInput.value = searchQuery;
+        
+        // Perform the search automatically
+        setTimeout(() => {
+            handleChatMessage();
+        }, 500);
+        
+        // Clear the search parameter from URL to prevent re-searching on refresh
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }
+}
 
 // Initialize dynamic search boxes with current queries
 function initializeDynamicSearchBoxes() {
@@ -1566,10 +1591,32 @@ function updateFiltersFromQuery(query, extractedEntities) {
     console.log('New filter state:', globalFilterState);
 }
 
-// Show property details (placeholder for future enhancement)
+// Show property details by navigating to project details page
 function showPropertyDetails(property) {
-    alert(`Property Details: ${property.specs}\nPrice: ${property.price}\nAddress: ${property.address}`);
-    // In a real application, this would open a modal or navigate to a detail page
+    console.log('Property clicked:', property);
+    
+    // Prepare the property data for the details page
+    const propertyData = {
+        id: property.id,
+        project_name: property.project_name || property.project || 'Unknown',
+        status: property.status || 'Available',
+        sell_price: property.sell_price || property.sellPrice || 0,
+        price_per_sqft: property.price_per_sqft || property.pricePerSqft || 0,
+        bhk_count: property.bhk_count || property.bhkCount || 0,
+        carpet_area: property.carpet_area_sqft || property.carpetArea || 0,
+        property_type: property.property_type || property.propertyType || 'Property',
+        locality: property.location?.locality || property.locality || 'Unknown',
+        city: property.location?.city || property.city || 'Unknown',
+        amenities: property.amenities || [],
+        description: property.description || ''
+    };
+    
+    console.log('Prepared property data:', propertyData);
+    
+    // Encode the data and navigate to project details page
+    const encodedData = encodeURIComponent(JSON.stringify(propertyData));
+    console.log('Encoded data:', encodedData);
+    window.location.href = `project_details.html?property=${encodedData}`;
 }
 
 

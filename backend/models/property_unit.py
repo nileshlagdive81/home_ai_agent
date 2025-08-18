@@ -25,5 +25,8 @@ class PropertyUnit(Base, TimestampMixin):
     property_images = relationship("PropertyImage", back_populates="unit", cascade="all, delete-orphan")
     property_viewings = relationship("PropertyViewing", back_populates="unit", cascade="all, delete-orphan")
     
+    # New relationship for room specifications
+    room_specifications = relationship("RoomSpecification", back_populates="property_unit", cascade="all, delete-orphan")
+    
     def __repr__(self):
         return f"<PropertyUnit(id={self.id}, bhk={self.bhk}, price={self.total_price})>"

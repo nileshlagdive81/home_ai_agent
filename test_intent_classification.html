@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intent Classification Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .test-input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        .test-button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .knowledge { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .property { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .casual { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🧠 Intent Classification Test</h1>
+    <p>Test the enhanced intent classification system for knowledge queries vs property searches.</p>
+    
+    <div class="test-section">
+        <h3>Test Intent Classification</h3>
+        <input type="text" id="testInput" class="test-input" placeholder="Type a query to test (e.g., 'What is carpet area?')">
+        <button onclick="testIntent()" class="test-button">Test Intent</button>
+        <div id="testResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Sample Test Cases</h3>
+        <button onclick="testQuery('What is carpet area?')" class="test-button">What is carpet area?</button>
+        <button onclick="testQuery('Show me 2 BHK apartments')" class="test-button">Show me 2 BHK apartments</button>
+        <button onclick="testQuery('How to apply for home loan?')" class="test-button">How to apply for home loan?</button>
+        <button onclick="testQuery('Properties in Pune under 1 crore')" class="test-button">Properties in Pune under 1 crore</button>
+        <button onclick="testQuery('What is RERA?')" class="test-button">What is RERA?</button>
+        <button onclick="testQuery('Hi there')" class="test-button">Hi there</button>
+    </div>
+
+    <script>
+        // Copy of the enhanced intent classification logic
+        function classifyIntent(message) {
+            const messageLower = message.toLowerCase().trim();
+            
+            // Check if message is a casual greeting or non-property query
+            const casualMessages = [
+                'hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening',
+                'how are you', 'thanks', 'thank you', 'bye', 'goodbye', 'see you',
+                'ok', 'okay', 'yes', 'no', 'maybe', 'sure', 'alright'
+            ];
+            
+            // Primary Intent Detection - Knowledge Query Patterns (highest priority)
+            const knowledgeQueryPatterns = [
+                'what is', 'what are', 'explain', 'tell me about', 'how to', 'what does', 
+                'meaning of', 'definition of', 'process', 'steps', 'documents', 'requirements',
+                'what do i need', 'how do i', 'can you explain', 'i want to know about',
+                'what does it mean', 'what is the meaning', 'how does', 'what is the process'
+            ];
+            
+            // Secondary Intent Detection - Knowledge-Specific Terms
+            const knowledgeTerms = [
+                'rera', 'stamp duty', 'gst', 'roi', 'investment', 'legal', 'regulations', 
+                'terminology', 'home loan', 'documents', 'buying process', 'selling process',
+                'property tax', 'encumbrance', 'mutation', 'title deed', 'sale deed'
+            ];
+            
+            // Property Search Keywords (only for actual property searches)
+            const propertySearchKeywords = [
+                'bhk', 'bedroom', 'apartment', 'house', 'property', 'flat', 'villa',
+                'pune', 'mumbai', 'bangalore', 'baner', 'hinjewadi', 'wakad', 'thane',
+                'price', 'crore', 'lakh', 'sqft', 'sq ft', 'square feet',
+                'gym', 'parking', 'pool', 'garden', 'security', 'lift',
+                'available', 'luxury', 'premium', 'new', 'ready', 'under construction'
+            ];
+            
+            // Check message characteristics
+            const isCasualMessage = casualMessages.some(casual => messageLower === casual);
+            const isKnowledgeQuery = knowledgeQueryPatterns.some(pattern => messageLower.includes(pattern));
+            const hasKnowledgeTerms = knowledgeTerms.some(term => messageLower.includes(term));
+            const hasPropertyKeywords = propertySearchKeywords.some(keyword => messageLower.includes(keyword));
+            
+            // Special handling for area-related knowledge queries (these are ALWAYS knowledge queries)
+            const isAreaKnowledgeQuery = (messageLower.includes('carpet area') || 
+                                         messageLower.includes('built up area') || 
+                                         messageLower.includes('super built up area')) && 
+                                        (isKnowledgeQuery || messageLower.includes('what is') || messageLower.includes('meaning'));
+            
+            // Enhanced Intent Classification Logic
+            if (isCasualMessage && !isKnowledgeQuery && !hasPropertyKeywords) {
+                return {
+                    intent: 'CASUAL',
+                    confidence: 'High',
+                    reason: 'Casual greeting detected',
+                    details: { isCasualMessage, isKnowledgeQuery, hasPropertyKeywords }
+                };
+                
+            } else if (isKnowledgeQuery || isAreaKnowledgeQuery || (hasKnowledgeTerms && isKnowledgeQuery)) {
+                return {
+                    intent: 'KNOWLEDGE_QUERY',
+                    confidence: 'High',
+                    reason: 'Knowledge query pattern detected',
+                    details: { isKnowledgeQuery, isAreaKnowledgeQuery, hasKnowledgeTerms, isKnowledgeQuery }
+                };
+                
+            } else if (hasPropertyKeywords && !isKnowledgeQuery) {
+                return {
+                    intent: 'PROPERTY_SEARCH',
+                    confidence: 'High',
+                    reason: 'Property search keywords detected',
+                    details: { hasPropertyKeywords, isKnowledgeQuery }
+                };
+                
+            } else {
+                // Default fallback - try to determine intent
+                if (messageLower.includes('?') || messageLower.includes('what') || messageLower.includes('how')) {
+                    return {
+                        intent: 'KNOWLEDGE_QUERY',
+                        confidence: 'Medium',
+                        reason: 'Question mark or question words detected - defaulting to knowledge',
+                        details: { hasQuestionMark: true, hasWhat: messageLower.includes('what'), hasHow: messageLower.includes('how') }
+                    };
+                } else {
+                    return {
+                        intent: 'PROPERTY_SEARCH',
+                        confidence: 'Medium',
+                        reason: 'No clear pattern - defaulting to property search',
+                        details: { hasQuestionMark: false, hasWhat: messageLower.includes('what'), hasHow: messageLower.includes('how') }
+                    };
+                }
+            }
+        }
+        
+        function testIntent() {
+            const input = document.getElementById('testInput').value;
+            if (!input.trim()) {
+                alert('Please enter a query to test');
+                return;
+            }
+            
+            const result = classifyIntent(input);
+            const resultDiv = document.getElementById('testResult');
+            
+            let className = '';
+            let icon = '';
+            
+            switch(result.intent) {
+                case 'KNOWLEDGE_QUERY':
+                    className = 'knowledge';
+                    icon = '📚';
+                    break;
+                case 'PROPERTY_SEARCH':
+                    className = 'property';
+                    icon = '🏠';
+                    break;
+                case 'CASUAL':
+                    className = 'casual';
+                    icon = '👋';
+                    break;
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="result ${className}">
+                    <h4>${icon} Intent: ${result.intent}</h4>
+                    <p><strong>Confidence:</strong> ${result.confidence}</p>
+                    <p><strong>Reason:</strong> ${result.reason}</p>
+                    <p><strong>Details:</strong> ${JSON.stringify(result.details, null, 2)}</p>
+                </div>
+            `;
+        }
+        
+        function testQuery(query) {
+            document.getElementById('testInput').value = query;
+            testIntent();
+        }
+    </script>
+</body>
+</html>

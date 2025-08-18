@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Property Navigation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0f0f23;
+            color: #d1d5db;
+        }
+        .test-card {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .test-card:hover {
+            background: #374151;
+            transform: translateY(-2px);
+        }
+        .test-card h3 {
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .test-card p {
+            color: #9ca3af;
+            margin: 5px 0;
+        }
+        .test-info {
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Property Navigation</h1>
+    
+    <div class="test-info">
+        <h3>Test Instructions:</h3>
+        <p>1. Click on any property card below</p>
+        <p>2. You should be redirected to project_details.html with property data</p>
+        <p>3. Check the browser console for debugging information</p>
+        <p>4. Use the back button to return to this test page</p>
+    </div>
+    
+    <div class="test-card" onclick="testPropertyNavigation('sample1')">
+        <h3>Sample Property 1</h3>
+        <p>Project: Lodha Park</p>
+        <p>Location: Baner, Pune</p>
+        <p>Price: ₹85 Lakh</p>
+        <p>Type: 2 BHK Apartment</p>
+    </div>
+    
+    <div class="test-card" onclick="testPropertyNavigation('sample2')">
+        <h3>Sample Property 2</h3>
+        <p>Project: Godrej Properties</p>
+        <p>Location: Hinjewadi, Pune</p>
+        <p>Price: ₹1.2 Cr</p>
+        <p>Type: 3 BHK House</p>
+    </div>
+    
+    <div class="test-card" onclick="testPropertyNavigation('sample3')">
+        <h3>Sample Property 3</h3>
+        <p>Project: Mahindra Lifespaces</p>
+        <p>Location: Koregaon Park, Pune</p>
+        <p>Price: ₹2.5 Cr</p>
+        <p>Type: 3 BHK Penthouse</p>
+    </div>
+    
+    <script>
+        function testPropertyNavigation(type) {
+            let propertyData;
+            
+            switch(type) {
+                case 'sample1':
+                    propertyData = {
+                        id: 1,
+                        project_name: 'Lodha Park',
+                        status: 'Available',
+                        sell_price: 8500000,
+                        price_per_sqft: 8500,
+                        bhk_count: 2,
+                        carpet_area: 1200,
+                        property_type: 'Apartment',
+                        locality: 'Baner',
+                        city: 'Pune',
+                        amenities: ['Gym', 'Parking', 'Pet-friendly'],
+                        description: 'Premium 2 BHK apartment in Baner'
+                    };
+                    break;
+                case 'sample2':
+                    propertyData = {
+                        id: 2,
+                        project_name: 'Godrej Properties',
+                        status: 'New Listing',
+                        sell_price: 12000000,
+                        price_per_sqft: 9200,
+                        bhk_count: 3,
+                        carpet_area: 1800,
+                        property_type: 'House',
+                        locality: 'Hinjewadi',
+                        city: 'Pune',
+                        amenities: ['Garden', 'Garage', 'Fireplace'],
+                        description: 'Spacious 3 BHK house in Hinjewadi'
+                    };
+                    break;
+                case 'sample3':
+                    propertyData = {
+                        id: 3,
+                        project_name: 'Mahindra Lifespaces',
+                        status: 'Premium',
+                        sell_price: 25000000,
+                        price_per_sqft: 12500,
+                        bhk_count: 3,
+                        carpet_area: 2500,
+                        property_type: 'Penthouse',
+                        locality: 'Koregaon Park',
+                        city: 'Pune',
+                        amenities: ['Balcony', 'Concierge', 'Pool'],
+                        description: 'Luxury 3 BHK penthouse in Koregaon Park'
+                    };
+                    break;
+            }
+            
+            console.log('Testing property navigation with:', propertyData);
+            
+            // Use the same function as the main application
+            const encodedData = encodeURIComponent(JSON.stringify(propertyData));
+            console.log('Encoded data:', encodedData);
+            window.location.href = `project_details.html?property=${encodedData}`;
+        }
+    </script>
+</body>
+</html>

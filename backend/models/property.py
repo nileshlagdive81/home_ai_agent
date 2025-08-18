@@ -19,6 +19,7 @@ class Property(Base, TimestampMixin):
     
     # Relationships
     project = relationship("Project", back_populates="properties")
+    room_specifications = relationship("RoomSpecification", back_populates="property", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Property(id={self.id}, bhk={self.bhk_count}, price={self.sell_price})>"
