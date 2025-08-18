@@ -1,0 +1,6 @@
+@echo off
+echo Starting Real Estate Frontend Server...
+echo.
+echo Starting HTTP server on port 3000...
+python -m http.server 3000
+pause
