@@ -300,6 +300,18 @@ async def nlp_search(
             if property_item.sell_price and property_item.carpet_area_sqft and property_item.carpet_area_sqft > 0:
                 price_per_sqft = property_item.sell_price / property_item.carpet_area_sqft
             
+            # Get primary image and media count for the project
+            primary_media = db.query(ProjectMedia).filter(
+                ProjectMedia.project_id == project.id,
+                ProjectMedia.is_primary == True,
+                ProjectMedia.is_active == True
+            ).first()
+            
+            total_media_count = db.query(ProjectMedia).filter(
+                ProjectMedia.project_id == project.id,
+                ProjectMedia.is_active == True
+            ).count()
+            
             project_data = {
                 "id": str(property_item.id),
                 "bhk_count": float(property_item.bhk_count) if property_item.bhk_count else None,
@@ -312,20 +324,24 @@ async def nlp_search(
                 "status": property_item.status,
                 "project": {
                     "id": str(project.id),
-                "name": project.name,
+                    "name": project.name,
                     "developer_id": str(project.developer_id) if project.developer_id else None,
-                "project_status": project.project_status,
-                "total_units": project.total_units,
-                "total_floors": project.total_floors,
-                "possession_date": str(project.possession_date) if project.possession_date else None,
-                "rera_number": project.rera_number,
-                "description": project.description,
+                    "project_status": project.project_status,
+                    "total_units": project.total_units,
+                    "total_floors": project.total_floors,
+                    "possession_date": str(project.possession_date) if project.possession_date else None,
+                    "rera_number": project.rera_number,
+                    "description": project.description,
                     "project_type": project.project_type
                 } if project else None,
                 "location": {
                     "city": location.city if location else None,
                     "locality": location.locality if location else None
-                } if location else None
+                } if location else None,
+                "media": {
+                    "primary_image": primary_media.file_path if primary_media else None,
+                    "total_count": total_media_count
+                } if primary_media or total_media_count > 0 else None
             }
             results.append(project_data)
         

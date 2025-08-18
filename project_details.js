@@ -1698,32 +1698,8 @@ function updateAmenitiesSection(amenities) {
     
     console.log('Amenities section updated with', allAmenities.length, 'amenities');
     
-    // Make amenities section expanded by default
-    const amenitiesAccordionItem = document.querySelector('.accordion-item:has(.amenities-grid)');
-    if (amenitiesAccordionItem) {
-        amenitiesAccordionItem.classList.add('active');
-        console.log('Amenities accordion item expanded by default');
-    } else {
-        // Fallback: find the amenities accordion item by looking for the one containing amenities-grid
-        const allAccordionItems = document.querySelectorAll('.accordion-item');
-        console.log('Found accordion items:', allAccordionItems.length);
-        allAccordionItems.forEach((item, index) => {
-            console.log(`Accordion item ${index}:`, item);
-            if (item.querySelector('.amenities-grid')) {
-                item.classList.add('active');
-                console.log('Amenities accordion item expanded by default (fallback method)');
-            }
-        });
-    }
-    
-    // Also try to find by class name
-    const amenitiesSection = document.querySelector('.amenities-section');
-    if (amenitiesSection) {
-        amenitiesSection.classList.add('active');
-        console.log('Amenities section found by class and expanded');
-    } else {
-        console.log('Amenities section not found by class');
-    }
+    // Note: Amenities section will be expanded by default via CSS
+    // The accordion functionality will handle expanding/collapsing
 }
 
 // Utility function to format price in Indian format

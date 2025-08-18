@@ -692,19 +692,7 @@ body {
     border-top: 1px solid #374151;
 }
 
-/* Make amenities section expanded by default */
-.amenities-section .accordion-content {
-    padding: 1.25rem 1.5rem;
-    max-height: none !important;
-    border-top: 1px solid #374151;
-    overflow: visible !important;
-}
-
-.amenities-section .accordion-header i {
-    transform: rotate(45deg);
-}
-
-/* Ensure amenities section is always active */
+/* Amenities section styling - follows normal accordion behavior */
 .amenities-section {
     border: 1px solid #374151;
     border-radius: 8px;
@@ -714,6 +702,17 @@ body {
 .amenities-section .accordion-content {
     background: #1f2937;
 }
+
+        /* Amenities section follows normal accordion behavior */
+        .amenities-section .accordion-header i {
+            transition: transform 0.3s ease;
+        }
+
+        /* Allow amenities section to expand fully when active */
+        .amenities-section.active .accordion-content {
+            max-height: none !important;
+            overflow: visible !important;
+        }
 
 .accordion-content p {
     color: #d1d5db;

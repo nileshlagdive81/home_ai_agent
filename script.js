@@ -1445,13 +1445,29 @@ function createPropertyCard(property) {
         return specs || 'Specifications not available';
     };
     
-    card.innerHTML = `
-        <div class="property-image">
-            <div class="status-tag">${status}</div>
+    // Handle media display
+    let imageDisplay = '';
+    let imageCounter = '1/1';
+    
+    if (property.media && property.media.primary_image) {
+        // Use real image from database
+        imageDisplay = `<img src="${property.media.primary_image}" alt="${projectName}" class="property-real-image">`;
+        imageCounter = `1/${property.media.total_count || 1}`;
+    } else {
+        // Fallback to placeholder
+        imageDisplay = `
             <div class="image-placeholder">
                 <i class="fas fa-building"></i>
             </div>
-            <div class="image-counter">1/1</div>
+        `;
+        imageCounter = '1/1';
+    }
+    
+    card.innerHTML = `
+        <div class="property-image">
+            <div class="status-tag">${status}</div>
+            ${imageDisplay}
+            <div class="image-counter">${imageCounter}</div>
         </div>
         <div class="property-details">
             <div class="project-name" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; font-size: 18px; font-weight: 600; color: #fff; margin-bottom: 16px;">${createProjectName(projectName)}</div>
