@@ -16,10 +16,14 @@ class Property(Base, TimestampMixin):
     facing = Column(String(50), nullable=True)
     status = Column(String(50), nullable=True)
     sell_price = Column(Numeric(15, 2), nullable=False, index=True)
+    floor_plan_url = Column(String(500), nullable=True)  # URL for floor plan image
     
     # Relationships
     project = relationship("Project", back_populates="properties")
     room_specifications = relationship("RoomSpecification", back_populates="property", cascade="all, delete-orphan")
+    
+    # Media relationship
+    media = relationship("ProjectMedia", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Property(id={self.id}, bhk={self.bhk_count}, price={self.sell_price})>"

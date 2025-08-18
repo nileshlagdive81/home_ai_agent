@@ -50,17 +50,55 @@
             <!-- Include Header Component -->
             <div id="header-placeholder"></div>
             
-            <!-- Project Info Section -->
-            <section class="project-info-section">
-                <div class="project-info-content">
-                    <h2 class="project-title">Skyline Residency</h2>
-                    <p class="project-tagline">Premium Living in the Heart of Mumbai</p>
-                    <div class="project-meta">
-                        <span class="rera-number">RERA: MH31000123456</span>
-                        <span class="location"><i class="fas fa-map-marker-alt"></i> Bandra West, Mumbai</span>
-                        <span class="status-badge ready">Ready to Move</span>
+            <!-- Project Overview Section -->
+            <div class="project-overview">
+                <div class="overview-content">
+                    <div class="overview-left">
+                        <h1 class="project-title" id="project-title">Loading...</h1>
+                        <p class="project-tagline" id="project-tagline">Loading...</p>
+                        <div class="location-info">
+                            <span class="location-span" id="location-span">Loading...</span>
+                        </div>
+                        <div class="project-status">
+                            <span class="status-badge" id="status-badge">Loading...</span>
+                            <span class="rera-number" id="rera-number">Loading...</span>
+                        </div>
                     </div>
+                    <div class="overview-right">
+                        <div class="price-info">
+                            <div class="starting-price">
+                                <span class="price-label">Starting Price</span>
+                                <span class="price-value" id="starting-price">Loading...</span>
+                            </div>
+                            <div class="price-per-sqft">
+                                <span class="price-label">Price per sq ft</span>
+                                <span class="price-value" id="price-per-sqft">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Project Tour Section -->
+            <section class="project-tour-section" id="projectTourSection" style="display: none;">
+                <div class="section-header">
+                    <h3>Project Tour</h3>
+                    <p>Explore our project through images and videos</p>
+                </div>
+                
+                <!-- Unified Media Slider -->
+                <div class="media-slider-container" id="mediaSliderContainer" style="display: none;">
+                    <div class="media-slider">
+                        <button class="slider-btn prev-btn" onclick="slideMedia('prev')">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <div class="media-slides" id="mediaSlides">
+                            <!-- All media (images and videos) will be populated dynamically -->
+                        </div>
+                        <button class="slider-btn next-btn" onclick="slideMedia('next')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -174,7 +212,7 @@
                 </div>
             </div>
             
-            <div class="accordion-item">
+            <div class="accordion-item amenities-section">
                 <div class="accordion-header">
                     <h3>Amenities & Facilities</h3>
                     <i class="fas fa-plus"></i>
@@ -270,10 +308,14 @@
                     <div class="modal-left-column">
                         <div class="floor-plan-section">
                             <h3>Floor Plan</h3>
-                            <div class="interactive-floor-plan">
-                                <i class="fas fa-ruler-combined"></i>
-                                <p>Interactive Floor Plan</p>
-                                <p class="area-highlight" id="modalArea">650 sq ft</p>
+                            <div class="floor-plan-display" id="floorPlanDisplay">
+                                <!-- Floor plan image will be displayed here -->
+                                <div class="floor-plan-placeholder" id="floorPlanPlaceholder">
+                                    <i class="fas fa-ruler-combined"></i>
+                                    <p>Floor Plan</p>
+                                    <p class="area-highlight" id="modalArea">650 sq ft</p>
+                                </div>
+                                <img id="floorPlanImage" class="floor-plan-image" style="display: none;" alt="Floor Plan">
                             </div>
                             <p class="price-onwards" id="modalPrice">₹2.5 Cr onwards</p>
                             <p class="carpet-area-info" id="modalCarpetArea">650 sq ft carpet area</p>
@@ -310,6 +352,16 @@
     </div>
         </div> <!-- Close main-content -->
     </div> <!-- Close app-container -->
+
+    <!-- Media Modal for Bigger View -->
+    <div id="mediaModal" class="modal">
+        <div class="modal-content media-modal-content">
+            <span class="close-modal media-close-btn">&times;</span>
+            <div id="mediaModalContent">
+                <!-- Media content will be displayed here -->
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
     <script src="project_details.js"></script>

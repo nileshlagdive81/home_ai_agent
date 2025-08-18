@@ -15,6 +15,7 @@ class Project(Base, TimestampMixin):
     rera_number = Column(String(100))
     description = Column(Text)
     project_type = Column(String(50))  # residential, commercial, mixed
+    video_url = Column(String(500), nullable=True)  # URL for project video
     
     # Relationships
     properties = relationship("Property", back_populates="project", cascade="all, delete-orphan")
@@ -27,6 +28,9 @@ class Project(Base, TimestampMixin):
     expert_reviews = relationship("ProjectExpertReview", back_populates="project", cascade="all, delete-orphan")
     safety_features = relationship("ProjectSafetyFeature", back_populates="project", cascade="all, delete-orphan")
     milestones = relationship("ProjectMilestone", back_populates="project", cascade="all, delete-orphan")
+    
+    # Media relationship
+    media = relationship("ProjectMedia", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Project(id={self.id}, name='{self.name}', status='{self.project_status}')>"

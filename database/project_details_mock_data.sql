@@ -1,6 +1,38 @@
 -- Mock Data for Project Details Tables
 -- This data relates to existing projects and property units
 
+-- 0. Amenities (basic amenities that projects can have)
+INSERT INTO amenities (name, category, icon) VALUES
+-- Basic amenities
+('Swimming Pool', 'basic', '🏊'),
+('Gym', 'basic', '💪'),
+('Garden', 'basic', '🌳'),
+('Security', 'basic', '🛡️'),
+('Lift', 'basic', '🛗'),
+('Parking', 'basic', '🚗'),
+('Concierge', 'basic', '🔔'),
+('Spa', 'luxury', '🧖'),
+('Theater', 'luxury', '🎭'),
+('Kids Play Area', 'basic', '🎠'),
+('Party Hall', 'basic', '🎉'),
+('Indoor Games', 'basic', '🎮'),
+('Outdoor Sports', 'basic', '⚽'),
+('Restaurant', 'basic', '🍽️'),
+('Bank', 'basic', '🏦'),
+('ATM', 'basic', '💳'),
+('Medical Center', 'basic', '🏥'),
+('Library', 'basic', '📚'),
+('Business Center', 'basic', '💼'),
+('Guest House', 'basic', '🏠'),
+('Balcony', 'basic', '🏠'),
+('Fireplace', 'luxury', '🔥'),
+('Patio', 'basic', '🌺'),
+('Laundry', 'basic', '👕'),
+('Storage', 'basic', '📦'),
+('Garage', 'basic', '🚪'),
+('Wine Cellar', 'luxury', '🍷')
+ON CONFLICT (name) DO NOTHING;
+
 -- 1. Room Specifications for existing BHK types
 -- Using actual property IDs from the database
 INSERT INTO room_specifications (property_id, room_name, room_type, length_feet, width_feet, area_sqft, direction, features) VALUES
@@ -75,3 +107,95 @@ INSERT INTO project_milestones (project_id, milestone_name, status, completion_d
 ('d87e9c19-e101-4867-85d9-05b925bfa094', 'Structure', 'completed', '2024-02-01', '2024-02-15', 'Luxury steel frame structure completed', 100, 2),
 ('d87e9c19-e101-4867-85d9-05b925bfa094', 'Interiors', 'in_progress', NULL, '2024-06-30', 'Luxury interior finishing in progress', 45, 3),
 ('d87e9c19-e101-4867-85d9-05b925bfa094', 'Handover', 'pending', NULL, '2024-12-31', 'Final luxury handover to customers', 0, 4);
+
+-- 7. Project Amenities (for Lodha Park - Bandra West, Mumbai)
+INSERT INTO project_amenities (project_id, amenity_id, is_available) VALUES
+-- Lodha Park amenities (using project_id: 0338932f-b499-4b51-8f0a-07f877364674)
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Swimming Pool'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Gym'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Garden'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Security'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Lift'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Parking'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Concierge'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Spa'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Theater'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Kids Play Area'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Party Hall'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Indoor Games'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Outdoor Sports'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Restaurant'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Bank'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'ATM'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Medical Center'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Library'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Business Center'), TRUE),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM amenities WHERE name = 'Guest House'), TRUE);
+
+-- 7.5. Nearby Places for Bandra West, Mumbai (if not already exists)
+INSERT INTO nearby_places (name, category_id, locality_id, distance_km, address) VALUES
+-- Bandra West specific landmarks
+('Bandra West Metro', (SELECT id FROM nearby_categories WHERE name = 'Metro Station'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 1.5, 'Bandra West Metro Station'),
+ 
+('Bandra West Bus Stand', (SELECT id FROM nearby_categories WHERE name = 'Bus Stand'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 0.8, 'Bandra West Bus Terminal'),
+ 
+('Bandra West Market', (SELECT id FROM nearby_categories WHERE name = 'Market'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 1.2, 'Bandra West Local Market'),
+ 
+('Bandra West Hospital', (SELECT id FROM nearby_categories WHERE name = 'Hospital'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 2.5, 'Bandra West Medical Center'),
+ 
+('Bandra West School', (SELECT id FROM nearby_categories WHERE name = 'School'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 1.8, 'Bandra West Educational Institute'),
+ 
+('Bandra West Restaurant', (SELECT id FROM nearby_categories WHERE name = 'Restaurant'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 0.5, 'Bandra West Food Court'),
+ 
+('Bandra West Park', (SELECT id FROM nearby_categories WHERE name = 'Park'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 1.0, 'Bandra West Public Park'),
+ 
+('Bandra West Bank', (SELECT id FROM nearby_categories WHERE name = 'Bank'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 1.3, 'Bandra West Banking Center'),
+ 
+('Bandra West Gym', (SELECT id FROM nearby_categories WHERE name = 'Gym'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 2.0, 'Bandra West Fitness Center'),
+ 
+('Bandra West Cinema', (SELECT id FROM nearby_categories WHERE name = 'Cinema'), 
+ (SELECT id FROM localities WHERE name = 'Bandra West' AND city_id = (SELECT id FROM cities WHERE name = 'Mumbai')), 
+ 3.0, 'Bandra West Movie Theater')
+ON CONFLICT (name, locality_id) DO NOTHING;
+
+-- 8. Project Nearby Places (for Lodha Park - Bandra West, Mumbai with distances in KMs)
+INSERT INTO project_nearby (project_id, nearby_place_id, distance_km) VALUES
+-- Lodha Park nearby places (using project_id: 0338932f-b499-4b51-8f0a-07f877364674)
+-- Bandra West landmarks
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra Railway Station'), 2.0),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West Metro'), 1.5),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West Bus Stand'), 0.8),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West Market'), 1.2),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West Hospital'), 2.5),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West School'), 1.8),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West Restaurant'), 0.5),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West Park'), 1.0),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West Bank'), 1.3),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West Gym'), 2.0),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Bandra West Cinema'), 3.0),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Mumbai Airport'), 8.0),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Andheri Metro'), 6.5),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Inorbit Mall'), 7.0),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Mindspace IT Park'), 8.5),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Kokilaben Hospital'), 4.0),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Powai Lake'), 5.5),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'Hiranandani Gardens'), 5.0),
+('0338932f-b499-4b51-8f0a-07f877364674', (SELECT id FROM nearby_places WHERE name = 'IIT Bombay'), 5.8);

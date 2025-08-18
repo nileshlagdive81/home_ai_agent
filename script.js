@@ -232,63 +232,122 @@ let globalFilterState = {
     roi: null
 };
 
-// Header scroll effect
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        header.classList.add('scrolled');
-    } else {
-        header.classList.remove('scrolled');
-    }
-});
+// Header scroll effect - only on home page
+if (document.querySelector('.main-content .search-header')) {
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('.main-header');
+        if (header && window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else if (header) {
+            header.classList.remove('scrolled');
+        }
+    });
+}
+
+// Helper: safely get the chat input textarea element on any page
+function getChatInputElement() {
+    const byId = document.getElementById('chatInput');
+    if (byId) return byId;
+    const inContainer = document.querySelector('.message-input textarea');
+    if (inContainer) return inContainer;
+    return null;
+}
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-    // Check for search parameter in URL (for redirects from project details page)
-    checkURLSearchParameter();
+    // Check if we're on the home page (has search functionality)
+    const isHomePage = document.querySelector('.main-content .search-header');
     
-    // Add event listeners
-    sendBtn.addEventListener('click', handleChatMessage);
-    chatInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); // Prevent new line
-            handleChatMessage();
+    // Initialize chat functionality on ALL pages
+    const sendBtn = document.querySelector('.send-btn');
+    const chatInput = getChatInputElement();
+    
+    if (sendBtn && chatInput) {
+        sendBtn.addEventListener('click', handleChatMessage);
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent new line
+                handleChatMessage();
+            }
+        });
+        
+        // Auto-resize textarea
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        });
+
+        // Add focus/blur event listeners for suggestive placeholder (only on home page)
+        if (isHomePage) {
+            chatInput.addEventListener('focus', function() {
+                // Clear placeholder when user focuses on input
+                this.placeholder = '';
+            });
+            
+            chatInput.addEventListener('blur', function() {
+                // Restore suggestive placeholder when user leaves input
+                if (this.value.trim() === '') {
+                    updateSuggestivePlaceholder();
+                }
+            });
         }
-    });
+    }
     
-    // Auto-resize textarea
-    chatInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-    });
+    if (isHomePage) {
+        // Check for search parameter in URL (for redirects from project details page)
+        checkURLSearchParameter();
+        
+        // Initialize dynamic search boxes
+        initializeDynamicSearchBoxes();
+        
+        // Start query rotation timer
+        startQueryRotation();
 
-    // Add focus/blur event listeners for suggestive placeholder
-    chatInput.addEventListener('focus', function() {
-        // Clear placeholder when user focuses on input
-        this.placeholder = '';
-    });
-    
-    chatInput.addEventListener('blur', function() {
-        // Restore suggestive placeholder when user leaves input
-        if (this.value.trim() === '') {
-            updateSuggestivePlaceholder();
+        // Add click handler for New Query button
+        const newChatBtn = document.querySelector('.new-chat-btn');
+        if (newChatBtn) {
+            newChatBtn.addEventListener('click', function() {
+                // Clear chat and reset to landing page
+                const landingContent = document.querySelector('.landing-content');
+                const searchResults = document.querySelector('.search-results');
+                const filtersBar = document.getElementById('filtersBar');
+                const aiAssistant = document.querySelector('.ai-assistant');
+                const filters = document.querySelectorAll('.filter-value');
+                
+                if (landingContent && searchResults) {
+                    landingContent.style.display = 'block';
+                    searchResults.style.display = 'none';
+                }
+                
+                if (filtersBar) {
+                    filtersBar.style.display = 'none';
+                }
+                
+                // Clear ALL chat messages including the initial AI message
+                if (aiAssistant) {
+                    const allMessages = aiAssistant.querySelectorAll('.assistant-message, .user-message');
+                    allMessages.forEach(msg => msg.remove());
+                }
+                
+                // Reset filters
+                if (filters.length > 0) {
+                    filters.forEach(filter => filter.textContent = '—');
+                }
+                
+                // Clear chat input
+                const chatInput = getChatInputElement();
+                if (chatInput) {
+                    chatInput.value = '';
+                }
+                
+                // Call handleNewQuery for additional functionality
+                handleNewQuery();
+            });
         }
-    });
-
-    // Initialize dynamic search boxes
-    initializeDynamicSearchBoxes();
-    
-    // Start query rotation timer
-    startQueryRotation();
-
-    // Add click handler for New Query button
-    document.querySelector('.new-chat-btn').addEventListener('click', function() {
-        handleNewQuery();
-    });
-
-    // Contact button handler removed - element doesn't exist in HTML
-    
-    // Set initial suggestive placeholder
-    updateSuggestivePlaceholder();
+        
+        // Set initial suggestive placeholder
+        updateSuggestivePlaceholder();
+    }
 });
 
 // Check for search parameter in URL and perform search if found
@@ -300,7 +359,10 @@ function checkURLSearchParameter() {
         console.log('Found search parameter in URL:', searchQuery);
         
         // Set the search query in the chat input
-        chatInput.value = searchQuery;
+        const chatInput = getChatInputElement();
+        if (chatInput) {
+            chatInput.value = searchQuery;
+        }
         
         // Perform the search automatically
         setTimeout(() => {
@@ -315,15 +377,24 @@ function checkURLSearchParameter() {
 
 // Initialize dynamic search boxes with current queries
 function initializeDynamicSearchBoxes() {
-    updateSearchBoxContent('size');
-    updateSearchBoxContent('budget');
-    updateSearchBoxContent('locality');
-    updateSearchBoxContent('status');
+    // Only initialize if search cards exist (home page)
+    if (document.querySelectorAll('.search-card').length > 0) {
+        updateSearchBoxContent('size');
+        updateSearchBoxContent('budget');
+        updateSearchBoxContent('locality');
+        updateSearchBoxContent('status');
+    }
 }
 
 // Update search box content with current query
 function updateSearchBoxContent(category) {
     const searchCards = document.querySelectorAll('.search-card');
+    
+    // Safety check - only proceed if search cards exist
+    if (searchCards.length === 0) {
+        return;
+    }
+    
     let targetCard;
     
     switch(category) {
@@ -343,11 +414,16 @@ function updateSearchBoxContent(category) {
     
     if (targetCard) {
         const currentQuery = dynamicSearchQueries[category][currentQueryIndices[category]];
-        targetCard.querySelector('h3').textContent = currentQuery.title;
-        targetCard.querySelector('p').textContent = currentQuery.description;
+        const titleElement = targetCard.querySelector('h3');
+        const descElement = targetCard.querySelector('p');
         
-        // Update onclick to use current query
-        targetCard.onclick = () => searchProperties(currentQuery.query);
+        if (titleElement && descElement && currentQuery) {
+            titleElement.textContent = currentQuery.title;
+            descElement.textContent = currentQuery.description;
+            
+            // Update onclick to use current query
+            targetCard.onclick = () => searchProperties(currentQuery.query);
+        }
     }
 }
 
@@ -371,19 +447,25 @@ function rotateQueries() {
 
 // Function to update the suggestive placeholder
 function updateSuggestivePlaceholder() {
-    const suggestion = generateSuggestiveQueries(globalFilterState);
-    chatInput.placeholder = suggestion;
+    const chatInput = getChatInputElement();
+    if (chatInput) {
+        const suggestion = generateSuggestiveQueries(globalFilterState);
+        chatInput.placeholder = suggestion;
+    }
 }
 
 // Handle chat messages
 function handleChatMessage() {
-    const message = chatInput.value.trim();
-    if (message) {
-        // Add user message to chat
-        addUserMessage(message);
-        // Simulate AI response
-        simulateAIResponse(message);
-        chatInput.value = '';
+    const chatInput = getChatInputElement();
+    if (chatInput) {
+        const message = chatInput.value.trim();
+        if (message) {
+            // Add user message to chat
+            addUserMessage(message);
+            // Simulate AI response
+            simulateAIResponse(message);
+            chatInput.value = '';
+        }
     }
 }
 
@@ -1035,7 +1117,10 @@ function handleNewQuery() {
     document.getElementById('filtersBar').style.display = 'none';
     
     // Clear chat input
-    chatInput.value = '';
+    const chatInput = document.querySelector('.message-input');
+    if (chatInput) {
+        chatInput.value = '';
+    }
     
     // Update suggestive placeholder
     updateSuggestivePlaceholder();
@@ -1078,55 +1163,82 @@ function addUserMessage(message) {
 
 // Search properties function
 async function searchProperties(query) {
+    // Check if we're on the home page (has search functionality)
+    const isHomePage = document.querySelector('.main-content .search-header');
+    
+    // If not on home page, redirect to home page with search query
+    if (!isHomePage) {
+        console.log('🚀 Redirecting to home page for property search:', query);
+        const encodedQuery = encodeURIComponent(query);
+        window.location.href = `index.html?search=${encodedQuery}`;
+        return;
+    }
+    
     // Check if there are any meaningful filters or search criteria
     const hasValidFilters = hasMeaningfulFilters(query);
     
     if (!hasValidFilters) {
         // Show message that at least one parameter is needed
-        propertyGrid.innerHTML = `
-            <div class="no-filters-message">
-                <i class="fas fa-info-circle"></i>
-                <h3>Please specify search criteria</h3>
-                <p>To search for properties, please provide at least one of the following:</p>
-                <ul>
-                    <li><strong>Location:</strong> City, locality, or area</li>
-                    <li><strong>Property Type:</strong> BHK, apartment, house, villa</li>
-                    <li><strong>Price Range:</strong> Budget in lakhs or crores</li>
-                    <li><strong>Size:</strong> Carpet area in sq ft</li>
-                    <li><strong>Amenities:</strong> Gym, parking, pool, etc.</li>
-                </ul>
-                <p><strong>Examples:</strong></p>
-                <ul>
-                    <li>"2 BHK apartments in Pune"</li>
-                    <li>"Properties under 1 crore"</li>
-                    <li>"Homes with gym in Baner"</li>
-                    <li>"3 BHK above 50 lakhs"</li>
-                </ul>
-            </div>
-        `;
+        if (propertyGrid) {
+            propertyGrid.innerHTML = `
+                <div class="no-filters-message">
+                    <i class="fas fa-info-circle"></i>
+                    <h3>Please specify search criteria</h3>
+                    <p>To search for properties, please provide at least one of the following:</p>
+                    <ul>
+                        <li><strong>Location:</strong> City, locality, or area</li>
+                        <li><strong>Property Type:</strong> BHK, apartment, house, villa</li>
+                        <li><strong>Price Range:</strong> Budget in lakhs or crores</li>
+                        <li><strong>Size:</strong> Carpet area in sq ft</li>
+                        <li><strong>Amenities:</strong> Gym, parking, pool, etc.</li>
+                    </ul>
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li>"2 BHK apartments in Pune"</li>
+                        <li>"Properties under 1 crore"</li>
+                        <li>"Homes with gym in Baner"</li>
+                        <li>"3 BHK above 50 lakhs"</li>
+                    </ul>
+                </div>
+            `;
+        }
         
         // Hide filters bar and result count for no-filter searches
-        document.getElementById('filtersBar').style.display = 'none';
+        const filtersBar = document.getElementById('filtersBar');
+        if (filtersBar) {
+            filtersBar.style.display = 'none';
+        }
         if (resultCount) {
             resultCount.textContent = '';
         }
         
         // Show search results area but with the no-filters message
-        landingContent.style.display = 'none';
-        searchResults.style.display = 'block';
+        if (landingContent && searchResults) {
+            landingContent.style.display = 'none';
+            searchResults.style.display = 'block';
+        }
         return;
     }
     
     // Hide landing content and show search results
-    landingContent.style.display = 'none';
-    searchResults.style.display = 'block';
+    if (landingContent && searchResults) {
+        landingContent.style.display = 'none';
+        searchResults.style.display = 'block';
+    }
     
     // Show filters bar
-    document.getElementById('filtersBar').style.display = 'flex';
+    const filtersBar = document.getElementById('filtersBar');
+    if (filtersBar) {
+        filtersBar.style.display = 'flex';
+    }
     
     // Show loading state
-    resultCount.textContent = 'Searching...';
-    propertyGrid.innerHTML = '<div class="loading">🔍 Processing your query...</div>';
+    if (resultCount) {
+        resultCount.textContent = 'Searching...';
+    }
+    if (propertyGrid) {
+        propertyGrid.innerHTML = '<div class="loading">🔍 Processing your query...</div>';
+    }
     
     try {
         // Build enhanced query with existing filters
@@ -1152,28 +1264,34 @@ async function searchProperties(query) {
         // Display the actual results from the API
         if (data.results && data.results.length > 0) {
             // Update result count with actual results
-            resultCount.textContent = `Found ${data.results_count} properties matching your criteria`;
+            if (resultCount) {
+                resultCount.textContent = `Found ${data.results_count} properties matching your criteria`;
+            }
             displayProperties(data.results);
             
             // Update filters based on extracted entities and maintain state
             updateFiltersFromQuery(query, data.extracted_entities);
         } else {
             // No results found - hide result count completely and provide AI-powered suggestions
-            resultCount.style.display = 'none';
+            if (resultCount) {
+                resultCount.style.display = 'none';
+            }
             const suggestions = generateAISuggestions(query, globalFilterState);
-            propertyGrid.innerHTML = `
-                <div class="no-results">
-                    <i class="fas fa-search"></i>
-                    <h3>No properties found</h3>
-                    <p>Your search for "${enhancedQuery}" returned no results.</p>
-                    <div class="ai-suggestions">
-                        <h4>💡 AI Suggestions:</h4>
-                        <ul>
-                            ${suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
-                        </ul>
+            if (propertyGrid) {
+                propertyGrid.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>No properties found</h3>
+                        <p>Your search for "${enhancedQuery}" returned no results.</p>
+                        <div class="ai-suggestions">
+                            <h4>💡 AI Suggestions:</h4>
+                            <ul>
+                                ${suggestions.map(suggestion => `<li>${suggestion}</li>`).join('')}
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
         
         // Log the NLP processing details for debugging
@@ -1189,19 +1307,23 @@ async function searchProperties(query) {
         console.error('Error calling NLP API:', error);
         
         // Fallback to sample data if API fails
-        resultCount.textContent = sampleProperties.length;
+        if (resultCount) {
+            resultCount.textContent = sampleProperties.length;
+        }
         displayProperties(sampleProperties);
         
         // Show error message
-        propertyGrid.innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>API Error</h3>
-                <p>Could not connect to NLP search service.</p>
-                <p>Showing sample properties instead.</p>
-                <button onclick="searchProperties('${query}')" class="retry-btn">Retry</button>
-            </div>
-        `;
+        if (propertyGrid) {
+            propertyGrid.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>API Error</h3>
+                    <p>Could not connect to NLP search service.</p>
+                    <p>Showing sample properties instead.</p>
+                    <button onclick="searchProperties('${query}')" class="retry-btn">Retry</button>
+                </div>
+            `;
+        }
     }
     
     // Don't scroll - keep header visible
@@ -1210,6 +1332,8 @@ async function searchProperties(query) {
 
 // Display properties in the grid
 function displayProperties(properties) {
+    if (!propertyGrid) return;
+    
     propertyGrid.innerHTML = '';
     
     // Ensure result count is visible when showing properties
@@ -1272,17 +1396,6 @@ function createPropertyCard(property) {
     
     // Format price in Indian format (lakhs/crores) from sellPrice in rupees
     const formatPrice = (sellPrice) => {
-        if (!sellPrice || sellPrice === 0) return 'Price on request';
-        const priceInLakhs = sellPrice / 100000; // Convert rupees to lakhs
-        if (priceInLakhs >= 100) {
-            return `₹${(priceInLakhs / 100).toFixed(1)} Cr`;
-        } else {
-            return `₹${priceInLakhs.toFixed(0)} Lakh`;
-        }
-    };
-    
-    // Global price formatting function for consistency
-    window.formatPriceForDisplay = (sellPrice) => {
         if (!sellPrice || sellPrice === 0) return 'Price on request';
         const priceInLakhs = sellPrice / 100000; // Convert rupees to lakhs
         if (priceInLakhs >= 100) {
@@ -1370,6 +1483,8 @@ function createPropertyCard(property) {
 // Enhanced NLP logic for price intent detection and filter updates
 function updateFiltersFromQuery(query, extractedEntities) {
     const filters = document.querySelectorAll('.filter-value');
+    if (!filters || filters.length === 0) return;
+    
     const queryLower = query.toLowerCase();
     
     console.log('Updating filters with extracted entities:', extractedEntities);
@@ -1380,11 +1495,11 @@ function updateFiltersFromQuery(query, extractedEntities) {
     // City detection (filter[0]) - Persistent filter
     if (extractedEntities && extractedEntities.city) {
         const cityValue = extractedEntities.city.charAt(0).toUpperCase() + extractedEntities.city.slice(1);
-        filters[0].textContent = cityValue;
+        if (filters[0]) filters[0].textContent = cityValue;
         newFilters.city = extractedEntities.city.toLowerCase();
     } else if (queryLower.includes('pune') || queryLower.includes('mumbai') || queryLower.includes('bangalore')) {
         const cityMatch = queryLower.match(/(pune|mumbai|bangalore)/i);
-        if (cityMatch) {
+        if (cityMatch && filters[0]) {
             const cityValue = cityMatch[0].charAt(0).toUpperCase() + cityMatch[0].slice(1);
             filters[0].textContent = cityValue;
             newFilters.city = cityMatch[0].toLowerCase();
@@ -1397,12 +1512,12 @@ function updateFiltersFromQuery(query, extractedEntities) {
         const capitalizedLocality = localityWords.map(word => 
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
-        filters[1].textContent = capitalizedLocality;
+        if (filters[1]) filters[1].textContent = capitalizedLocality;
         newFilters.locality = extractedEntities.locality.toLowerCase();
     } else if (queryLower.includes('baner') || queryLower.includes('hinjewadi') || queryLower.includes('wakad') || 
                queryLower.includes('thane west') || queryLower.includes('bandra west') || queryLower.includes('viman nagar')) {
         const localityMatch = queryLower.match(/(baner|hinjewadi|wakad|thane west|bandra west|viman nagar)/i);
-        if (localityMatch) {
+        if (localityMatch && filters[1]) {
             const localityWords = localityMatch[0].split(' ');
             const capitalizedLocality = localityWords.map(word => 
                 word.charAt(0).toUpperCase() + word.slice(1)
@@ -1414,19 +1529,19 @@ function updateFiltersFromQuery(query, extractedEntities) {
     
     // BHK detection (filter[2]) - Persistent filter
     if (extractedEntities && extractedEntities.bhk) {
-        filters[2].textContent = `${extractedEntities.bhk} BHK`;
+        if (filters[2]) filters[2].textContent = `${extractedEntities.bhk} BHK`;
         newFilters.bhk = extractedEntities.bhk.toString();
     } else if (queryLower.includes('2-bedroom') || queryLower.includes('2 bed') || queryLower.includes('2bhk')) {
-        filters[2].textContent = '2 BHK';
+        if (filters[2]) filters[2].textContent = '2 BHK';
         newFilters.bhk = '2';
     } else if (queryLower.includes('3-bedroom') || queryLower.includes('3 bed') || queryLower.includes('3bhk')) {
-        filters[2].textContent = '3 BHK';
+        if (filters[2]) filters[2].textContent = '3 BHK';
         newFilters.bhk = '3';
     } else if (queryLower.includes('1-bedroom') || queryLower.includes('1 bed') || queryLower.includes('1bhk')) {
-        filters[2].textContent = '1 BHK';
+        if (filters[2]) filters[2].textContent = '1 BHK';
         newFilters.bhk = '1';
     } else if (queryLower.includes('4-bedroom') || queryLower.includes('4 bed') || queryLower.includes('4bhk')) {
-        filters[2].textContent = '4 BHK';
+        if (filters[2]) filters[2].textContent = '4 BHK';
         newFilters.bhk = '4';
     }
     
@@ -1477,33 +1592,78 @@ function updateFiltersFromQuery(query, extractedEntities) {
             }
         }
         
-        if (priceDisplay) {
+        if (priceDisplay && filters[3]) {
             filters[3].textContent = priceDisplay;
         }
     }
     
     // Carpet area detection (filter[4]) - Replaceable filter
     if (extractedEntities && extractedEntities.carpet_area) {
-        const areaText = extractedEntities.carpet_area.toLowerCase();
-        let areaDisplay = '';
+        console.log('🔍 Carpet area entity found:', extractedEntities.carpet_area);
+        console.log('🔍 Full extracted entities:', extractedEntities);
         
-        if (areaText.includes('less than') || areaText.includes('under') || areaText.includes('below')) {
-            const areaMatch = areaText.match(/(\d+)\s*sqft/i);
-            if (areaMatch) {
-                const areaValue = parseInt(areaMatch[1]);
-                areaDisplay = `Under ${areaValue} sq ft`;
-                newFilters.carpet_area = `under ${areaValue} sqft`;
-            }
-        } else if (areaText.includes('more than') || areaText.includes('above') || areaText.includes('over')) {
-            const areaMatch = areaText.match(/(\d+)\s*sqft/i);
-            if (areaMatch) {
-                const areaValue = parseInt(areaMatch[1]);
-                areaDisplay = `Above ${areaValue} sq ft`;
-                newFilters.carpet_area = `above ${areaValue} sqft`;
+        // Use area_value if available (more reliable), otherwise parse from text
+        let areaValue = null;
+        let areaOperator = null;
+        
+        if (extractedEntities.area_value) {
+            areaValue = extractedEntities.area_value;
+            areaOperator = extractedEntities.area_operator || '=';
+        } else {
+            // Fallback to parsing from text
+            const areaText = extractedEntities.carpet_area.toLowerCase();
+            
+            // Handle various area patterns with better regex
+            if (areaText.includes('less than') || areaText.includes('under') || areaText.includes('below')) {
+                const areaMatch = areaText.match(/(\d+)(?:\s*sqft|\s*square\s*feet|\s*area)?/i);
+                if (areaMatch) {
+                    areaValue = parseInt(areaMatch[1]);
+                    areaOperator = '<';
+                }
+            } else if (areaText.includes('more than') || areaText.includes('above') || areaText.includes('over')) {
+                const areaMatch = areaText.match(/(\d+)(?:\s*sqft|\s*square\s*feet|\s*area)?/i);
+                if (areaMatch) {
+                    areaValue = parseInt(areaMatch[1]);
+                    areaOperator = '>';
+                }
+            } else if (areaText.includes('between') || areaText.includes('to') || areaText.includes('-')) {
+                // Handle range patterns like "1000-1500 sqft" or "between 1000 to 1500"
+                const rangeMatch = areaText.match(/(\d+)(?:\s*[-to]\s*|\s+to\s+)(\d+)(?:\s*sqft|\s*square\s*feet|\s*area)?/i);
+                if (rangeMatch) {
+                    const minArea = parseInt(rangeMatch[1]);
+                    const maxArea = parseInt(rangeMatch[2]);
+                    areaValue = `${minArea}-${maxArea}`;
+                    areaOperator = 'BETWEEN';
+                }
+            } else {
+                // Fallback: try to extract just the number and assume it's an exact match
+                const exactMatch = areaText.match(/(\d+)(?:\s*sqft|\s*square\s*feet|\s*area)?/i);
+                if (exactMatch) {
+                    areaValue = parseInt(exactMatch[1]);
+                    areaOperator = '=';
+                }
             }
         }
         
-        if (areaDisplay) {
+        // Generate display text based on operator and value
+        let areaDisplay = '';
+        if (areaValue && areaOperator) {
+            if (areaOperator === '<') {
+                areaDisplay = `Under ${areaValue} sq ft`;
+                newFilters.carpet_area = `under ${areaValue} sqft`;
+            } else if (areaOperator === '>') {
+                areaDisplay = `Above ${areaValue} sq ft`;
+                newFilters.carpet_area = `above ${areaValue} sqft`;
+            } else if (areaOperator === 'BETWEEN') {
+                areaDisplay = `${areaValue} sq ft`;
+                newFilters.carpet_area = `${areaValue} sqft`;
+            } else {
+                areaDisplay = `${areaValue} sq ft`;
+                newFilters.carpet_area = `${areaValue} sqft`;
+            }
+        }
+        
+        if (areaDisplay && filters[4]) {
             filters[4].textContent = areaDisplay;
         }
     }
@@ -1514,7 +1674,9 @@ function updateFiltersFromQuery(query, extractedEntities) {
         // Update display to show all accumulated amenities
         const allAmenities = [...globalFilterState.amenities, ...amenities];
         const uniqueAmenities = [...new Set(allAmenities)];
-        filters[5].textContent = uniqueAmenities.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(', ');
+        if (filters[5]) {
+            filters[5].textContent = uniqueAmenities.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(', ');
+        }
         newFilters.amenities = amenities;
     } else if (queryLower.includes('gym') || queryLower.includes('parking') || queryLower.includes('pool') || 
                queryLower.includes('garden') || queryLower.includes('security') || queryLower.includes('lift') ||
@@ -1532,7 +1694,7 @@ function updateFiltersFromQuery(query, extractedEntities) {
             }
         });
         
-        if (foundAmenities.length > 0) {
+        if (foundAmenities.length > 0 && filters[5]) {
             // Update display to show all accumulated amenities
             const allAmenities = [...globalFilterState.amenities, ...foundAmenities];
             const uniqueAmenities = [...new Set(allAmenities)];
@@ -1541,7 +1703,7 @@ function updateFiltersFromQuery(query, extractedEntities) {
         }
     } else {
         // If no new amenities found, still update display with existing ones
-        if (globalFilterState.amenities.length > 0) {
+        if (globalFilterState.amenities.length > 0 && filters[5]) {
             filters[5].textContent = globalFilterState.amenities.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(', ');
         }
     }
@@ -1549,7 +1711,7 @@ function updateFiltersFromQuery(query, extractedEntities) {
     // Status detection (filter[6]) - Replaceable filter
     if (extractedEntities && extractedEntities.status) {
         const statusValue = extractedEntities.status.charAt(0).toUpperCase() + extractedEntities.status.slice(1);
-        filters[6].textContent = statusValue;
+        if (filters[6]) filters[6].textContent = statusValue;
         newFilters.status = extractedEntities.status.toLowerCase();
     } else if (queryLower.includes('available') || queryLower.includes('ready to move') || 
                queryLower.includes('under construction') || queryLower.includes('new launch') ||
@@ -1562,7 +1724,7 @@ function updateFiltersFromQuery(query, extractedEntities) {
         ];
         
         const foundStatus = statusPatterns.find(pattern => queryLower.includes(pattern));
-        if (foundStatus) {
+        if (foundStatus && filters[6]) {
             const statusValue = foundStatus.charAt(0).toUpperCase() + foundStatus.slice(1);
             filters[6].textContent = statusValue;
             newFilters.status = foundStatus.toLowerCase();
@@ -1570,7 +1732,7 @@ function updateFiltersFromQuery(query, extractedEntities) {
     }
     
     // ROI detection (filter[7]) - Replaceable filter
-    if (extractedEntities && extractedEntities.roi) {
+    if (extractedEntities && extractedEntities.roi && filters[7]) {
         filters[7].textContent = extractedEntities.roi;
         newFilters.roi = extractedEntities.roi;
     }
@@ -1579,7 +1741,7 @@ function updateFiltersFromQuery(query, extractedEntities) {
     updateFilterState(newFilters);
     
     // Refresh amenities display to show accumulated values
-    if (globalFilterState.amenities.length > 0) {
+    if (globalFilterState.amenities.length > 0 && filters[5]) {
         const amenitiesDisplay = globalFilterState.amenities.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(', ');
         filters[5].textContent = amenitiesDisplay;
     }
@@ -1597,7 +1759,7 @@ function showPropertyDetails(property) {
     
     // Prepare the property data for the details page
     const propertyData = {
-        id: property.id,
+        id: property.project_id || property.project?.id || property.id, // Use project_id for amenities API
         project_name: property.project_name || property.project || 'Unknown',
         status: property.status || 'Available',
         sell_price: property.sell_price || property.sellPrice || 0,
@@ -1621,30 +1783,7 @@ function showPropertyDetails(property) {
 
 
 
-// New chat functionality
-document.querySelector('.new-chat-btn').addEventListener('click', function() {
-    // Clear chat and reset to landing page
-    landingContent.style.display = 'block';
-    searchResults.style.display = 'none';
-    
-    // Hide filters bar
-    document.getElementById('filtersBar').style.display = 'none';
-    
-    // Clear ALL chat messages including the initial AI message
-    const aiAssistant = document.querySelector('.ai-assistant');
-    const allMessages = aiAssistant.querySelectorAll('.assistant-message, .user-message');
-    allMessages.forEach(msg => msg.remove());
-    
-    // Reset filters
-    const filters = document.querySelectorAll('.filter-value');
-    filters.forEach(filter => filter.textContent = '—');
-    
-    // Clear chat input
-    chatInput.value = '';
-    
-    // Don't scroll - keep header visible
-    // window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+// New chat functionality - moved to DOMContentLoaded event handler
 
 // Toggle amenities visibility
 function toggleAmenities(element, hiddenAmenities) {

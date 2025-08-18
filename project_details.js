@@ -189,13 +189,29 @@ function addAIMessage(result) {
                 <p><strong>${result.message}</strong></p>
                 <div class="property-preview">
                     <p>Here's a preview of what you'll find:</p>
-                    ${result.properties.slice(0, 3).map(prop => `
-                        <div class="preview-item">
-                            <strong>${prop.project_name || prop.project || 'Unknown'}</strong> - 
-                            ${prop.bhk_count || prop.bhkCount || 'N/A'} BHK, 
-                            ₹${(prop.sell_price || prop.sellPrice || 0) / 100000} Lakh
-                        </div>
-                    `).join('')}
+                    ${result.properties.slice(0, 3).map(prop => {
+                        let projectName = 'Unknown';
+                        if (prop.project_name) {
+                            if (typeof prop.project_name === 'object' && prop.project_name.name) {
+                                projectName = prop.project_name.name;
+                            } else if (typeof prop.project_name === 'string') {
+                                projectName = prop.project_name;
+                            }
+                        } else if (prop.project) {
+                            if (typeof prop.project === 'object' && prop.project.name) {
+                                projectName = prop.project.name;
+                            } else if (typeof prop.project === 'string') {
+                                projectName = prop.project;
+                            }
+                        }
+                        return `
+                            <div class="preview-item">
+                                <strong>${projectName}</strong> - 
+                                ${prop.bhk_count || prop.bhkCount || 'N/A'} BHK, 
+                                ₹${(prop.sell_price || prop.sellPrice || 0) / 100000} Lakh
+                            </div>
+                        `;
+                    }).join('')}
                     ${result.properties.length > 3 ? `<p>... and ${result.properties.length - 3} more properties</p>` : ''}
                 </div>
                 <p><em>You'll be redirected to the main search page in a few seconds to view all results.</em></p>
@@ -207,13 +223,29 @@ function addAIMessage(result) {
             <div class="message-content">
                 <p><strong>Found ${result.properties.length} properties matching your criteria:</strong></p>
                 <div class="property-preview">
-                    ${result.properties.slice(0, 3).map(prop => `
-                        <div class="preview-item">
-                            <strong>${prop.project_name || prop.project || 'Unknown'}</strong> - 
-                            ${prop.bhk_count || prop.bhkCount || 'N/A'} BHK, 
-                            ₹${(prop.sell_price || prop.sellPrice || 0) / 100000} Lakh
-                        </div>
-                    `).join('')}
+                    ${result.properties.slice(0, 3).map(prop => {
+                        let projectName = 'Unknown';
+                        if (prop.project_name) {
+                            if (typeof prop.project_name === 'object' && prop.project_name.name) {
+                                projectName = prop.project_name.name;
+                            } else if (typeof prop.project_name === 'string') {
+                                projectName = prop.project_name;
+                            }
+                        } else if (prop.project) {
+                            if (typeof prop.project === 'object' && prop.project.name) {
+                                projectName = prop.project.name;
+                            } else if (typeof prop.project === 'string') {
+                                projectName = prop.project;
+                            }
+                        }
+                        return `
+                            <div class="preview-item">
+                                <strong>${projectName}</strong> - 
+                                ${prop.bhk_count || prop.bhkCount || 'N/A'} BHK, 
+                                ₹${(prop.sell_price || prop.sellPrice || 0) / 100000} Lakh
+                            </div>
+                        `;
+                    }).join('')}
                     ${result.properties.length > 3 ? `<p>... and ${result.properties.length - 3} more properties</p>` : ''}
                 </div>
                 <p><em>Click <a href="index.html?search=${encodeURIComponent(result.query || '')}" style="color: #2563eb; text-decoration: underline;">here</a> to view all results on the main search page.</em></p>
@@ -330,6 +362,31 @@ function initializeModal() {
             closeModal();
         }
     });
+    
+    // Initialize media modal
+    const mediaModal = document.getElementById('mediaModal');
+    const mediaModalCloseBtn = mediaModal?.querySelector('.media-close-btn');
+    
+    if (mediaModalCloseBtn) {
+        mediaModalCloseBtn.addEventListener('click', () => {
+            closeMediaModal();
+        });
+    }
+    
+    if (mediaModal) {
+        mediaModal.addEventListener('click', (e) => {
+            if (e.target === mediaModal) {
+                closeMediaModal();
+            }
+        });
+    }
+    
+    // Close media modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mediaModal?.style.display === 'block') {
+            closeMediaModal();
+        }
+    });
 }
 
 // Initialize view details buttons
@@ -364,7 +421,9 @@ function initializeContactButtons() {
 }
 
 // Show BHK configuration modal
-function showBHKModal(bhkType) {
+function showBHKModal(bhkData) {
+    console.log('Showing BHK modal for:', bhkData);
+    
     const modal = document.getElementById('bhkModal');
     const modalTitle = document.getElementById('modalTitle');
     const modalArea = document.getElementById('modalArea');
@@ -374,26 +433,273 @@ function showBHKModal(bhkType) {
     const modalFeatures = document.getElementById('modalFeatures');
     const modalCtaText = document.getElementById('modalCtaText');
     
-    // Get BHK configuration data
-    const bhkConfig = getBHKConfiguration(bhkType);
+    // Update modal title
+    modalTitle.textContent = `${bhkData.bhk_count} BHK Configuration Details`;
     
-    if (bhkConfig) {
-        // Update modal content
-        modalTitle.textContent = `${bhkType} BHK - ${bhkConfig.title}`;
-        modalArea.textContent = `${bhkConfig.area} sq ft`;
-        modalPrice.textContent = `${bhkConfig.price} onwards`;
-        modalCarpetArea.textContent = `${bhkConfig.area} sq ft carpet area`;
-        modalCtaText.textContent = `Interested in this ${bhkType} BHK configuration?`;
+    // Update area and price information
+    modalArea.textContent = `${bhkData.carpet_area_sqft} sq ft`;
+    modalPrice.textContent = `₹${(bhkData.sell_price / 10000000).toFixed(1)} Cr onwards`;
+    modalCarpetArea.textContent = `${bhkData.carpet_area_sqft} sq ft carpet area`;
+    
+    // Update CTA text
+    modalCtaText.textContent = `Interested in this ${bhkData.bhk_count} BHK configuration?`;
+    
+    // Display floor plan if available
+    displayFloorPlan(bhkData.floor_plan_url);
+    
+    // Populate room specifications
+    populateRoomSpecifications(bhkData.room_specifications || []);
+    
+    // Populate features
+    populateModalFeatures(bhkData);
+    
+    // Show the modal
+    modal.style.display = 'block';
+}
+
+// Display floor plan in the modal
+function displayFloorPlan(floorPlanUrl) {
+    const floorPlanDisplay = document.getElementById('floorPlanDisplay');
+    const floorPlanPlaceholder = document.getElementById('floorPlanPlaceholder');
+    const floorPlanImage = document.getElementById('floorPlanImage');
+    
+    if (floorPlanUrl) {
+        // Show floor plan image
+        floorPlanImage.src = floorPlanUrl;
+        floorPlanImage.style.display = 'block';
+        floorPlanPlaceholder.style.display = 'none';
+    } else {
+        // Show placeholder
+        floorPlanImage.style.display = 'none';
+        floorPlanPlaceholder.style.display = 'block';
+    }
+}
+
+// Load and display project media (images and videos)
+async function loadProjectMedia(projectId) {
+    try {
+        console.log('Loading media for project:', projectId);
         
-        // Populate room specifications
-        populateRoomList(modalRoomList, bhkConfig.rooms);
+        if (!projectId) {
+            console.log('No project ID provided for media loading');
+            return;
+        }
         
-        // Populate features
-        populateFeatures(modalFeatures, bhkConfig.features);
+        // Fetch media from the API
+        const response = await fetch(`http://localhost:8000/api/v1/projects/${projectId}/media`);
+        console.log('Media response status:', response.status);
         
-        // Show modal
-        modal.style.display = 'block';
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        if (response.ok) {
+            const mediaData = await response.json();
+            console.log('Fetched media data:', mediaData);
+            
+            if (mediaData.success && mediaData.media && mediaData.media.length > 0) {
+                // Show project tour section
+                const projectTourSection = document.getElementById('projectTourSection');
+                projectTourSection.style.display = 'block';
+                
+                // Show unified media slider
+                const mediaSliderContainer = document.getElementById('mediaSliderContainer');
+                mediaSliderContainer.style.display = 'block';
+                
+                // Display all media in unified slider
+                displayUnifiedMedia(mediaData.media);
+            }
+        } else {
+            console.log('Media response not ok:', response.statusText);
+        }
+        
+    } catch (error) {
+        console.error('Error loading project media:', error);
+    }
+}
+
+// Display unified media in single slider
+function displayUnifiedMedia(mediaItems) {
+    const mediaSlides = document.getElementById('mediaSlides');
+    
+    mediaSlides.innerHTML = '';
+    
+    mediaItems.forEach((media, index) => {
+        const mediaSlide = document.createElement('div');
+        mediaSlide.className = 'media-slide';
+        mediaSlide.onclick = () => openMediaModal(media.file_type, media.file_path, media.alt_text || `Project ${media.file_type}`);
+        
+        if (media.file_type === 'video') {
+            mediaSlide.innerHTML = `
+                <video src="${media.file_path}" preload="metadata">
+                    Your browser does not support the video tag.
+                </video>
+                <div class="media-caption">${media.alt_text || 'Project Video'}</div>
+            `;
+        } else {
+            mediaSlide.innerHTML = `
+                <img src="${media.file_path}" alt="${media.alt_text}" loading="lazy">
+                <div class="media-caption">${media.alt_text || 'Project Image'}</div>
+            `;
+        }
+        
+        mediaSlides.appendChild(mediaSlide);
+    });
+}
+
+// Open media modal for bigger view
+function openMediaModal(type, src, caption) {
+    const mediaModal = document.getElementById('mediaModal');
+    const mediaModalContent = document.getElementById('mediaModalContent');
+    
+    if (type === 'video') {
+        mediaModalContent.innerHTML = `
+            <video controls autoplay>
+                <source src="${src}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        `;
+    } else {
+        mediaModalContent.innerHTML = `
+            <img src="${src}" alt="${caption}">
+        `;
+    }
+    
+    mediaModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+// Close media modal
+function closeMediaModal() {
+    const mediaModal = document.getElementById('mediaModal');
+    mediaModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Unified media slider navigation
+function slideMedia(direction) {
+    const mediaSlides = document.getElementById('mediaSlides');
+    const slideWidth = 280 + 16; // slide width + gap
+    
+    if (direction === 'prev') {
+        mediaSlides.scrollLeft -= slideWidth;
+    } else {
+        mediaSlides.scrollLeft += slideWidth;
+    }
+}
+
+// Populate room specifications in the modal
+function populateRoomSpecifications(roomSpecs) {
+    const modalRoomList = document.getElementById('modalRoomList');
+    
+    if (!roomSpecs || roomSpecs.length === 0) {
+        // Show default room specifications if none provided
+        modalRoomList.innerHTML = `
+            <div class="room-item">
+                <h4>Living Room</h4>
+                <p>Spacious living area with natural light</p>
+            </div>
+            <div class="room-item">
+                <h4>Master Bedroom</h4>
+                <p>Large bedroom with attached bathroom</p>
+            </div>
+            <div class="room-item">
+                <h4>Kitchen</h4>
+                <p>Modern kitchen with utility area</p>
+            </div>
+        `;
+        return;
+    }
+    
+    modalRoomList.innerHTML = '';
+    
+    roomSpecs.forEach(room => {
+        const roomItem = document.createElement('div');
+        roomItem.className = 'room-item';
+        
+        roomItem.innerHTML = `
+            <h4>${room.room_name}</h4>
+            <p>${room.room_type} - ${room.area_sqft} sq ft</p>
+            ${room.features ? `<p>Features: ${room.features.join(', ')}</p>` : ''}
+        `;
+        
+        modalRoomList.appendChild(roomItem);
+    });
+}
+
+// Populate modal features
+function populateModalFeatures(bhkData) {
+    const modalFeatures = document.getElementById('modalFeatures');
+    
+    // Use real features from BHK data or generate based on BHK count
+    let features = [];
+    
+    if (bhkData.features && bhkData.features.length > 0) {
+        // Use real features from database
+        features = bhkData.features;
+    } else {
+        // Generate features based on BHK count and property type
+        features = generateFeaturesForBHK(bhkData.bhk_count, bhkData.property_type);
+    }
+    
+    modalFeatures.innerHTML = '';
+    
+    features.forEach(feature => {
+        const featureItem = document.createElement('div');
+        featureItem.className = 'feature-item';
+        
+        featureItem.innerHTML = `
+            <i class="fas fa-check"></i>
+            <span>${feature}</span>
+        `;
+        
+        modalFeatures.appendChild(featureItem);
+    });
+}
+
+// Generate features based on BHK count and property type
+function generateFeaturesForBHK(bhkCount, propertyType = 'Apartment') {
+    const baseFeatures = ['Modern Design', 'Quality Finishes'];
+    
+    if (bhkCount <= 1) {
+        return [
+            ...baseFeatures,
+            'Efficient Space Utilization',
+            'Modern Kitchen Design',
+            'Balcony Access',
+            'Built-in Storage',
+            'Attached Bathroom'
+        ];
+    } else if (bhkCount <= 2) {
+        return [
+            ...baseFeatures,
+            'Spacious Bedrooms',
+            'Separate Dining Area',
+            'Multiple Balconies',
+            'Built-in Wardrobes',
+            'Modular Kitchen',
+            'Attached Bathrooms'
+        ];
+    } else if (bhkCount <= 3) {
+        return [
+            ...baseFeatures,
+            'Large Master Bedroom',
+            'Separate Living & Dining',
+            'Multiple Balconies with Views',
+            'Premium Kitchen with Island',
+            'Walk-in Wardrobe',
+            'Attached Bathrooms',
+            'Study Area'
+        ];
+    } else {
+        return [
+            ...baseFeatures,
+            'Luxurious Master Suite',
+            'Separate Living & Dining',
+            'Private Terrace Garden',
+            'Premium Kitchen with Butler Pantry',
+            'Walk-in Wardrobes',
+            'Attached Bathrooms',
+            'Study/Home Office',
+            'Entertainment Area',
+            'Utility Room'
+        ];
     }
 }
 
@@ -629,7 +935,7 @@ function showNotification(message, type = 'info') {
 }
 
 // Load and display property data from URL parameters
-function loadPropertyData() {
+async function loadPropertyData() {
     console.log('Loading property data from URL...');
     const urlParams = new URLSearchParams(window.location.search);
     const propertyParam = urlParams.get('property');
@@ -646,8 +952,71 @@ function loadPropertyData() {
         const propertyData = JSON.parse(decodeURIComponent(propertyParam));
         console.log('Loaded property data:', propertyData);
         
+        // Fetch project details using the project ID
+        if (propertyData.id) {
+            try {
+                console.log('Fetching project details for ID:', propertyData.id);
+                
+                // Fetch project details from the properties endpoint
+                const projectResponse = await fetch(`http://localhost:8000/api/v1/properties?limit=50`);
+                if (projectResponse.ok) {
+                    const projectData = await projectResponse.json();
+                    if (projectData.results && projectData.results.length > 0) {
+                        // Find the project that matches our location (city + locality)
+                        const matchingProject = projectData.results.find(project => {
+                            const projectCity = project.location?.city?.toLowerCase() || '';
+                            const projectLocality = project.location?.locality?.toLowerCase() || '';
+                            const searchCity = city.toLowerCase();
+                            const searchLocality = locality.toLowerCase();
+                            
+                            return projectCity === searchCity && projectLocality === searchLocality;
+                        });
+                        
+                        if (matchingProject) {
+                            console.log('Found matching project:', matchingProject);
+                            
+                            // Merge project data with property data
+                            propertyData.project = matchingProject;
+                            propertyData.project_name = matchingProject.name;
+                            propertyData.project_status = matchingProject.project_status;
+                            propertyData.total_units = matchingProject.total_units;
+                            propertyData.total_floors = matchingProject.total_floors;
+                            propertyData.possession_date = matchingProject.possession_date;
+                            propertyData.rera_number = matchingProject.rera_number;
+                            propertyData.description = matchingProject.description;
+                            propertyData.project_type = matchingProject.project_type;
+                        } else {
+                            console.log('No matching project found for location:', city, locality);
+                        }
+                    }
+                }
+                
+                // Fetch amenities data for this project
+                console.log('Fetching amenities for project ID:', propertyData.id);
+                const amenitiesResponse = await fetch(`http://localhost:8000/api/v1/projects/${propertyData.id}/amenities`);
+                console.log('Amenities response status:', amenitiesResponse.status);
+                if (amenitiesResponse.ok) {
+                    const amenitiesData = await amenitiesResponse.json();
+                    console.log('Fetched amenities data:', amenitiesData);
+                    if (amenitiesData.success && amenitiesData.amenities) {
+                        propertyData.amenities = amenitiesData.amenities.map(a => a.name);
+                        console.log('Updated property data with amenities:', propertyData.amenities);
+                    }
+                } else {
+                    console.log('Amenities response not ok:', amenitiesResponse.statusText);
+                }
+            } catch (error) {
+                console.log('Could not fetch project data or amenities, using defaults:', error);
+            }
+        } else {
+            console.log('No project ID found in property data');
+        }
+        
         // Populate the page with property data
         populatePropertyDetails(propertyData);
+        
+        // Load and display project media
+        await loadProjectMedia(propertyData.id);
         
     } catch (error) {
         console.error('Error parsing property data:', error);
@@ -655,54 +1024,91 @@ function loadPropertyData() {
     }
 }
 
-// Populate the page with property data
+// Populate property details on the page
 function populatePropertyDetails(property) {
-    console.log('Populating property details:', property);
+    console.log('populatePropertyDetails called with property:', property);
+    console.log('Property amenities:', property.amenities);
     
-    // Extract project name from various possible fields
+    // Extract project name safely
     let projectName = 'Property';
-    if (property.project_name) {
+    if (typeof property.project_name === 'object' && property.project_name?.name) {
+        projectName = property.project_name.name;
+    } else if (typeof property.project === 'object' && property.project?.name) {
+        projectName = property.project.name;
+    } else if (typeof property.project_name === 'string') {
         projectName = property.project_name;
-    } else if (property.project) {
+    } else if (typeof property.project === 'string') {
         projectName = property.project;
-    } else if (property.name) {
-        projectName = property.name;
-    } else if (property.title) {
-        projectName = property.title;
     }
     
-    // Update page title
-    document.title = `Project Details - ${projectName}`;
+    // Extract locality safely
+    let locality = '';
+    if (typeof property.locality === 'object' && property.locality?.name) {
+        locality = property.locality.name;
+    } else if (typeof property.locality === 'string') {
+        locality = property.locality;
+    }
     
-    // Update header information
+    // Extract city safely
+    let city = '';
+    if (typeof property.city === 'object' && property.city?.name) {
+        city = property.city.name;
+    } else if (typeof property.city === 'string') {
+        city = property.city;
+    }
+    
+    // Extract status safely
+    let status = '';
+    if (typeof property.status === 'object' && property.status?.name) {
+        status = property.status.name;
+    } else if (typeof property.status === 'string') {
+        status = property.status;
+    }
+    
+    // Extract RERA number safely
+    let reraNumber = '';
+    if (typeof property.rera_number === 'object' && property.rera_number?.number) {
+        reraNumber = property.rera_number.number;
+    } else if (typeof property.rera_number === 'string') {
+        reraNumber = property.rera_number;
+    }
+    
+    console.log('Extracted values - Project Name:', projectName, 'Locality:', locality, 'City:', city, 'Status:', status, 'RERA:', reraNumber);
+    
+    // Update project title and tagline
     const projectTitle = document.querySelector('.project-title');
     const projectTagline = document.querySelector('.project-tagline');
-    const locationSpan = document.querySelector('.location');
+    const locationSpan = document.querySelector('.location-span');
     const statusBadge = document.querySelector('.status-badge');
+    const reraNumberSpan = document.querySelector('.rera-number');
     
-    if (projectTitle) projectTitle.textContent = projectName;
-    if (projectTagline) projectTagline.textContent = `${property.property_type || 'Property'} in ${property.locality || 'Unknown'}, ${property.city || 'Unknown'}`;
-    if (locationSpan) locationSpan.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${property.locality || 'Unknown'}, ${property.city || 'Unknown'}`;
-    if (statusBadge) {
-        statusBadge.textContent = property.status || 'Available';
-        statusBadge.className = `status-badge ${(property.status || 'available').toLowerCase().replace(' ', '-')}`;
-    }
+    if (projectTitle) projectTitle.textContent = projectName || 'Property Details';
+    if (projectTagline) projectTagline.textContent = property.description || 'Premium residential project';
+    if (locationSpan) locationSpan.textContent = `${locality}, ${city}`;
+    if (statusBadge) statusBadge.textContent = status || 'Available';
+    if (reraNumberSpan) reraNumberSpan.textContent = reraNumber || 'RERA Number Pending';
     
-    // Update key metrics
-    const startingPrice = document.querySelector('.metric-card:nth-child(1) .metric-value');
-    const pricePerSqft = document.querySelector('.metric-card:nth-child(2) .metric-value');
-    const bhkOptions = document.querySelector('.metric-card:nth-child(4) .metric-value');
+    // Update metrics
+    const startingPrice = document.querySelector('#starting-price');
+    const pricePerSqft = document.querySelector('#price-per-sqft');
+    const totalUnits = document.querySelector('.metric-card:nth-child(3) .metric-value');
+    const totalFloors = document.querySelector('.metric-card:nth-child(4) .metric-value');
     
-    if (startingPrice) startingPrice.textContent = formatPrice(property.sell_price || property.sellPrice || 0);
+    if (startingPrice) startingPrice.textContent = formatPrice(property.sell_price || property.starting_price || property.startingPrice || 0);
     if (pricePerSqft) pricePerSqft.textContent = `₹${(property.price_per_sqft || property.pricePerSqft || 0).toLocaleString()}`;
-    if (bhkOptions) bhkOptions.textContent = property.bhk_count || property.bhkCount || '1';
+    if (totalUnits) totalUnits.textContent = property.total_units || property.project?.total_units || 'N/A';
+    if (totalFloors) totalFloors.textContent = property.total_floors || property.project?.total_floors || 'N/A';
     
     // Update residences section based on BHK count
     updateResidencesSection(property);
     
     // Update amenities section if available
+    console.log('About to call updateAmenitiesSection with:', property.amenities);
     if (property.amenities && property.amenities.length > 0) {
         updateAmenitiesSection(property.amenities);
+    } else {
+        console.log('No amenities found in property, using default amenities');
+        updateAmenitiesSection([]);
     }
     
     // Populate all expandable sections with real data
@@ -739,19 +1145,27 @@ function populateConstructionSpecs(property) {
     const specs = [
         {
             title: 'Foundation',
-            description: property.foundation_specs || 'RCC foundation with standard depth and M25 grade concrete'
+            description: property.foundation_specs || property.construction_specs?.foundation || 'RCC foundation with standard depth and M25 grade concrete'
         },
         {
             title: 'Structure',
-            description: property.structure_specs || 'RCC framed structure with M30 grade concrete and Fe500D steel'
+            description: property.structure_specs || property.construction_specs?.structure || 'RCC framed structure with M30 grade concrete and Fe500D steel'
         },
         {
             title: 'Walls',
-            description: property.wall_specs || 'Clay bricks with cement mortar, standard thickness'
+            description: property.wall_specs || property.construction_specs?.walls || 'Clay bricks with cement mortar, standard thickness'
         },
         {
             title: 'Finishing',
-            description: property.finishing_specs || 'Premium quality tiles, paints, and fixtures from reputed brands'
+            description: property.finishing_specs || property.construction_specs?.finishing || 'Premium quality tiles, paints, and fixtures from reputed brands'
+        },
+        {
+            title: 'Electrical',
+            description: property.electrical_specs || property.construction_specs?.electrical || 'Standard electrical fittings with safety switches'
+        },
+        {
+            title: 'Plumbing',
+            description: property.plumbing_specs || property.construction_specs?.plumbing || 'CPVC pipes with modern fixtures'
         }
     ];
     
@@ -773,17 +1187,32 @@ function populateEnvironmentalFeatures(property) {
         {
             icon: 'fa-solar-panel',
             title: 'Solar Power',
-            description: property.solar_power || 'Solar panels for energy efficiency'
+            description: property.solar_power || property.environmental_features?.solar_power || 'Solar panels for energy efficiency'
         },
         {
             icon: 'fa-recycle',
             title: 'Water Recycling',
-            description: property.water_recycling || 'STP plant for grey water treatment'
+            description: property.water_recycling || property.environmental_features?.water_recycling || 'STP plant for grey water treatment'
         },
         {
             icon: 'fa-leaf',
             title: 'Green Building',
-            description: property.green_certification || 'Environmentally friendly construction'
+            description: property.green_certification || property.environmental_features?.green_certification || 'Environmentally friendly construction'
+        },
+        {
+            icon: 'fa-wind',
+            title: 'Natural Ventilation',
+            description: property.natural_ventilation || property.environmental_features?.natural_ventilation || 'Cross-ventilation design for natural air flow'
+        },
+        {
+            icon: 'fa-seedling',
+            title: 'Landscaping',
+            description: property.landscaping || property.environmental_features?.landscaping || 'Green spaces and gardens for better environment'
+        },
+        {
+            icon: 'fa-tint',
+            title: 'Rainwater Harvesting',
+            description: property.rainwater_harvesting || property.environmental_features?.rainwater_harvesting || 'Rainwater collection and storage system'
         }
     ];
     
@@ -802,7 +1231,7 @@ function populateExpertReview(property) {
     if (!reviewContainer) return;
     
     // Use real data from property or default review
-    const rating = property.expert_rating || 4.5;
+    const rating = property.expert_rating || property.expert_review?.rating || 4.5;
     const stars = '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating));
     
     reviewContainer.innerHTML = `
@@ -810,9 +1239,11 @@ function populateExpertReview(property) {
             <div class="stars">${stars}</div>
             <span class="rating-text">${rating}/5.0</span>
         </div>
-        <p><strong>Architectural Excellence:</strong> ${property.architectural_review || 'Modern design with optimal space utilization and natural light.'}</p>
-        <p><strong>Construction Quality:</strong> ${property.construction_review || 'Premium materials and workmanship meeting international standards.'}</p>
-        <p><strong>Investment Potential:</strong> ${property.investment_review || 'High ROI potential due to prime location and quality construction.'}</p>
+        <p><strong>Architectural Excellence:</strong> ${property.architectural_review || property.expert_review?.architectural || 'Modern design with optimal space utilization and natural light.'}</p>
+        <p><strong>Construction Quality:</strong> ${property.construction_review || property.expert_review?.construction_quality || 'Premium materials and workmanship meeting international standards.'}</p>
+        <p><strong>Investment Potential:</strong> ${property.investment_review || property.expert_review?.investment_potential || 'High ROI potential due to prime location and quality construction.'}</p>
+        <p><strong>Location Analysis:</strong> ${property.location_review || property.expert_review?.location_analysis || 'Prime location with excellent connectivity and future growth potential.'}</p>
+        <p><strong>Market Position:</strong> ${property.market_position || property.expert_review?.market_position || 'Competitive pricing with strong market demand in the area.'}</p>
     `;
 }
 
@@ -821,27 +1252,47 @@ function populateNearbyConnectivity(property) {
     const connectivityContainer = document.getElementById('nearby-connectivity');
     if (!connectivityContainer) return;
     
-    // Use real data from property or default connectivity info
+    // Use real data from property or default connectivity info with distances in KMs
     const connectivity = [
         {
             icon: 'fa-subway',
             title: 'Metro Station',
-            description: property.metro_distance || 'Metro station nearby'
+            description: property.metro_distance ? `${property.metro_distance} KM` : property.nearby_connectivity?.metro || 'Metro station nearby'
         },
         {
             icon: 'fa-shopping-bag',
             title: 'Shopping',
-            description: property.shopping_distance || 'Shopping centers in vicinity'
+            description: property.shopping_distance ? `${property.shopping_distance} KM` : property.nearby_connectivity?.shopping || 'Shopping centers in vicinity'
         },
         {
             icon: 'fa-hospital',
             title: 'Healthcare',
-            description: property.healthcare_distance || 'Hospitals and clinics nearby'
+            description: property.healthcare_distance ? `${property.healthcare_distance} KM` : property.nearby_connectivity?.healthcare || 'Hospitals and clinics nearby'
         },
         {
             icon: 'fa-graduation-cap',
             title: 'Education',
-            description: property.education_distance || 'Schools and colleges in area'
+            description: property.education_distance ? `${property.education_distance} KM` : property.nearby_connectivity?.education || 'Schools and colleges in area'
+        },
+        {
+            icon: 'fa-plane',
+            title: 'Airport',
+            description: property.airport_distance ? `${property.airport_distance} KM` : property.nearby_connectivity?.airport || 'Airport connectivity available'
+        },
+        {
+            icon: 'fa-train',
+            title: 'Railway Station',
+            description: property.railway_distance ? `${property.railway_distance} KM` : property.nearby_connectivity?.railway || 'Railway station nearby'
+        },
+        {
+            icon: 'fa-bus',
+            title: 'Bus Stand',
+            description: property.bus_distance ? `${property.bus_distance} KM` : property.nearby_connectivity?.bus || 'Bus stand in vicinity'
+        },
+        {
+            icon: 'fa-utensils',
+            title: 'Restaurants',
+            description: property.restaurant_distance ? `${property.restaurant_distance} KM` : property.nearby_connectivity?.restaurants || 'Restaurants and cafes nearby'
         }
     ];
     
@@ -860,8 +1311,9 @@ function populateSafetyFeatures(property) {
     if (!safetyContainer) return;
     
     // Use real data from property or default safety features
-    const securityFeatures = property.security_features || ['CCTV Surveillance', 'Fire Alarm System', 'Access Control'];
-    const emergencyFeatures = property.emergency_features || ['Fire Staircase', 'Refuge Areas', 'Fire Extinguishers'];
+    const securityFeatures = property.security_features || property.safety_features?.security || ['CCTV Surveillance', 'Fire Alarm System', 'Access Control'];
+    const emergencyFeatures = property.emergency_features || property.safety_features?.emergency || ['Fire Staircase', 'Refuge Areas', 'Fire Extinguishers'];
+    const safetyFeatures = property.safety_features?.general || ['Child-safe railings', 'Non-slip flooring', 'Emergency lighting'];
     
     safetyContainer.innerHTML = `
         <div class="safety-column">
@@ -876,9 +1328,17 @@ function populateSafetyFeatures(property) {
                 ${emergencyFeatures.map(feature => `<li><i class="fas fa-check"></i> ${feature}</li>`).join('')}
             </ul>
         </div>
-        <div class="safety-note">
-            <p><strong>Important:</strong> ${property.safety_note || 'All security systems are monitored 24/7 by trained personnel. Emergency response protocols are in place.'}</p>
+        <div class="safety-column">
+            <h3>General Safety</h3>
+            <ul class="safety-list">
+                ${safetyFeatures.map(feature => `<li><i class="fas fa-check"></i> ${feature}</li>`).join('')}
+            </ul>
         </div>
+        ${property.safety_note || property.safety_features?.note ? `
+        <div class="safety-note">
+            <p><strong>Important:</strong> ${property.safety_note || property.safety_features?.note}</p>
+        </div>
+        ` : ''}
     `;
 }
 
@@ -889,10 +1349,10 @@ function populateProgressSection(property) {
     
     // Use real data from property or default progress
     const progressData = {
-        overallProgress: property.overall_progress || 75,
-        timeline: property.timeline_months || 18,
-        remaining: property.remaining_months || 6,
-        phases: property.construction_phases || [
+        overallProgress: property.overall_progress || property.project_progress?.overall || 75,
+        timeline: property.timeline_months || property.project_progress?.timeline || 18,
+        remaining: property.remaining_months || property.project_progress?.remaining || 6,
+        phases: property.construction_phases || property.project_progress?.phases || [
             { name: 'Foundation', status: 'completed' },
             { name: 'Structure', status: 'completed' },
             { name: 'Interiors', status: 'in-progress' },
@@ -925,7 +1385,7 @@ function populateProgressSection(property) {
 }
 
 // Update residences section based on property data
-function updateResidencesSection(property) {
+async function updateResidencesSection(property) {
     const residencesGrid = document.querySelector('.residences-grid');
     
     if (!residencesGrid) return;
@@ -934,7 +1394,7 @@ function updateResidencesSection(property) {
     residencesGrid.innerHTML = '';
     
     // Create multiple BHK configurations based on property data
-    const bhkConfigs = generateBHKConfigurations(property);
+    const bhkConfigs = await generateBHKConfigurations(property);
     
     bhkConfigs.forEach(config => {
         const residenceCard = createResidenceCard(config);
@@ -946,7 +1406,44 @@ function updateResidencesSection(property) {
 }
 
 // Generate multiple BHK configurations for the project
-function generateBHKConfigurations(property) {
+async function generateBHKConfigurations(property) {
+    try {
+        // Fetch real BHK configurations from the API
+        const projectId = property.project_id || property.id;
+        if (!projectId) {
+            console.log('No project ID available for fetching BHK configurations');
+            return generateDefaultBHKConfigurations(property);
+        }
+        
+        const response = await fetch(`http://localhost:8000/api/v1/projects/${projectId}/property-configurations`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.configurations) {
+                console.log('Fetched real BHK configurations:', data.configurations);
+                return data.configurations.map(config => ({
+                    ...config,
+                    title: getBHKTitle(config.bhk_count),
+                    pricePerSqft: config.sell_price && config.carpet_area_sqft ? 
+                        (config.sell_price / config.carpet_area_sqft) : null,
+                    features: getDefaultFeatures(config.bhk_count),
+                    property_type: config.property_type || 'Apartment',
+                    locality: property.locality || 'Unknown',
+                    city: property.city || 'Unknown'
+                }));
+            }
+        }
+        
+        console.log('Failed to fetch BHK configurations, using defaults');
+        return generateDefaultBHKConfigurations(property);
+        
+    } catch (error) {
+        console.error('Error fetching BHK configurations:', error);
+        return generateDefaultBHKConfigurations(property);
+    }
+}
+
+// Generate default BHK configurations as fallback
+function generateDefaultBHKConfigurations(property) {
     const baseArea = property.carpet_area || 1000;
     const basePrice = property.sell_price || 25000000;
     const basePricePerSqft = property.price_per_sqft || 18000;
@@ -1001,14 +1498,54 @@ function generateBHKConfigurations(property) {
     return configurations;
 }
 
+// Get BHK title based on BHK count
+function getBHKTitle(bhkCount) {
+    switch (bhkCount) {
+        case 1: return 'COMPACT LIVING';
+        case 1.5: return 'COMPACT PLUS';
+        case 2: return 'FAMILY COMFORT';
+        case 2.5: return 'FAMILY PLUS';
+        case 3: return 'SPACIOUS LUXURY';
+        case 3.5: return 'LUXURY PLUS';
+        case 4: return 'ULTIMATE PRESTIGE';
+        default: return `${bhkCount} BHK CONFIGURATION`;
+    }
+}
+
+// Get default features based on BHK count
+function getDefaultFeatures(bhkCount) {
+    const baseFeatures = ['Modern design', 'Quality finishes', 'Balcony access'];
+    
+    if (bhkCount <= 1) {
+        return [...baseFeatures, 'Efficient space utilization', 'Modern kitchen design'];
+    } else if (bhkCount <= 2) {
+        return [...baseFeatures, 'Spacious bedrooms', 'Separate dining area'];
+    } else if (bhkCount <= 3) {
+        return [...baseFeatures, 'Multiple bedrooms', 'Separate dining area', 'Multiple balconies'];
+    } else {
+        return [...baseFeatures, 'Luxurious bedrooms', 'Premium finishes', 'Private terrace garden'];
+    }
+}
+
 // Create a residence card for the property
 function createResidenceCard(config) {
     const card = document.createElement('div');
     card.className = 'residence-card';
     
     const bhkText = `${config.bhk_count} BHK`;
-    const areaText = `${config.area.toLocaleString()} sq ft`;
-    const priceText = formatPrice(config.price);
+    // Use real data if available, fallback to calculated values
+    const areaText = config.carpet_area_sqft ? 
+        `${config.carpet_area_sqft.toLocaleString()} sq ft` : 
+        `${(config.area || 0).toLocaleString()} sq ft`;
+    const priceText = config.sell_price ? 
+        formatPrice(config.sell_price) : 
+        formatPrice(config.price || 0);
+    
+    // Check if floor plan is available
+    const hasFloorPlan = config.floor_plan_url;
+    const floorPlanBadge = hasFloorPlan ? 
+        '<span class="floor-plan-badge">📐 Floor Plan Available</span>' : 
+        '<span class="floor-plan-badge unavailable">📐 Floor Plan Coming Soon</span>';
     
     card.innerHTML = `
         <div class="card-header">
@@ -1021,13 +1558,16 @@ function createResidenceCard(config) {
             </div>
             <ul class="features-list">
                 <li>${bhkText} configuration</li>
-                <li>${config.area} sq ft carpet area</li>
+                <li>${areaText} carpet area</li>
                 <li>Located in ${config.locality}, ${config.city}</li>
             </ul>
+            <div class="floor-plan-info">
+                ${floorPlanBadge}
+            </div>
             <div class="price-info">
                 <span class="price">${priceText} onwards</span>
             </div>
-            <button class="view-details-btn" data-bhk="${config.bhk_count}">
+            <button class="view-details-btn" data-bhk="${config.bhk_count}" data-config='${JSON.stringify(config)}'>
                 View Details
             </button>
         </div>
@@ -1038,7 +1578,8 @@ function createResidenceCard(config) {
     viewDetailsBtn.addEventListener('click', (e) => {
         e.preventDefault();
         const bhkType = viewDetailsBtn.getAttribute('data-bhk');
-        showBHKModal(bhkType);
+        const configData = JSON.parse(viewDetailsBtn.getAttribute('data-config'));
+        showBHKModal(configData);
     });
     
     return card;
@@ -1086,14 +1627,27 @@ function initializeResidencesSlider() {
 
 // Update amenities section with property amenities
 function updateAmenitiesSection(amenities) {
+    console.log('updateAmenitiesSection called with:', amenities);
     const amenitiesGrid = document.querySelector('.amenities-grid');
+    console.log('amenitiesGrid found:', amenitiesGrid);
     if (!amenitiesGrid) return;
     
     // Clear existing amenities
     amenitiesGrid.innerHTML = '';
     
+    // Use real amenities from property or default ones
+    const allAmenities = amenities && amenities.length > 0 ? amenities : [
+        'Gym', 'Parking', 'Swimming Pool', 'Garden', 'Security', 'Lift', 
+        'Balcony', 'Concierge', 'Spa', 'Theater', 'Wine Cellar', 'Garage', 
+        'Fireplace', 'Patio', 'Laundry', 'Storage', 'Kids Play Area', 
+        'Party Hall', 'Indoor Games', 'Outdoor Sports', 'Restaurant', 'Bank',
+        'ATM', 'Medical Center', 'Library', 'Business Center', 'Guest House'
+    ];
+    
+    console.log('All amenities to display:', allAmenities);
+    
     // Add property amenities
-    amenities.forEach(amenity => {
+    allAmenities.forEach(amenity => {
         const amenityCard = document.createElement('div');
         amenityCard.className = 'amenity-card';
         
@@ -1115,7 +1669,18 @@ function updateAmenitiesSection(amenities) {
             'fireplace': 'fa-fire',
             'patio': 'fa-umbrella-beach',
             'laundry': 'fa-tshirt',
-            'storage': 'fa-box'
+            'storage': 'fa-box',
+            'kids play area': 'fa-child',
+            'party hall': 'fa-birthday-cake',
+            'indoor games': 'fa-gamepad',
+            'outdoor sports': 'fa-futbol',
+            'restaurant': 'fa-utensils',
+            'bank': 'fa-university',
+            'atm': 'fa-credit-card',
+            'medical center': 'fa-hospital',
+            'library': 'fa-book',
+            'business center': 'fa-briefcase',
+            'guest house': 'fa-bed'
         };
         
         const iconClass = iconMap[amenity.toLowerCase()] || 'fa-star';
@@ -1130,6 +1695,35 @@ function updateAmenitiesSection(amenities) {
         
         amenitiesGrid.appendChild(amenityCard);
     });
+    
+    console.log('Amenities section updated with', allAmenities.length, 'amenities');
+    
+    // Make amenities section expanded by default
+    const amenitiesAccordionItem = document.querySelector('.accordion-item:has(.amenities-grid)');
+    if (amenitiesAccordionItem) {
+        amenitiesAccordionItem.classList.add('active');
+        console.log('Amenities accordion item expanded by default');
+    } else {
+        // Fallback: find the amenities accordion item by looking for the one containing amenities-grid
+        const allAccordionItems = document.querySelectorAll('.accordion-item');
+        console.log('Found accordion items:', allAccordionItems.length);
+        allAccordionItems.forEach((item, index) => {
+            console.log(`Accordion item ${index}:`, item);
+            if (item.querySelector('.amenities-grid')) {
+                item.classList.add('active');
+                console.log('Amenities accordion item expanded by default (fallback method)');
+            }
+        });
+    }
+    
+    // Also try to find by class name
+    const amenitiesSection = document.querySelector('.amenities-section');
+    if (amenitiesSection) {
+        amenitiesSection.classList.add('active');
+        console.log('Amenities section found by class and expanded');
+    } else {
+        console.log('Amenities section not found by class');
+    }
 }
 
 // Utility function to format price in Indian format
@@ -1173,5 +1767,10 @@ window.ProjectDetails = {
     populateProgressSection,
     generateBHKConfigurations,
     initializeResidencesSlider,
-    goBack
+    goBack,
+    // New Project Tour functions
+    openMediaModal,
+    closeMediaModal,
+    slideMedia,
+    displayUnifiedMedia
 };

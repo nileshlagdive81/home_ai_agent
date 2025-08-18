@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Amenities Display</title>
+    <link rel="stylesheet" href="project_details.css">
+    <link rel="stylesheet" href="chat-component.css">
+    <link rel="stylesheet" href="header-component.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h3>AI Agent</h3>
+                    <button class="new-chat-btn">
+                        <i class="fas fa-plus"></i>
+                        New Chat
+                    </button>
+                </div>
+                <div class="chat-messages">
+                    <div class="ai-message">
+                        <div class="message-content">
+                            <p>Hello! I'm here to help you with your real estate queries. How can I assist you today?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-input">
+                    <textarea id="chatInput" placeholder="Type your message here..." rows="1"></textarea>
+                    <button class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header Placeholder -->
+            <div id="header-placeholder"></div>
+
+            <!-- Project Info Section -->
+            <section class="project-info-section">
+                <div class="project-info-content">
+                    <h2 class="project-title">Lodha Park, Bandra West, Mumbai</h2>
+                    <p class="project-tagline">Ready to Move • RERA: MAHARERA/A5120000000001</p>
+                </div>
+            </section>
+
+            <!-- Metrics Section -->
+            <section class="metrics-section">
+                <div class="metrics-container">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-rupee-sign"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Starting Price</h3>
+                            <p class="metric-value">₹2.5 Cr</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-ruler-combined"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Per Sq.Ft</h3>
+                            <p class="metric-value">₹45,000</p>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Total Units</h3>
+                            <p class="metric-value">150</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Expandable Sections -->
+            <section class="expandable-sections">
+                <div class="accordion">
+                    <div class="accordion-item amenities-section">
+                        <div class="accordion-header">
+                            <h3>Amenities & Facilities</h3>
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="amenities-grid" id="amenities-grid">
+                                <!-- Amenities will be populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Test amenities display
+        async function testAmenities() {
+            try {
+                console.log('Testing amenities display...');
+                
+                // Test with a sample project ID
+                const projectId = '0338932f-b499-4b51-8f0a-07f877364674';
+                console.log('Fetching amenities for project ID:', projectId);
+                
+                const response = await fetch(`http://localhost:8000/api/v1/projects/${projectId}/amenities`);
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Amenities data:', data);
+                    
+                    if (data.success && data.amenities) {
+                        // Update the amenities grid
+                        const amenitiesGrid = document.getElementById('amenities-grid');
+                        if (amenitiesGrid) {
+                            amenitiesGrid.innerHTML = '';
+                            
+                            data.amenities.forEach(amenity => {
+                                const amenityCard = document.createElement('div');
+                                amenityCard.className = 'amenity-card';
+                                
+                                amenityCard.innerHTML = `
+                                    <div class="amenity-icon">
+                                        <span style="font-size: 24px;">${amenity.icon}</span>
+                                    </div>
+                                    <h3>${amenity.name}</h3>
+                                    <p>Available</p>
+                                `;
+                                
+                                amenitiesGrid.appendChild(amenityCard);
+                            });
+                            
+                            console.log('Amenities displayed:', data.amenities.length);
+                        } else {
+                            console.log('Amenities grid not found');
+                        }
+                    }
+                } else {
+                    console.log('Response not ok:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error testing amenities:', error);
+            }
+        }
+
+        // Run test when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, testing amenities...');
+            testAmenities();
+            
+            // Also test accordion functionality
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            console.log('Found accordion items:', accordionItems.length);
+            
+            accordionItems.forEach((item, index) => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                
+                if (header && content) {
+                    header.addEventListener('click', () => {
+                        const isActive = item.classList.contains('active');
+                        
+                        if (isActive) {
+                            item.classList.remove('active');
+                        } else {
+                            item.classList.add('active');
+                        }
+                    });
+                    
+                    console.log(`Accordion item ${index} initialized`);
+                }
+            });
+            
+            // Make amenities section expanded by default
+            const amenitiesSection = document.querySelector('.amenities-section');
+            if (amenitiesSection) {
+                amenitiesSection.classList.add('active');
+                console.log('Amenities section expanded by default');
+            }
+        });
+    </script>
+</body>
+</html>

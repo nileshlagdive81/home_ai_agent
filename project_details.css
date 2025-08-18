@@ -325,6 +325,29 @@ body {
     font-size: 0.85rem; /* Reduced from 0.9rem */
 }
 
+.floor-plan-info {
+    margin: 0.75rem 0;
+    text-align: center;
+}
+
+.floor-plan-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.floor-plan-badge.unavailable {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+}
+
 .card-content {
     padding: 1.5rem; /* Reduced from 2rem */
 }
@@ -669,6 +692,29 @@ body {
     border-top: 1px solid #374151;
 }
 
+/* Make amenities section expanded by default */
+.amenities-section .accordion-content {
+    padding: 1.25rem 1.5rem;
+    max-height: none !important;
+    border-top: 1px solid #374151;
+    overflow: visible !important;
+}
+
+.amenities-section .accordion-header i {
+    transform: rotate(45deg);
+}
+
+/* Ensure amenities section is always active */
+.amenities-section {
+    border: 1px solid #374151;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.amenities-section .accordion-content {
+    background: #1f2937;
+}
+
 .accordion-content p {
     color: #d1d5db;
     line-height: 1.6;
@@ -867,10 +913,11 @@ body {
 .modal-content {
     background: #1f2937;
     margin: 2% auto;
+    margin-left: calc(320px + 5%);
     padding: 0;
     border: 1px solid #374151;
     border-radius: 16px;
-    width: 90%;
+    width: calc(95% - 320px);
     max-width: 1000px;
     max-height: 90vh;
     overflow-y: auto;
@@ -1111,6 +1158,77 @@ body {
     color: white;
 }
 
+/* Media Modal Styles */
+.media-modal-content {
+    max-width: 800px;
+    max-height: 90vh;
+    margin: 5% auto;
+    margin-left: calc(320px + 5%);
+    width: calc(100% - 320px - 10%);
+    position: relative;
+}
+
+/* Close button for media modal */
+.media-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #000;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.media-close-btn:hover {
+    background: rgba(255, 255, 255, 1);
+}
+
+#mediaModalContent {
+    padding: 0;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#mediaModalContent img,
+#mediaModalContent video {
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Responsive adjustments for media modal */
+@media (max-width: 1200px) {
+    .media-modal-content {
+        max-width: 700px;
+        margin-left: 320px;
+        width: calc(100% - 320px - 5%);
+    }
+}
+
+@media (max-width: 768px) {
+    .media-modal-content {
+        max-width: 95vw;
+        margin: 5% auto;
+        margin-left: 0;
+        width: 95%;
+    }
+}
+
 /* Loading States */
 .btn.loading {
     position: relative;
@@ -1303,5 +1421,412 @@ body {
     
     .review-content, .blog-post {
         padding: 1rem;
+    }
+}
+
+/* Floor Plan Display in BHK Modal */
+.floor-plan-display {
+    width: 100%;
+    min-height: 300px;
+    border: 2px dashed #374151;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1f2937;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* BHK Modal specific positioning */
+#bhkModal .modal-content {
+    margin-left: calc(320px + 2%);
+    width: calc(98% - 320px);
+    max-width: 1200px;
+}
+
+.floor-plan-placeholder {
+    text-align: center;
+    color: #9ca3af;
+    padding: 2rem;
+}
+
+.floor-plan-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #6b7280;
+}
+
+.floor-plan-placeholder p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+}
+
+.floor-plan-placeholder .area-highlight {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #10b981;
+}
+
+.floor-plan-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
+/* Video display styles */
+.project-video-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #1f2937;
+    border-radius: 8px;
+    border: 1px solid #374151;
+}
+
+.project-video-section h3 {
+    margin-bottom: 1rem;
+    color: #f9fafb;
+    font-size: 1.25rem;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.video-container video {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.video-placeholder {
+    width: 100%;
+    height: 300px;
+    background: #374151;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 1.1rem;
+}
+
+/* Project Tour Section */
+.project-tour-section {
+    background: #1f2937;
+    padding: 2rem;
+    margin: 2rem 0;
+    border-radius: 12px;
+    border: 1px solid #374151;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.section-header h3 {
+    color: #fff;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.section-header p {
+    color: #9ca3af;
+    font-size: 1rem;
+}
+
+/* Unified Media Slider */
+.media-slider-container {
+    margin-bottom: 2rem;
+}
+
+.media-slider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.media-slides {
+    display: flex;
+    gap: 1rem;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    padding: 0.5rem;
+}
+
+.media-slide {
+    min-width: 280px;
+    background: #111827;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #374151;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.media-slide:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.media-slide img,
+.media-slide video {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.media-slide .media-caption {
+    padding: 1rem;
+    text-align: center;
+    color: #d1d5db;
+    font-size: 0.9rem;
+}
+
+/* Slider Navigation Buttons */
+.slider-btn {
+    background: #374151;
+    border: none;
+    color: #d1d5db;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.slider-btn:hover {
+    background: #4b5563;
+    color: #fff;
+}
+
+.slider-btn:disabled {
+    background: #1f2937;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* Project images gallery (Legacy - keeping for compatibility) */
+.project-images-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #1f2937;
+    border-radius: 8px;
+    border: 1px solid #374151;
+}
+
+.project-images-section h3 {
+    margin-bottom: 1rem;
+    color: #f9fafb;
+    font-size: 1.25rem;
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.image-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.image-item:hover {
+    transform: scale(1.05);
+}
+
+.image-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.image-caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+/* Room specifications in modal */
+.room-item {
+    background: #374151;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    border-left: 4px solid #10b981;
+}
+
+.room-item h4 {
+    color: #f9fafb;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.room-item p {
+    color: #d1d5db;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Features in modal */
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #374151;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.feature-item i {
+    color: #10b981;
+    font-size: 1rem;
+}
+
+.feature-item span {
+    color: #f9fafb;
+    font-size: 0.9rem;
+}
+
+/* Project overview section */
+.project-overview {
+    background: #1f2937;
+    border-radius: 8px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 1px solid #374151;
+}
+
+.overview-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.overview-left {
+    flex: 1;
+}
+
+.overview-right {
+    flex: 0 0 auto;
+}
+
+.project-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #f9fafb;
+    margin: 0 0 0.5rem 0;
+}
+
+.project-tagline {
+    font-size: 1.25rem;
+    color: #d1d5db;
+    margin: 0 0 1rem 0;
+}
+
+.location-info {
+    margin-bottom: 1rem;
+}
+
+.location-span {
+    color: #9ca3af;
+    font-size: 1.1rem;
+}
+
+.project-status {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.status-badge {
+    background: #10b981;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.rera-number {
+    color: #9ca3af;
+    font-size: 0.9rem;
+}
+
+.price-info {
+    text-align: right;
+}
+
+.starting-price, .price-per-sqft {
+    margin-bottom: 1rem;
+}
+
+.price-label {
+    display: block;
+    color: #9ca3af;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.price-value {
+    display: block;
+    color: #f9fafb;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Responsive adjustments for modals */
+@media (max-width: 1200px) {
+    .modal-content {
+        margin-left: 320px;
+        width: calc(100% - 320px);
+    }
+    
+    #bhkModal .modal-content {
+        margin-left: 320px;
+        width: calc(100% - 320px);
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 5% auto;
+        margin-left: 0;
+        width: 95%;
+    }
+    
+    #bhkModal .modal-content {
+        margin: 5% auto;
+        margin-left: 0;
+        width: 95%;
+    }
+    
+    .modal-columns {
+        grid-template-columns: 1fr;
+        gap: 1rem;
     }
 }

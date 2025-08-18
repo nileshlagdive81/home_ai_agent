@@ -107,7 +107,7 @@ class RealEstateNLPEngine:
     
     def _extract_location_entities(self, doc, entities, text_lower):
         """Extract location entities using spaCy's NER and common Indian cities"""
-        # First, check for common Indian cities in the text
+        # First, check for common Indian cities and localities in the text
         indian_cities = [
             "mumbai", "delhi", "bangalore", "hyderabad", "chennai", "kolkata", "pune", 
             "ahmedabad", "jaipur", "lucknow", "kanpur", "nagpur", "indore", "thane",
@@ -115,6 +115,31 @@ class RealEstateNLPEngine:
             "agra", "nashik", "faridabad", "meerut", "rajkot", "kalyan", "vasai",
             "vashi", "navi mumbai", "gurgaon", "noida", "greater noida", "faridabad"
         ]
+        
+        # Common localities within major cities
+        pune_localities = ["baner", "wakad", "hinjewadi", "kharadi", "viman nagar", "koregaon park", "kalyani nagar", "aundh", "bavdhan", "pimpri", "chinchwad", "nigdi", "akurdi", "ravet", "moshi", "chakan", "talegaon"]
+        mumbai_localities = ["bandra", "andheri", "powai", "juhu", "worli", "dadar", "matunga", "sion", "kurla", "chembur", "goregaon", "malad", "kandivali", "borivali", "dahisar", "mulund", "thane", "navi mumbai", "kalyan", "vasai", "vashi", "nerul", "belapur", "panvel", "ulwe", "dronagiri", "kharghar", "seawoods", "ghansoli", "airoli", "rabale", "mahape", "turbhe", "kopar khairane", "sanpada", "juinagar"]
+        delhi_localities = ["connaught place", "cp", "karol bagh", "rajouri garden", "dwarka", "rohini", "pitampura", "rohini", "shalimar bagh", "ashok vihar", "model town", "gtb nagar", "hauz khas", "saket", "defence colony", "lajpat nagar", "greater kailash", "south extension", "vasant vihar", "munirka", "sarita vihar", "badarpur", "faridabad", "gurgaon", "noida", "greater noida"]
+        bangalore_localities = ["koramangala", "indiranagar", "whitefield", "electronic city", "marathahalli", "bellandur", "sarjapur", "hsr layout", "jayanagar", "jp nagar", "banashankari", "basavanagudi", "malleshwaram", "rajajinagar", "yeshwanthpur", "peenya", "hebbal", "yelahanka", "airport road", "old airport road", "domlur", "cunningham road", "residency road", "mg road", "brigade road", "commercial street"]
+        
+        all_localities = pune_localities + mumbai_localities + delhi_localities + bangalore_localities
+        
+        # Check for locality mentions first (more specific)
+        for locality in all_localities:
+            if locality in text_lower:
+                # Check if it's actually being requested as a location
+                context_words = self._get_context_words(text_lower, text_lower.find(locality), text_lower.find(locality) + len(locality), 10)
+                if any(word in context_words for word in ["in", "at", "near", "from", "of", "within", "around"]) or any(city in text_lower for city in indian_cities):
+                    entities.append(ExtractedEntity(
+                        text=locality,
+                        label="LOCATION",
+                        start=text_lower.find(locality),
+                        end=text_lower.find(locality) + len(locality),
+                        confidence=0.95,
+                        context={"type": "locality", "full_text": locality, "semantic_meaning": "required_location"}
+                    ))
+                    print(f"🔍 INTENT-DRIVEN: Found LOCATION entity: '{locality}' (locality)")
+                    return  # Exit after finding first locality
         
         # Check for city mentions in the text
         for city in indian_cities:
@@ -160,7 +185,8 @@ class RealEstateNLPEngine:
             for match in matches:
                 # INTENT-DRIVEN: Check if this is actually about property BHK, not just a number
                 context_words = self._get_context_words(text_lower, match.start(), match.end(), 10)
-                if any(word in context_words for word in ["property", "flat", "apartment", "house", "real estate", "bhk"]):
+                # More flexible context checking - if it's in a query with location, it's likely a property search
+                if any(word in context_words for word in ["property", "flat", "apartment", "house", "real estate", "bhk"]) or any(word in text_lower for word in ["mumbai", "delhi", "bangalore", "hyderabad", "chennai", "kolkata", "pune", "baner", "wakad", "hinjewadi", "kharadi", "viman nagar", "koregaon park", "kalyani nagar", "aundh", "bavdhan", "pimpri", "chinchwad", "nigdi", "akurdi", "ravet", "moshi", "chakan", "talegaon", "lonavala", "khandala", "alibaug", "karjat", "panvel", "thane", "navi mumbai", "kalyan", "vasai", "vashi", "nerul", "belapur", "panvel", "ulwe", "dronagiri", "kharghar", "seawoods", "ghansoli", "airoli", "rabale", "mahape", "turbhe", "kopar khairane", "sanpada", "juinagar", "nerul", "seawoods", "belapur", "panvel", "ulwe", "dronagiri", "kharghar", "seawoods", "ghansoli", "airoli", "rabale", "mahape", "turbhe", "kopar khairane", "sanpada", "juinagar"]):
                     entities.append(ExtractedEntity(
                         text=match.group(0),
                         label="BHK",
@@ -501,6 +527,16 @@ class RealEstateNLPEngine:
         
         # INTENT-DRIVEN: Calculate confidence based on semantic indicators, not just keyword counting
         intent_scores = {}
+        
+        # SPECIAL CASE: Check for implicit property searches first
+        # If query contains BHK + location, it's likely a property search even without explicit search words
+        has_bhk = any(word in text_lower for word in ["bhk", "bedroom", "bed room"])
+        has_location = any(word in text_lower for word in ["mumbai", "delhi", "bangalore", "hyderabad", "chennai", "kolkata", "pune", "baner", "wakad", "hinjewadi", "kharadi", "viman nagar", "koregaon park", "kalyani nagar", "aundh", "bavdhan", "pimpri", "chinchwad", "nigdi", "akurdi", "ravet", "moshi", "chakan", "talegaon", "lonavala", "khandala", "alibaug", "karjat", "panvel", "thane", "navi mumbai", "kalyan", "vasai", "vashi", "nerul", "belapur", "panvel", "ulwe", "dronagiri", "kharghar", "seawoods", "ghansoli", "airoli", "rabale", "mahape", "turbhe", "kopar khairane", "sanpada", "juinagar", "nerul", "seawoods", "belapur", "panvel", "ulwe", "dronagiri", "kharghar", "seawoods", "ghansoli", "airoli", "rabale", "mahape", "turbhe", "kopar khairane", "sanpada", "juinagar"])
+        
+        if has_bhk and has_location:
+            # This is definitely a property search
+            intent_scores["SEARCH_PROPERTY"] = 0.95
+            print(f"🔍 INTENT-DRIVEN: Detected implicit property search (BHK + Location): '{text}'")
         
         for intent_name, intent_info in self.intents.items():
             score = 0
