@@ -4,6 +4,13 @@ echo =============================================
 echo.
 echo This will start both backend and frontend servers
 echo.
+echo Checking NumPy compatibility...
+python -c "import numpy; print('NumPy version:', numpy.__version__)" 2>nul
+if %errorlevel% neq 0 (
+    echo Installing NumPy...
+    pip install "numpy<2"
+)
+echo.
 echo Backend: http://localhost:8000
 echo Frontend: http://localhost:3000
 echo.

@@ -29,8 +29,14 @@ class Project(Base, TimestampMixin):
     safety_features = relationship("ProjectSafetyFeature", back_populates="project", cascade="all, delete-orphan")
     milestones = relationship("ProjectMilestone", back_populates="project", cascade="all, delete-orphan")
     
-    # Media relationship
-    media = relationship("ProjectMedia", cascade="all, delete-orphan")
+    # Media relationship - using viewonly to avoid conflicts
+    media = relationship("ProjectMedia", viewonly=True)
+    
+    # Nearby places relationship
+    nearby_places = relationship("NearbyPlace", back_populates="project", cascade="all, delete-orphan")
+    
+    # Project nearby relationship (for the junction table)
+    project_nearby = relationship("ProjectNearby", back_populates="project", cascade="all, delete-orphan")
     
     def __repr__(self):
         return f"<Project(id={self.id}, name='{self.name}', status='{self.project_status}')>"

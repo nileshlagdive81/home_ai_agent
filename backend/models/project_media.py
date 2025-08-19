@@ -36,8 +36,8 @@ class ProjectMedia(Base, TimestampMixin):
     is_active = Column(Boolean, default=True)
     
     # Relationships - no backref to avoid conflicts
-    project = relationship("Project")
-    property = relationship("Property")
+    project = relationship("Project", overlaps="media")
+    property = relationship("Property", overlaps="media")
     
     def __repr__(self):
         return f"<ProjectMedia(id={self.id}, type='{self.file_type}', category='{self.media_category}', path='{self.file_path[:50]}...')>"

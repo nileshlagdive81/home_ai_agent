@@ -46,9 +46,14 @@ class RealEstateNLPEngine:
                 "context_indicators": ["rera", "carpet area", "built up area", "super built up area", "home loan", "documents", "process", "buying", "selling", "registration", "stamp duty", "gst", "roi", "investment", "legal", "regulations", "terminology", "terms"]
             },
             "FILTER_BY_AMENITY": {
-                "description": "User wants properties with specific amenities or near landmarks",
-                "semantic_indicators": ["near", "close to", "nearby", "within", "distance"],
-                "context_indicators": ["metro", "hospital", "school", "office", "station", "mall", "park", "garden"]
+                "description": "User wants properties with specific amenities or features",
+                "semantic_indicators": ["with", "having", "including", "features", "facilities", "amenities"],
+                "context_indicators": ["gym", "swimming pool", "parking", "lift", "security", "garden", "playground", "clubhouse"]
+            },
+            "FILTER_BY_NEARBY_PLACE": {
+                "description": "User wants properties near specific landmarks or places",
+                "semantic_indicators": ["near", "close to", "nearby", "within", "distance", "away from"],
+                "context_indicators": ["metro", "hospital", "school", "office", "station", "mall", "park", "airport", "bank"]
             },
             "COMPARE_PROPERTIES": {
                 "description": "User wants to compare different properties",
@@ -84,19 +89,22 @@ class RealEstateNLPEngine:
         
         # INTENT-DRIVEN: Extract entities based on semantic understanding, not just patterns
         
-        # 1. LOCATION entities (cities, localities, landmarks)
+        # 1. NEARBY PLACE entities with distance context (check before location to avoid conflicts)
+        self._extract_nearby_place_entities(doc, entities, text_lower)
+        
+        # 2. LOCATION entities (cities, localities, landmarks)
         self._extract_location_entities(doc, entities, text_lower)
         
-        # 2. BHK entities with semantic context
+        # 3. BHK entities with semantic context
         self._extract_bhk_entities(doc, entities, text_lower)
         
-        # 3. PRICE entities with semantic context (MOST IMPORTANT)
+        # 4. PRICE entities with semantic context (MOST IMPORTANT)
         self._extract_price_entities_with_context(doc, entities, text_lower)
         
-        # 4. CARPET AREA entities with semantic context
+        # 5. CARPET AREA entities with semantic context
         self._extract_area_entities_with_context(doc, entities, text_lower)
         
-        # 5. AMENITY entities with semantic context
+        # 6. AMENITY entities with semantic context
         self._extract_amenity_entities(doc, entities, text_lower)
         
         print(f"🔍 INTENT-DRIVEN: Total entities with context: {len(entities)}")
@@ -161,15 +169,27 @@ class RealEstateNLPEngine:
         # Fallback to spaCy's NER for other location entities
         for ent in doc.ents:
             if ent.label_ in ["GPE", "LOC", "FAC"]:  # Location entities
-                entities.append(ExtractedEntity(
-                    text=ent.text,
-                    label="LOCATION",
-                    start=ent.start_char,
-                    end=ent.end_char,
-                    confidence=0.8,
-                    context={"type": ent.label_, "full_text": ent.text}
-                ))
-                print(f"🔍 INTENT-DRIVEN: Found LOCATION entity: '{ent.text}' ({ent.label_})")
+                # Check if this entity is actually a nearby place type to avoid conflicts
+                ent_text_lower = ent.text.lower()
+                nearby_place_types_list = [
+                    "hospital", "school", "college", "mall", "market", "metro station", "metro", "bus stop", "bus", "railway station", "railway", "airport",
+                    "park", "gym", "restaurant", "bank", "post office", "police station", "police", "fire station", "temple",
+                    "cinema", "library", "sports complex", "shopping center", "medical center", "university"
+                ]
+                is_nearby_place = any(place_type in ent_text_lower for place_type in nearby_place_types_list)
+                
+                if not is_nearby_place:
+                    entities.append(ExtractedEntity(
+                        text=ent.text,
+                        label="LOCATION",
+                        start=ent.start_char,
+                        end=ent.end_char,
+                        confidence=0.8,
+                        context={"type": ent.label_, "full_text": ent.text}
+                    ))
+                    print(f"🔍 INTENT-DRIVEN: Found LOCATION entity: '{ent.text}' ({ent.label_})")
+                else:
+                    print(f"🔍 INTENT-DRIVEN: Skipped '{ent.text}' as it's a nearby place type, not a location")
     
     def _extract_bhk_entities(self, doc, entities, text_lower):
         """Extract BHK entities with semantic understanding"""
@@ -384,25 +404,302 @@ class RealEstateNLPEngine:
     
     def _extract_amenity_entities(self, doc, entities, text_lower):
         """INTENT-DRIVEN: Extract amenity entities with semantic context"""
+        # ONLY property amenities - NOT nearby places or landmarks
         amenity_keywords = [
             "gym", "swimming pool", "parking", "lift", "security", "garden", 
-            "playground", "clubhouse", "hospital", "school", "metro", "railway", "airport", "mall", "park"
+            "playground", "clubhouse", "concierge", "spa", "sauna", "tennis court",
+            "basketball court", "badminton court", "table tennis", "pool table",
+            "home theater", "wine cellar", "fireplace", "balcony", "terrace",
+            "servant quarter", "puja room", "study room", "utility area",
+            "modular kitchen", "wardrobe", "walk-in closet", "jacuzzi",
+            "steam room", "fitness center", "yoga room", "meditation room"
         ]
         
         for amenity in amenity_keywords:
             if amenity in text_lower:
                 # INTENT-DRIVEN: Check if this amenity is actually being requested
                 context_words = self._get_context_words(text_lower, text_lower.find(amenity), text_lower.find(amenity) + len(amenity), 15)
-                if any(word in context_words for word in ["with", "having", "including", "near", "close", "nearby"]):
-                    entities.append(ExtractedEntity(
-                        text=amenity,
-                        label="AMENITY",
-                        start=text_lower.find(amenity),
-                        end=text_lower.find(amenity) + len(amenity),
-                        confidence=0.85,
-                        context={"type": "amenity", "semantic_meaning": "required_feature"}
-                    ))
-                    print(f"🔍 INTENT-DRIVEN: Found AMENITY entity: '{amenity}'")
+                
+                # Only extract as amenity if it's about property features, not nearby places
+                if any(word in context_words for word in ["with", "having", "including", "features", "facilities"]):
+                    # Double-check: ensure it's not being used in a nearby place context
+                    nearby_indicators = ["near", "close", "nearby", "within", "km", "kilometer", "distance", "away", "from"]
+                    if not any(indicator in context_words for indicator in nearby_indicators):
+                        entities.append(ExtractedEntity(
+                            text=amenity,
+                            label="AMENITY",
+                            start=text_lower.find(amenity),
+                            end=text_lower.find(amenity) + len(amenity),
+                            confidence=0.85,
+                            context={"type": "amenity", "semantic_meaning": "required_feature"}
+                        ))
+                        print(f"🔍 INTENT-DRIVEN: Found AMENITY entity: '{amenity}'")
+    
+    def _extract_nearby_place_entities(self, doc, entities, text_lower):
+        """Extract nearby place entities with distance context and specific place names"""
+        # Common nearby place types - these are NOT property amenities
+        nearby_place_types = [
+            # Transportation
+            "metro station", "metro", "bus stop", "bus", "railway station", "railway", "airport", "taxi stand", "auto stand",
+            "rickshaw stand", "cycle stand", "parking lot", "car park", "bike parking",
+            
+            # Healthcare & Education
+            "hospital", "clinic", "medical center", "pharmacy", "chemist", "school", "college", "university", "institute",
+            "training center", "coaching center", "daycare", "play school",
+            
+            # Shopping & Entertainment
+            "mall", "shopping center", "market", "supermarket", "hypermarket", "cinema", "theater", "multiplex",
+            "restaurant", "cafe", "food court", "bar", "pub", "club", "amusement park", "water park",
+            
+            # Essential Services
+            "bank", "atm", "post office", "police station", "police", "fire station", "fire brigade", "ambulance",
+            "gas station", "petrol pump", "service center", "repair shop",
+            
+            # Religious & Cultural
+            "temple", "mosque", "church", "gurudwara", "mandir", "masjid", "library", "museum", "art gallery",
+            "community center", "cultural center",
+            
+            # Recreation & Sports
+            "park", "garden", "playground", "sports complex", "stadium", "gym", "fitness center", "swimming pool",
+            "tennis court", "basketball court", "football ground", "cricket ground",
+            
+            # Business & Office
+            "office", "corporate office", "business center", "industrial area", "warehouse", "factory",
+            "co-working space", "startup hub", "tech park", "sez", "special economic zone"
+        ]
+        
+        # Distance patterns
+        distance_patterns = [
+            r'within\s+(\d+(?:\.\d+)?)\s*km',
+            r'(\d+(?:\.\d+)?)\s*km\s*(?:away|from|of)',
+            r'(\d+(?:\.\d+)?)\s*kilometer',
+            r'(\d+(?:\.\d+)?)\s*km\s*range',
+            r'walking\s+distance',
+            r'near\s+(\w+)',
+            r'close\s+to\s+(\w+)',
+            r'next\s+to\s+(\w+)'
+        ]
+        
+        # Extract distance information first
+        distance_km = None
+        distance_operator = "="
+        
+        for pattern in distance_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                if "walking" in match.group(0):
+                    distance_km = 1.0  # Walking distance typically within 1km
+                    distance_operator = "<="
+                    break
+                elif match.group(1):
+                    try:
+                        distance_km = float(match.group(1))
+                        if "within" in match.group(0):
+                            distance_operator = "<="
+                        elif "under" in match.group(0) or "below" in match.group(0):
+                            distance_operator = "<"
+                        elif "above" in match.group(0) or "over" in match.group(0):
+                            distance_operator = ">"
+                        else:
+                            distance_operator = "<="  # Default to <= for distance queries
+                        break
+                    except ValueError:
+                        continue
+        
+        # NEW: Extract specific place names with place types
+        # Pattern: "near [Specific Name] [Place Type]" or "[Specific Name] [Place Type]"
+        specific_place_patterns = [
+            # Pattern 1: "within X km of [Name] [Type]" - handle this first to avoid conflicts
+            r'within\s+(\d+(?:\.\d+)?)\s*km\s+of\s+([a-z]+(?:\s+[a-z]+)*)\s+(' + '|'.join(nearby_place_types) + ')',
+            # Pattern 2: "near [Name] [Type]" - but only if [Name] is not a common word
+            r'near\s+([a-z]+(?:\s+[a-z]+)*)\s+(' + '|'.join(nearby_place_types) + ')',
+            # Pattern 3: "close to [Name] [Type]" - but only if [Name] is not a common word
+            r'close\s+to\s+([a-z]+(?:\s+[a-z]+)*)\s+(' + '|'.join(nearby_place_types) + ')'
+            # Removed general case patterns that were too greedy and caused false matches
+        ]
+        
+        # Common words that should not be treated as place names
+        common_words = ["properties", "property", "flats", "flat", "homes", "home", "houses", "house", "apartments", "apartment", "near", "close", "within", "km", "kilometer", "distance", "walking", "of", "to", "from"]
+        
+        # Try to extract specific place names first
+        specific_place_found = False
+        for pattern in specific_place_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                if len(match.groups()) >= 2:
+                    # Extract the specific name and place type
+                    if "within" in match.group(0) and "km" in match.group(0) and "of" in match.group(0):
+                        # Pattern: "within X km of [Name] [Type]" - group1 is distance, group2 is name, group3 is type
+                        place_name = match.group(2).strip()
+                        place_type = match.group(3).strip()
+                    elif "near" in match.group(0) or "close to" in match.group(0):
+                        # Pattern: "near [Name] [Type]" or "close to [Name] [Type]"
+                        place_name = match.group(1).strip()
+                        place_type = match.group(2).strip()
+                    else:
+                        # Pattern: "[Name] [Type]" or "[Type] [Name]"
+                        # Determine which is which based on whether it's a known place type
+                        group1 = match.group(1).strip()
+                        group2 = match.group(2).strip()
+                        
+                        if group1.lower() in nearby_place_types:
+                            place_type = group1
+                            place_name = group2
+                        elif group2.lower() in nearby_place_types:
+                            place_type = group2
+                            place_name = group1
+                        else:
+                            continue
+                    
+                    # Validate that we have both a name and type
+                    # Also validate that the place name is not a common word
+                    if (place_name and place_type and 
+                        place_type.lower() in nearby_place_types and
+                        place_name.lower() not in common_words and
+                        len(place_name) > 2):  # Ensure name is substantial
+                        
+                        # Additional validation: check if the place name contains any common words
+                        place_name_words = place_name.lower().split()
+                        if not any(word in common_words for word in place_name_words):
+                            entities.append(ExtractedEntity(
+                                text=f"{place_name} {place_type}",
+                                label="NEARBY_PLACE",
+                                start=match.start(),
+                                end=match.end(),
+                                confidence=0.95,
+                                context={
+                                    "type": "nearby_place",
+                                    "place_type": place_type.lower(),
+                                    "place_name": place_name,
+                                    "distance_km": distance_km,
+                                    "distance_operator": distance_operator,
+                                    "semantic_meaning": "specific_nearby_place"
+                                }
+                            ))
+                            print(f"🔍 INTENT-DRIVEN: Found SPECIFIC NEARBY_PLACE entity: '{place_name} {place_type}' with distance: {distance_km}km ({distance_operator})")
+                            specific_place_found = True
+                            break
+            if specific_place_found:
+                break
+        
+
+        
+        # Common words that should not be treated as place names
+        common_words = ["properties", "property", "flats", "flat", "homes", "home", "houses", "house", "apartments", "apartment", "near", "close", "within", "km", "kilometer", "distance", "walking", "of", "to", "from"]
+        
+        # Try to extract specific place names first
+        specific_place_found = False
+        for pattern in specific_place_patterns:
+            matches = re.finditer(pattern, text_lower)
+            for match in matches:
+                if len(match.groups()) >= 2:
+                    # Extract the specific name and place type
+                    if "within" in match.group(0) and "km" in match.group(0) and "of" in match.group(0):
+                        # Pattern: "within X km of [Name] [Type]" - group1 is distance, group2 is name, group3 is type
+                        place_name = match.group(2).strip()
+                        place_type = match.group(3).strip()
+                    elif "near" in match.group(0) or "close to" in match.group(0):
+                        # Pattern: "near [Name] [Type]" or "close to [Name] [Type]"
+                        place_name = match.group(1).strip()
+                        place_type = match.group(2).strip()
+                    else:
+                        # Pattern: "[Name] [Type]" or "[Type] [Name]"
+                        # Determine which is which based on whether it's a known place type
+                        group1 = match.group(1).strip()
+                        group2 = match.group(2).strip()
+                        
+                        if group1.lower() in nearby_place_types:
+                            place_type = group1
+                            place_name = group2
+                        elif group2.lower() in nearby_place_types:
+                            place_type = group2
+                            place_name = group1
+                        else:
+                            continue
+                    
+                    # Validate that we have both a name and type
+                    # Also validate that the place name is not a common word
+                    if (place_name and place_type and 
+                        place_type.lower() in nearby_place_types and
+                        place_name.lower() not in common_words and
+                        len(place_name) > 2):  # Ensure name is substantial
+                        entities.append(ExtractedEntity(
+                            text=f"{place_name} {place_type}",
+                            label="NEARBY_PLACE",
+                            start=match.start(),
+                            end=match.end(),
+                            confidence=0.95,
+                            context={
+                                "type": "nearby_place",
+                                "place_type": place_type.lower(),
+                                "place_name": place_name,
+                                "distance_km": distance_km,
+                                "distance_operator": distance_operator,
+                                "semantic_meaning": "specific_nearby_place"
+                            }
+                        ))
+                        print(f"🔍 INTENT-DRIVEN: Found SPECIFIC NEARBY_PLACE entity: '{place_name} {place_type}' with distance: {distance_km}km ({distance_operator})")
+                        specific_place_found = True
+                        break
+            if specific_place_found:
+                break
+        
+        # If no specific place name found, fall back to generic place type extraction
+        if not specific_place_found:
+            # Extract nearby place types - try multi-word matches first, then single words
+            # Sort by length (longest first) to prioritize multi-word matches
+            sorted_place_types = sorted(nearby_place_types, key=len, reverse=True)
+            
+            for place_type in sorted_place_types:
+                if place_type in text_lower:
+                    # Check if it's actually being requested as a nearby place
+                    context_words = self._get_context_words(text_lower, text_lower.find(place_type), text_lower.find(place_type) + len(place_type), 15)
+                    
+                    # Nearby place indicators
+                    nearby_indicators = ["near", "close", "within", "around", "next to", "nearby", "walking distance", "km", "kilometer"]
+                    
+                    # Special handling for short place types like "metro" - require stronger context
+                    if len(place_type) <= 4:  # Short place types like "metro", "bus"
+                        # Require stronger nearby context for short place types
+                        strong_indicators = ["within", "walking distance", "km", "kilometer"]
+                        if any(indicator in context_words for indicator in strong_indicators):
+                            entities.append(ExtractedEntity(
+                                text=place_type,
+                                label="NEARBY_PLACE",
+                                start=text_lower.find(place_type),
+                                end=text_lower.find(place_type) + len(place_type),
+                                confidence=0.9,
+                                context={
+                                    "type": "nearby_place",
+                                    "place_type": place_type,
+                                    "place_name": None,  # No specific name
+                                    "distance_km": distance_km,
+                                    "distance_operator": distance_operator,
+                                    "semantic_meaning": "generic_nearby_place"
+                                }
+                            ))
+                            print(f"🔍 INTENT-DRIVEN: Found GENERIC NEARBY_PLACE entity: '{place_type}' with distance: {distance_km}km ({distance_operator})")
+                            break  # Exit after finding first match
+                    else:
+                        # Regular nearby place detection for longer place types
+                        if any(indicator in context_words for indicator in nearby_indicators):
+                            entities.append(ExtractedEntity(
+                                text=place_type,
+                                label="NEARBY_PLACE",
+                                start=text_lower.find(place_type),
+                                end=text_lower.find(place_type) + len(place_type),
+                                confidence=0.9,
+                                context={
+                                    "type": "nearby_place",
+                                    "place_type": place_type,
+                                    "place_name": None,  # No specific name
+                                    "distance_km": distance_km,
+                                    "distance_operator": distance_operator,
+                                    "semantic_meaning": "generic_nearby_place"
+                                }
+                            ))
+                            print(f"🔍 INTENT-DRIVEN: Found GENERIC NEARBY_PLACE entity: '{place_type}' with distance: {distance_km}km ({distance_operator})")
+                            break  # Exit after finding first match
     
     def _is_price_context(self, text_lower, start, end):
         """INTENT-DRIVEN: Determine if the matched text is actually about price"""
@@ -606,6 +903,13 @@ class RealEstateNLPEngine:
                 if "amenities" not in criteria["filters"]:
                     criteria["filters"]["amenities"] = []
                 criteria["filters"]["amenities"].append(entity.text)
+            elif entity.label == "NEARBY_PLACE":
+                criteria["filters"]["nearby_place"] = {
+                    "place_type": entity.context["place_type"],
+                    "place_name": entity.context.get("place_name"),  # Include specific place name if available
+                    "distance_km": entity.context["distance_km"],
+                    "distance_operator": entity.context["distance_operator"]
+                }
         
         return criteria
     

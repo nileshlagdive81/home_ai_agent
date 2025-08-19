@@ -952,46 +952,13 @@ async function loadPropertyData() {
         const propertyData = JSON.parse(decodeURIComponent(propertyParam));
         console.log('Loaded property data:', propertyData);
         
-        // Fetch project details using the project ID
+        // For nearby places functionality, use the property ID directly as project ID
+        // This ensures we can fetch nearby places data without complex matching logic
+        propertyData.project_id = propertyData.id;
+        
+        // Fetch amenities data for this project
         if (propertyData.id) {
             try {
-                console.log('Fetching project details for ID:', propertyData.id);
-                
-                // Fetch project details from the properties endpoint
-                const projectResponse = await fetch(`http://localhost:8000/api/v1/properties?limit=50`);
-                if (projectResponse.ok) {
-                    const projectData = await projectResponse.json();
-                    if (projectData.results && projectData.results.length > 0) {
-                        // Find the project that matches our location (city + locality)
-                        const matchingProject = projectData.results.find(project => {
-                            const projectCity = project.location?.city?.toLowerCase() || '';
-                            const projectLocality = project.location?.locality?.toLowerCase() || '';
-                            const searchCity = city.toLowerCase();
-                            const searchLocality = locality.toLowerCase();
-                            
-                            return projectCity === searchCity && projectLocality === searchLocality;
-                        });
-                        
-                        if (matchingProject) {
-                            console.log('Found matching project:', matchingProject);
-                            
-                            // Merge project data with property data
-                            propertyData.project = matchingProject;
-                            propertyData.project_name = matchingProject.name;
-                            propertyData.project_status = matchingProject.project_status;
-                            propertyData.total_units = matchingProject.total_units;
-                            propertyData.total_floors = matchingProject.total_floors;
-                            propertyData.possession_date = matchingProject.possession_date;
-                            propertyData.rera_number = matchingProject.rera_number;
-                            propertyData.description = matchingProject.description;
-                            propertyData.project_type = matchingProject.project_type;
-                        } else {
-                            console.log('No matching project found for location:', city, locality);
-                        }
-                    }
-                }
-                
-                // Fetch amenities data for this project
                 console.log('Fetching amenities for project ID:', propertyData.id);
                 const amenitiesResponse = await fetch(`http://localhost:8000/api/v1/projects/${propertyData.id}/amenities`);
                 console.log('Amenities response status:', amenitiesResponse.status);
@@ -1006,7 +973,7 @@ async function loadPropertyData() {
                     console.log('Amenities response not ok:', amenitiesResponse.statusText);
                 }
             } catch (error) {
-                console.log('Could not fetch project data or amenities, using defaults:', error);
+                console.log('Could not fetch amenities, using defaults:', error);
             }
         } else {
             console.log('No project ID found in property data');
@@ -1248,7 +1215,107 @@ function populateExpertReview(property) {
 }
 
 // Populate Nearby Areas & Connectivity
-function populateNearbyConnectivity(property) {
+async function populateNearbyConnectivity(property) {
+    const connectivityContainer = document.getElementById('nearby-connectivity');
+    if (!connectivityContainer) return;
+    
+    try {
+        // Fetch nearby places from the API
+        const projectId = property.project?.id || property.project_id;
+        
+        if (!projectId) {
+            // Fallback to default connectivity info
+            populateDefaultConnectivity(property);
+            return;
+        }
+        
+        const response = await fetch(`http://localhost:8000/api/v1/projects/${projectId}/nearby-places`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch nearby places: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.nearby_places) {
+            // Display real nearby places data
+            displayNearbyPlaces(data.nearby_places, connectivityContainer);
+        } else {
+            // Fallback to default connectivity info
+            populateDefaultConnectivity(property);
+        }
+    } catch (error) {
+        console.error('Error fetching nearby places:', error);
+        // Fallback to default connectivity info
+        populateDefaultConnectivity(property);
+    }
+}
+
+// Display nearby places with real data
+function displayNearbyPlaces(nearbyPlaces, container) {
+    // Define icons for different place types
+    const placeIcons = {
+        'School': 'fa-graduation-cap',
+        'College': 'fa-university',
+        'University': 'fa-university',
+        'Hospital': 'fa-hospital',
+        'Metro Station': 'fa-subway',
+        'Railway Station': 'fa-train',
+        'Mall': 'fa-shopping-bag',
+        'Shopping Center': 'fa-shopping-cart',
+        'Market': 'fa-store',
+        'Park': 'fa-tree',
+        'Gym': 'fa-dumbbell',
+        'Restaurant': 'fa-utensils',
+        'Cinema': 'fa-film',
+        'Bank': 'fa-university',
+        'ATM': 'fa-credit-card',
+        'Post Office': 'fa-envelope',
+        'Police Station': 'fa-shield-alt',
+        'Fire Station': 'fa-fire-extinguisher',
+        'Airport': 'fa-plane',
+        'Library': 'fa-book',
+        'Sports Complex': 'fa-futbol',
+        'Temple': 'fa-pray',
+        'Bus Stand': 'fa-bus'
+    };
+    
+    // Convert to array and sort by category
+    const placesArray = Object.entries(nearbyPlaces).map(([category, places]) => ({
+        category,
+        places: places.sort((a, b) => a.distance_km - b.distance_km) // Sort by distance
+    }));
+    
+    // Sort categories by priority
+    const categoryPriority = ['Metro Station', 'School', 'Hospital', 'Mall', 'Railway Station', 'College', 'University', 'Park', 'Gym', 'Restaurant', 'Bank', 'ATM', 'Post Office', 'Police Station', 'Fire Station', 'Airport', 'Library', 'Sports Complex', 'Temple', 'Bus Stand'];
+    
+    placesArray.sort((a, b) => {
+        const aPriority = categoryPriority.indexOf(a.category);
+        const bPriority = categoryPriority.indexOf(b.category);
+        return (aPriority === -1 ? 999 : aPriority) - (bPriority === -1 ? 999 : bPriority);
+    });
+    
+    container.innerHTML = placesArray.map(categoryData => `
+        <div class="connectivity-category">
+            <h4 class="category-title">
+                <i class="fas ${placeIcons[categoryData.category] || 'fa-map-marker-alt'}"></i>
+                ${categoryData.category}
+            </h4>
+            <div class="places-list">
+                ${categoryData.places.map(place => `
+                    <div class="place-item">
+                        <span class="place-name">${place.place_name}</span>
+                        <span class="place-distance">${place.distance_km} km</span>
+                        ${place.walking_distance ? '<span class="walking-badge">🚶 Walking</span>' : ''}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Fallback to default connectivity info
+function populateDefaultConnectivity(property) {
     const connectivityContainer = document.getElementById('nearby-connectivity');
     if (!connectivityContainer) return;
     

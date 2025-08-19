@@ -26,6 +26,7 @@ from models.project_environmental_feature import ProjectEnvironmentalFeature
 from models.project_expert_review import ProjectExpertReview
 from models.project_safety_feature import ProjectSafetyFeature
 from models.project_milestone import ProjectMilestone
+from models.nearby_place import NearbyPlace
 
 load_dotenv()
 
@@ -284,6 +285,80 @@ async def nlp_search(
                 if amenity_filters:
                     db_query = db_query.filter(or_(*amenity_filters))
                     print(f"✅ Applied amenities filter: {', '.join(amenities_list)}")
+        
+        # Apply nearby place filters
+        nearby_place_info = None
+        if "nearby_place" in search_criteria["filters"]:
+            nearby_place_info = search_criteria["filters"]["nearby_place"]
+        elif "nearby_place" in search_criteria:
+            nearby_place_info = search_criteria["nearby_place"]
+        
+        if nearby_place_info:
+            place_type = nearby_place_info.get("place_type")
+            place_name = nearby_place_info.get("place_name")  # Get specific place name if available
+            distance_km = nearby_place_info.get("distance_km")
+            distance_operator = nearby_place_info.get("distance_operator", "<=")
+            
+            if place_type:
+                # Join with nearby_places table to filter by nearby places
+                db_query = db_query.join(NearbyPlace, Property.project_id == NearbyPlace.project_id)
+                
+                # Apply nearby place filter with specific name if available
+                if place_name:
+                    # Filter by specific place name (exact match or partial match)
+                    if distance_km is not None:
+                        # Apply both place type and name with distance
+                        if distance_operator == "<=":
+                            db_query = db_query.filter(
+                                NearbyPlace.place_type.ilike(f"%{place_type}%"),
+                                NearbyPlace.place_name.ilike(f"%{place_name}%"),
+                                NearbyPlace.distance_km <= distance_km
+                            )
+                        elif distance_operator == "<":
+                            db_query = db_query.filter(
+                                NearbyPlace.place_type.ilike(f"%{place_type}%"),
+                                NearbyPlace.place_name.ilike(f"%{place_name}%"),
+                                NearbyPlace.distance_km < distance_km
+                            )
+                        elif distance_operator == "=":
+                            db_query = db_query.filter(
+                                NearbyPlace.place_type.ilike(f"%{place_type}%"),
+                                NearbyPlace.place_name.ilike(f"%{place_name}%"),
+                                NearbyPlace.distance_km == distance_km
+                            )
+                        print(f"✅ Applied specific nearby place filter: '{place_name}' ({place_type}) within {distance_km}km ({distance_operator})")
+                    else:
+                        # Apply place type and name without distance constraint
+                        db_query = db_query.filter(
+                            NearbyPlace.place_type.ilike(f"%{place_type}%"),
+                            NearbyPlace.place_name.ilike(f"%{place_name}%")
+                        )
+                        print(f"✅ Applied specific nearby place filter: '{place_name}' ({place_type})")
+                else:
+                    # Generic place type filtering (no specific name)
+                    if distance_km is not None:
+                        if distance_operator == "<=":
+                            db_query = db_query.filter(
+                                NearbyPlace.place_type.ilike(f"%{place_type}%"),
+                                NearbyPlace.distance_km <= distance_km
+                            )
+                        elif distance_operator == "<":
+                            db_query = db_query.filter(
+                                NearbyPlace.place_type.ilike(f"%{place_type}%"),
+                                NearbyPlace.distance_km < distance_km
+                            )
+                        elif distance_operator == "=":
+                            db_query = db_query.filter(
+                                NearbyPlace.place_type.ilike(f"%{place_type}%"),
+                                NearbyPlace.distance_km == distance_km
+                            )
+                        print(f"✅ Applied generic nearby place filter: {place_type} within {distance_km}km ({distance_operator})")
+                    else:
+                        # Just place type without distance
+                        db_query = db_query.filter(
+                            NearbyPlace.place_type.ilike(f"%{place_type}%")
+                        )
+                        print(f"✅ Applied generic nearby place filter: {place_type}")
         
         # Execute the query
         query_results = db_query.limit(20).all()
@@ -564,6 +639,42 @@ async def get_project_property_configurations(project_id: str, db: Session = Dep
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching property configurations: {str(e)}")
 
+@app.get("/api/v1/projects/{project_id}/nearby-places")
+async def get_project_nearby_places(project_id: str, db: Session = Depends(get_db)):
+    """Get nearby places for a specific project with distances"""
+    try:
+        # Query nearby places for the given project
+        nearby_places = db.query(NearbyPlace).filter(
+            NearbyPlace.project_id == project_id
+        ).order_by(NearbyPlace.place_type, NearbyPlace.distance_km).all()
+        
+        # Group by place type for better organization
+        places_by_category = {}
+        for place in nearby_places:
+            category = place.place_type
+            if category not in places_by_category:
+                places_by_category[category] = []
+            
+            places_by_category[category].append({
+                "id": str(place.id),
+                "place_name": place.place_name,
+                "distance_km": float(place.distance_km),
+                "walking_distance": place.walking_distance,
+                "created_at": str(place.created_at),
+                "updated_at": str(place.updated_at)
+            })
+        
+        return {
+            "success": True,
+            "project_id": project_id,
+            "nearby_places": places_by_category,
+            "total_categories": len(places_by_category),
+            "total_places": len(nearby_places)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching nearby places: {str(e)}")
+
 @app.get("/api/v1/projects/{project_id}/media")
 async def get_project_media(project_id: str, db: Session = Depends(get_db)):
     """Get media (images and videos) for a specific project"""
@@ -603,6 +714,92 @@ async def get_project_media(project_id: str, db: Session = Depends(get_db)):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching project media: {str(e)}")
+
+@app.get("/api/v1/search/nearby")
+async def search_by_nearby_places(
+    place_type: str = Query(..., description="Type of nearby place (e.g., hospital, school, mall)"),
+    distance_km: float = Query(..., description="Maximum distance in kilometers"),
+    city: str = Query(None, description="City to search in"),
+    db: Session = Depends(get_db)
+):
+    """Search properties based on nearby places within specified distance"""
+    try:
+        # Build the query to find projects with nearby places
+        query = db.query(Project).join(NearbyPlace).filter(
+            NearbyPlace.place_type.ilike(f"%{place_type}%"),
+            NearbyPlace.distance_km <= distance_km
+        )
+        
+        # Add city filter if specified
+        if city:
+            query = query.join(ProjectLocation).join(Location).filter(
+                Location.city.ilike(f"%{city}%")
+            )
+        
+        # Get projects with nearby places
+        projects = query.distinct().all()
+        
+        # Get properties for these projects
+        project_ids = [str(project.id) for project in projects]
+        properties = db.query(Property).filter(Property.project_id.in_(project_ids)).all()
+        
+        # Format results with nearby place information
+        results = []
+        for prop in properties:
+            # Get nearby places for this property's project
+            nearby_places = db.query(NearbyPlace).filter(
+                NearbyPlace.project_id == prop.project_id,
+                NearbyPlace.place_type.ilike(f"%{place_type}%"),
+                NearbyPlace.distance_km <= distance_km
+            ).all()
+            
+            # Get project and location info
+            project = db.query(Project).filter(Project.id == prop.project_id).first()
+            project_location = db.query(ProjectLocation).filter(ProjectLocation.project_id == prop.project_id).first()
+            location = None
+            if project_location:
+                location = db.query(Location).filter(Location.id == project_location.location_id).first()
+            
+            result = {
+                "id": str(prop.id),
+                "project_id": str(prop.project_id),
+                "project_name": project.name if project else None,
+                "property_type": prop.property_type,
+                "bhk_count": float(prop.bhk_count) if prop.bhk_count else None,
+                "carpet_area_sqft": float(prop.carpet_area_sqft) if prop.carpet_area_sqft else None,
+                "super_builtup_area_sqft": float(prop.super_builtup_area_sqft) if prop.super_builtup_area_sqft else None,
+                "sell_price": float(prop.sell_price) if prop.sell_price else None,
+                "floor_plan_url": prop.floor_plan_url,
+                "facing": prop.facing,
+                "status": prop.status,
+                "floor_number": prop.floor_number,
+                "city": location.city if location else None,
+                "locality": location.locality if location else None,
+                "nearby_places": [
+                    {
+                        "place_name": place.place_name,
+                        "place_type": place.place_type,
+                        "distance_km": float(place.distance_km),
+                        "walking_distance": place.walking_distance
+                    }
+                    for place in nearby_places
+                ]
+            }
+            results.append(result)
+        
+        return {
+            "success": True,
+            "query": {
+                "place_type": place_type,
+                "max_distance_km": distance_km,
+                "city": city
+            },
+            "results": results,
+            "total_results": len(results)
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching by nearby places: {str(e)}")
 
 @app.get("/api/v1/cities")
 async def get_cities(db: Session = Depends(get_db)):

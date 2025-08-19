@@ -714,6 +714,28 @@ body {
             overflow: visible !important;
         }
 
+/* Nearby Places section styling - allow full expansion */
+.nearby-places-section {
+    border: 1px solid #374151;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.nearby-places-section .accordion-content {
+    background: #1f2937;
+}
+
+        /* Nearby Places section follows normal accordion behavior */
+        .nearby-places-section .accordion-header i {
+            transition: transform 0.3s ease;
+        }
+
+        /* Allow nearby places section to expand fully when active */
+        .nearby-places-section.active .accordion-content {
+            max-height: none !important;
+            overflow: visible !important;
+        }
+
 .accordion-content p {
     color: #d1d5db;
     line-height: 1.6;
@@ -1828,4 +1850,114 @@ body {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
+}
+
+/* Nearby Places Styling - Consistent with other expandable sections */
+.connectivity-category {
+    background: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+/* Ensure the nearby connectivity container uses the same grid layout as other sections */
+#nearby-connectivity {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+/* For single column layout on smaller screens */
+@media (max-width: 768px) {
+    #nearby-connectivity {
+        grid-template-columns: 1fr;
+    }
+}
+
+.connectivity-category:hover {
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.category-title {
+    color: #2563eb;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+}
+
+.category-title i {
+    color: #2563eb;
+    font-size: 1.1rem;
+}
+
+.places-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.place-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    border-left: 3px solid #2563eb;
+    transition: all 0.3s ease;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.place-item:hover {
+    background: #111827;
+    border-color: #2563eb;
+    transform: translateX(3px);
+}
+
+.place-name {
+    font-weight: 500;
+    color: #d1d5db;
+    flex: 1;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-right: 1rem;
+    /* Ensure long names are fully displayed */
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+.place-distance {
+    background: #2563eb;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-left: 0.75rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.walking-badge {
+    background: #059669;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-left: 0.75rem;
+    white-space: nowrap;
+    flex-shrink: 0;
 }

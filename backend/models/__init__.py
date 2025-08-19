@@ -11,6 +11,10 @@ from .project_environmental_feature import ProjectEnvironmentalFeature
 from .project_expert_review import ProjectExpertReview
 from .project_safety_feature import ProjectSafetyFeature
 from .project_milestone import ProjectMilestone
+from .project_media import ProjectMedia
+from .nearby_category import NearbyCategory
+from .nearby_place import NearbyPlace
+from .project_nearby import ProjectNearby
 
 __all__ = [
     "Base",
@@ -26,5 +30,9 @@ __all__ = [
     "ProjectEnvironmentalFeature",
     "ProjectExpertReview",
     "ProjectSafetyFeature",
-    "ProjectMilestone"
+    "ProjectMilestone",
+    "ProjectMedia",
+    "NearbyCategory",
+    "NearbyPlace",
+    "ProjectNearby"
 ]

@@ -91,125 +91,18 @@ const sampleProperties = [
     }
 ];
 
-// Dynamic search queries organized by header categories - Pune focused
-const dynamicSearchQueries = {
-    size: [
-        {
-            title: "Size",
-            query: "2 BHK apartments under 1 crore in Pune",
-            description: "2 BHK apartments under 1 crore in Pune"
-        },
-        {
-            title: "Size",
-            query: "1 BHK apartments under 50 lakhs in Wakad, Pune",
-            description: "1 BHK apartments under 50 lakhs in Wakad, Pune"
-        },
-        {
-            title: "Size",
-            query: "3 BHK apartments above 1.5 crore in Baner, Pune",
-            description: "3 BHK apartments above 1.5 crore in Baner, Pune"
-        },
-        {
-            title: "Size",
-            query: "4 BHK houses under 2 crore in Pune",
-            description: "4 BHK houses under 2 crore in Pune"
-        },
-        {
-            title: "Size",
-            query: "Studio apartments under 40 lakhs in Wakad, Pune",
-            description: "Studio apartments under 40 lakhs in Wakad, Pune"
-        }
-    ],
-    budget: [
-        {
-            title: "Budget",
-            query: "Properties under 50 lakhs in Pune",
-            description: "Properties under 50 lakhs in Pune"
-        },
-        {
-            title: "Budget",
-            query: "Homes under 1 crore in Baner, Pune",
-            description: "Homes under 1 crore in Baner, Pune"
-        },
-        {
-            title: "Budget",
-            query: "Flats under 75 lakhs in Hinjewadi, Pune",
-            description: "Flats under 75 lakhs in Hinjewadi, Pune"
-        },
-        {
-            title: "Budget",
-            query: "2 BHK under 80 lakhs in Wakad, Pune",
-            description: "2 BHK under 80 lakhs in Wakad, Pune"
-        },
-        {
-            title: "Budget",
-            query: "Affordable homes under 60 lakhs in Pune",
-            description: "Affordable homes under 60 lakhs in Pune"
-        }
-    ],
-    locality: [
-        {
-            title: "Locality",
-            query: "Properties in Baner, Pune",
-            description: "Properties in Baner, Pune"
-        },
-        {
-            title: "Locality",
-            query: "Homes in Hinjewadi, Pune",
-            description: "Homes in Hinjewadi, Pune"
-        },
-        {
-            title: "Locality",
-            query: "Flats in Wakad, Pune",
-            description: "Flats in Wakad, Pune"
-        },
-        {
-            title: "Locality",
-            query: "Apartments in Koregaon Park, Pune",
-            description: "Apartments in Koregaon Park, Pune"
-        },
-        {
-            title: "Locality",
-            query: "Houses in Viman Nagar, Pune",
-            description: "Houses in Viman Nagar, Pune"
-        }
-    ],
-    status: [
-        {
-            title: "Status",
-            query: "Ready to move properties in Pune",
-            description: "Ready to move properties in Pune"
-        },
-        {
-            title: "Status",
-            query: "Under construction projects in Baner, Pune",
-            description: "Under construction projects in Baner, Pune"
-        },
-        {
-            title: "Status",
-            query: "New launch properties in Hinjewadi, Pune",
-            description: "New launch properties in Hinjewadi, Pune"
-        },
-        {
-            title: "Status",
-            query: "Premium properties above 2 crore in Pune",
-            description: "Premium properties above 2 crore in Pune"
-        },
-        {
-            title: "Status",
-            query: "Luxury homes above 3 crore in Baner, Pune",
-            description: "Luxury homes above 3 crore in Baner, Pune"
-        }
-    ]
+
+
+// Static search queries - no rotation needed
+const staticSearchQueries = {
+    size: "2 BHK apartments under 1 crore in Pune",
+    budget: "Properties under 50 lakhs in Pune",
+    locality: "Homes in Baner, Pune", 
+    status: "Ready to move properties in Pune"
 };
 
-// Current query indices for rotation
-let currentQueryIndices = {
-    size: 0,
-    budget: 0,
-    locality: 0,
-    status: 0
-};
+// Global search state
+let isSearchActive = false;
 
 // DOM elements
 const landingContent = document.getElementById('landingContent');
@@ -297,11 +190,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check for search parameter in URL (for redirects from project details page)
         checkURLSearchParameter();
         
-        // Initialize dynamic search boxes
-        initializeDynamicSearchBoxes();
+        // Initialize static search boxes
+        initializeStaticSearchBoxes();
         
-        // Start query rotation timer
-        startQueryRotation();
+        // Initialize static search boxes
+        initializeStaticSearchBoxes();
 
         // Add click handler for New Query button
         const newChatBtn = document.querySelector('.new-chat-btn');
@@ -375,18 +268,9 @@ function checkURLSearchParameter() {
     }
 }
 
-// Initialize dynamic search boxes with current queries
-function initializeDynamicSearchBoxes() {
-    // Only initialize if search cards exist (home page)
-    if (document.querySelectorAll('.search-card').length > 0) {
-        updateSearchBoxContent('size');
-        updateSearchBoxContent('budget');
-        updateSearchBoxContent('locality');
-        updateSearchBoxContent('status');
-    }
-}
 
-// Update search box content with current query
+
+// Update search box content with static queries
 function updateSearchBoxContent(category) {
     const searchCards = document.querySelectorAll('.search-card');
     
@@ -413,36 +297,30 @@ function updateSearchBoxContent(category) {
     }
     
     if (targetCard) {
-        const currentQuery = dynamicSearchQueries[category][currentQueryIndices[category]];
+        const staticQuery = staticSearchQueries[category];
         const titleElement = targetCard.querySelector('h3');
         const descElement = targetCard.querySelector('p');
         
-        if (titleElement && descElement && currentQuery) {
-            titleElement.textContent = currentQuery.title;
-            descElement.textContent = currentQuery.description;
+        if (titleElement && descElement && staticQuery) {
+            // Set static title and description
+            titleElement.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            descElement.textContent = staticQuery;
             
-            // Update onclick to use current query
-            targetCard.onclick = () => searchProperties(currentQuery.query);
+            // Update onclick to use static query
+            targetCard.onclick = () => searchProperties(staticQuery);
         }
     }
 }
 
-// Start query rotation timer
-function startQueryRotation() {
-    // Rotate queries every 10 seconds
-    setInterval(() => {
-        rotateQueries();
-    }, 10000);
-}
-
-// Rotate to next query for each category
-function rotateQueries() {
-    Object.keys(currentQueryIndices).forEach(category => {
-        currentQueryIndices[category] = (currentQueryIndices[category] + 1) % dynamicSearchQueries[category].length;
-        updateSearchBoxContent(category);
-    });
-    
-    console.log('🔄 Search queries rotated:', currentQueryIndices);
+// Initialize static search boxes (no rotation needed)
+function initializeStaticSearchBoxes() {
+    // Only initialize if search cards exist (home page)
+    if (document.querySelectorAll('.search-card').length > 0) {
+        updateSearchBoxContent('size');
+        updateSearchBoxContent('budget');
+        updateSearchBoxContent('locality');
+        updateSearchBoxContent('status');
+    }
 }
 
 // Function to update the suggestive placeholder
@@ -475,8 +353,8 @@ async function simulateAIResponse(message) {
     
     // Check if message contains system-generated text that should not be processed
     const systemGeneratedPatterns = [
-        'found', 'properties', 'matching', 'criteria', 'searching', 'processing',
-        'knowledge base', 'knowledge base - all available queries', 'complete knowledge base'
+        'found properties matching criteria', 'searching for properties', 'processing your query',
+        'knowledge base - all available queries', 'complete knowledge base', 'showing sample properties'
     ];
     
     // Check if this is a system-generated message that shouldn't be processed
@@ -485,6 +363,8 @@ async function simulateAIResponse(message) {
         console.log('🚫 Ignoring system-generated text:', message);
         return; // Don't process system-generated text
     }
+    
+
     
     // Check if message is a casual greeting or non-property query
     const casualMessages = [
@@ -1125,6 +1005,9 @@ function handleNewQuery() {
     // Update suggestive placeholder
     updateSuggestivePlaceholder();
     
+            // Mark search as inactive
+        isSearchActive = false;
+    
     // Don't scroll - keep header visible
     // window.scrollTo({ top: 0, behavior: 'smooth' });
     
@@ -1163,6 +1046,9 @@ function addUserMessage(message) {
 
 // Search properties function
 async function searchProperties(query) {
+    // Set search as active
+    isSearchActive = true;
+    
     // Check if we're on the home page (has search functionality)
     const isHomePage = document.querySelector('.main-content .search-header');
     
@@ -1217,6 +1103,9 @@ async function searchProperties(query) {
             landingContent.style.display = 'none';
             searchResults.style.display = 'block';
         }
+        
+        // Mark search as completed
+        isSearchActive = false;
         return;
     }
     
@@ -1324,6 +1213,9 @@ async function searchProperties(query) {
                 </div>
             `;
         }
+    } finally {
+        // Mark search as completed
+        isSearchActive = false;
     }
     
     // Don't scroll - keep header visible
@@ -1826,5 +1718,6 @@ function toggleAmenities(element, hiddenAmenities) {
         element.style.color = '#3b82f6';
     }
 }
+
 
 

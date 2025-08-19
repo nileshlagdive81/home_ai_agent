@@ -25,6 +25,21 @@ try {
     pip install -r requirements.txt
 }
 
+# Check and fix NumPy compatibility issue
+Write-Host "Checking NumPy compatibility..." -ForegroundColor Yellow
+try {
+    $numpyVersion = python -c "import numpy; print(numpy.__version__)" 2>$null
+    if ($numpyVersion -like "2.*") {
+        Write-Host "⚠️  NumPy 2.x detected - downgrading for compatibility..." -ForegroundColor Yellow
+        pip install "numpy<2"
+        Write-Host "✅ NumPy downgraded for compatibility" -ForegroundColor Green
+    } else {
+        Write-Host "✅ NumPy version is compatible: $numpyVersion" -ForegroundColor Green
+    }
+} catch {
+    Write-Host "❌ Error checking NumPy version" -ForegroundColor Red
+}
+
 Write-Host ""
 Write-Host "Backend: http://localhost:8000" -ForegroundColor Cyan
 Write-Host "Frontend: http://localhost:3000" -ForegroundColor Cyan
