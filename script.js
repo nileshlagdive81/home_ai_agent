@@ -121,8 +121,7 @@ let globalFilterState = {
     price: null,
     carpet_area: null,
     amenities: [],
-    status: null,
-    roi: null
+    status: null
 };
 
 // Header scroll effect - only on home page
@@ -329,6 +328,145 @@ function updateSuggestivePlaceholder() {
     if (chatInput) {
         const suggestion = generateSuggestiveQueries(globalFilterState);
         chatInput.placeholder = suggestion;
+    }
+}
+
+// Function to update filter labels based on query type
+function updateFilterLabels(query) {
+    const filterLabels = document.querySelectorAll('.filter-item span');
+    if (!filterLabels || filterLabels.length === 0) return;
+    
+    const queryLower = query.toLowerCase();
+    
+    // Check for nearby place queries and update relevant filter labels
+    if (queryLower.includes('near') || queryLower.includes('nearby') || queryLower.includes('close to') || 
+        queryLower.includes('station') || queryLower.includes('metro') || queryLower.includes('hospital') || 
+        queryLower.includes('school') || queryLower.includes('mall') || queryLower.includes('airport')) {
+        
+        // Update the 6th filter (amenities) to show "Nearby Places" instead
+        if (filterLabels[5]) {
+            filterLabels[5].textContent = 'Nearby Places';
+        }
+        
+        // Also update the filter value to show the specific nearby place type
+        const filters = document.querySelectorAll('.filter-value');
+        if (filters && filters[5]) {
+            let nearbyPlace = '';
+            if (queryLower.includes('metro') || queryLower.includes('station')) {
+                nearbyPlace = 'Metro Station';
+            } else if (queryLower.includes('hospital')) {
+                nearbyPlace = 'Hospital';
+            } else if (queryLower.includes('school')) {
+                nearbyPlace = 'School';
+            } else if (queryLower.includes('mall')) {
+                nearbyPlace = 'Shopping Mall';
+            } else if (queryLower.includes('airport')) {
+                nearbyPlace = 'Airport';
+            } else if (queryLower.includes('near') || queryLower.includes('nearby')) {
+                // Try to extract the place name after "near" or "nearby"
+                const nearMatch = queryLower.match(/(?:near|nearby|close to)\s+([a-zA-Z\s]+?)(?:\s|$|in|with|and)/);
+                if (nearMatch && nearMatch[1]) {
+                    nearbyPlace = nearMatch[1].trim().split(' ').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                    ).join(' ');
+                } else {
+                    nearbyPlace = 'Nearby Place';
+                }
+            }
+            
+            if (nearbyPlace) {
+                filters[5].textContent = nearbyPlace;
+            }
+        }
+    }
+    
+    // Check for amenity-based queries
+    if (queryLower.includes('gym') || queryLower.includes('parking') || queryLower.includes('pool') || 
+        queryLower.includes('garden') || queryLower.includes('security') || queryLower.includes('lift')) {
+        
+        // Update the 6th filter to show "Amenities"
+        if (filterLabels[5]) {
+            filterLabels[5].textContent = 'Amenities';
+        }
+    }
+}
+
+// Function to update the results header text based on query type
+function updateResultsHeaderText(query, extractedEntities) {
+    const headerText = document.getElementById('resultsHeaderText');
+    if (!headerText) return;
+    
+    const queryLower = query.toLowerCase();
+    
+    // Check for nearby place queries
+    if (queryLower.includes('near') || queryLower.includes('nearby') || queryLower.includes('close to') || 
+        queryLower.includes('station') || queryLower.includes('metro') || queryLower.includes('hospital') || 
+        queryLower.includes('school') || queryLower.includes('mall') || queryLower.includes('airport')) {
+        
+        // Extract the nearby place type
+        let placeType = 'location';
+        if (queryLower.includes('station') || queryLower.includes('metro')) placeType = 'metro station';
+        else if (queryLower.includes('hospital')) placeType = 'hospital';
+        else if (queryLower.includes('school')) placeType = 'school';
+        else if (queryLower.includes('mall')) placeType = 'shopping mall';
+        else if (queryLower.includes('airport')) placeType = 'airport';
+        else if (queryLower.includes('near') || queryLower.includes('nearby')) {
+            // Try to extract the specific place name
+            const nearMatch = queryLower.match(/(?:near|nearby|close to)\s+([a-zA-Z\s]+?)(?:\s|$|in|with|and)/);
+            if (nearMatch && nearMatch[1]) {
+                placeType = nearMatch[1].trim();
+            }
+        }
+        
+        headerText.innerHTML = `Found <span id="resultCount">6</span> properties near ${placeType}`;
+    }
+    // Check for amenity-based queries
+    else if (queryLower.includes('gym') || queryLower.includes('parking') || queryLower.includes('pool') || 
+             queryLower.includes('garden') || queryLower.includes('security') || queryLower.includes('lift')) {
+        
+        let amenityType = 'amenities';
+        if (queryLower.includes('gym')) amenityType = 'gym';
+        else if (queryLower.includes('parking')) amenityType = 'parking';
+        else if (queryLower.includes('pool')) amenityType = 'swimming pool';
+        else if (queryLower.includes('garden')) amenityType = 'garden';
+        else if (queryLower.includes('security')) amenityType = 'security';
+        else if (queryLower.includes('lift')) amenityType = 'lift';
+        
+        headerText.innerHTML = `Found <span id="resultCount">6</span> properties with ${amenityType}`;
+    }
+    // Check for price-based queries
+    else if (queryLower.includes('under') || queryLower.includes('above') || queryLower.includes('crore') || 
+             queryLower.includes('lakh') || queryLower.includes('budget')) {
+        headerText.innerHTML = `Found <span id="resultCount">6</span> properties in your budget`;
+    }
+    // Check for BHK-specific queries
+    else if (queryLower.includes('bhk') || queryLower.includes('bedroom')) {
+        let bhkType = 'BHK';
+        if (queryLower.includes('1')) bhkType = '1 BHK';
+        else if (queryLower.includes('2')) bhkType = '2 BHK';
+        else if (queryLower.includes('3')) bhkType = '3 BHK';
+        else if (queryLower.includes('4')) bhkType = '4 BHK';
+        else if (queryLower.includes('5')) bhkType = '5+ BHK';
+        
+        headerText.innerHTML = `Found <span id="resultCount">6</span> ${bhkType} properties`;
+    }
+    // Check for location-specific queries
+    else if (queryLower.includes('pune') || queryLower.includes('mumbai') || queryLower.includes('bangalore') ||
+             queryLower.includes('baner') || queryLower.includes('hinjewadi') || queryLower.includes('wakad')) {
+        
+        let locationType = 'location';
+        if (queryLower.includes('pune')) locationType = 'Pune';
+        else if (queryLower.includes('mumbai')) locationType = 'Mumbai';
+        else if (queryLower.includes('bangalore')) locationType = 'Bangalore';
+        else if (queryLower.includes('baner')) locationType = 'Baner';
+        else if (queryLower.includes('hinjewadi')) locationType = 'Hinjewadi';
+        else if (queryLower.includes('wakad')) locationType = 'Wakad';
+        
+        headerText.innerHTML = `Found <span id="resultCount">6</span> properties in ${locationType}`;
+    }
+    // Default case
+    else {
+        headerText.innerHTML = `Found <span id="resultCount">6</span> properties`;
     }
 }
 
@@ -786,8 +924,7 @@ function clearAllFilters() {
         price: null,
         carpet_area: null,
         amenities: [],
-        status: null,
-        roi: null
+        status: null
     };
     
     // Reset all filter displays
@@ -832,10 +969,6 @@ function buildQueryWithFilters(userQuery) {
     
     if (globalFilterState.status) {
         enhancedQuery += ` ${globalFilterState.status}`;
-    }
-    
-    if (globalFilterState.roi) {
-        enhancedQuery += ` ${globalFilterState.roi}`;
     }
     
     return enhancedQuery;
@@ -1154,12 +1287,19 @@ async function searchProperties(query) {
         if (data.results && data.results.length > 0) {
             // Update result count with actual results
             if (resultCount) {
-                resultCount.textContent = `Found ${data.results_count} properties matching your criteria`;
+                resultCount.textContent = data.results_count;
             }
+            
+            // Update the header text based on query type
+            updateResultsHeaderText(query, data.extracted_entities);
+            
             displayProperties(data.results);
             
             // Update filters based on extracted entities and maintain state
             updateFiltersFromQuery(query, data.extracted_entities);
+            
+            // Update filter labels based on query type
+            updateFilterLabels(query);
         } else {
             // No results found - hide result count completely and provide AI-powered suggestions
             if (resultCount) {
@@ -1199,6 +1339,13 @@ async function searchProperties(query) {
         if (resultCount) {
             resultCount.textContent = sampleProperties.length;
         }
+        
+        // Update the header text for fallback case
+        updateResultsHeaderText(query, {});
+        
+        // Update filter labels for fallback case
+        updateFilterLabels(query);
+        
         displayProperties(sampleProperties);
         
         // Show error message
@@ -1609,6 +1756,40 @@ function updateFiltersFromQuery(query, extractedEntities) {
             filters[5].textContent = uniqueAmenities.map(a => a.charAt(0).toUpperCase() + a.slice(1)).join(', ');
             newFilters.amenities = foundAmenities;
         }
+    } else if (queryLower.includes('near') || queryLower.includes('nearby') || queryLower.includes('close to') ||
+               queryLower.includes('station') || queryLower.includes('metro') || queryLower.includes('hospital') ||
+               queryLower.includes('school') || queryLower.includes('mall') || queryLower.includes('airport')) {
+        // Nearby place detection for filter[5]
+        let nearbyPlace = '';
+        
+        // Extract the specific nearby place from the query
+        if (queryLower.includes('metro') || queryLower.includes('station')) {
+            nearbyPlace = 'Metro Station';
+        } else if (queryLower.includes('hospital')) {
+            nearbyPlace = 'Hospital';
+        } else if (queryLower.includes('school')) {
+            nearbyPlace = 'School';
+        } else if (queryLower.includes('mall')) {
+            nearbyPlace = 'Shopping Mall';
+        } else if (queryLower.includes('airport')) {
+            nearbyPlace = 'Airport';
+        } else if (queryLower.includes('near') || queryLower.includes('nearby')) {
+            // Try to extract the place name after "near" or "nearby"
+            const nearMatch = queryLower.match(/(?:near|nearby|close to)\s+([a-zA-Z\s]+?)(?:\s|$|in|with|and)/);
+            if (nearMatch && nearMatch[1]) {
+                nearbyPlace = nearMatch[1].trim().split(' ').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ');
+            } else {
+                nearbyPlace = 'Nearby Place';
+            }
+        }
+        
+        if (nearbyPlace && filters[5]) {
+            filters[5].textContent = nearbyPlace;
+            // Store in amenities array for consistency
+            newFilters.amenities = [nearbyPlace.toLowerCase()];
+        }
     } else {
         // If no new amenities found, still update display with existing ones
         if (globalFilterState.amenities.length > 0 && filters[5]) {
@@ -1639,11 +1820,7 @@ function updateFiltersFromQuery(query, extractedEntities) {
         }
     }
     
-    // ROI detection (filter[7]) - Replaceable filter
-    if (extractedEntities && extractedEntities.roi && filters[7]) {
-        filters[7].textContent = extractedEntities.roi;
-        newFilters.roi = extractedEntities.roi;
-    }
+
     
     // Update global filter state
     updateFilterState(newFilters);

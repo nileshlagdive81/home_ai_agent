@@ -1,0 +1,136 @@
+/* Calculators Page Styles - Updated to match site theme */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Benton-Book', Arial, sans-serif;
+    background: #0f0f23;
+    min-height: 100vh;
+    color: #d1d5db;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.calculators-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.calculators-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: #fff;
+}
+
+.calculators-header h1 {
+    font-family: 'FreightDisplayProBook', serif;
+    font-size: 44px;
+    line-height: 46px;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    letter-spacing: 0;
+    color: #fff;
+}
+
+.calculators-header p {
+    font-size: 18px;
+    color: #9ca3af;
+}
+
+.calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.calculator-card {
+    background: #1f2937;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #374151;
+}
+
+.calculator-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    border-color: #2563eb;
+    background: #374151;
+}
+
+.calculator-card i {
+    font-size: 3rem;
+    color: #2563eb;
+    margin-bottom: 1rem;
+}
+
+.calculator-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    font-weight: 500;
+}
+
+.calculator-card p {
+    color: #9ca3af;
+    line-height: 1.6;
+}
+
+.back-to-home {
+    text-align: center;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Benton-Book', Arial, sans-serif;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .calculators-container {
+        padding: 1rem;
+    }
+    
+    .calculators-header h1 {
+        font-size: 32px;
+        line-height: 36px;
+    }
+    
+    .calculator-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .calculator-card {
+        padding: 1.5rem;
+    }
+}
