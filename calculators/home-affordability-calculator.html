@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Affordability Calculator - Real Estate App</title>
+    <link rel="stylesheet" href="home-affordability-calculator.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header - Matching Real Estate App Theme -->
+    <header class="header">
+        <div class="header-content">
+            <h1><i class="fas fa-layer-group"></i> Real Estate Search</h1>
+            <div class="header-right">
+                <a href="../index.html" class="header-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Calculator Container -->
+    <div class="calculator-container">
+        <!-- Calculator Header -->
+        <div class="calculator-header">
+            <h2><i class="fas fa-calculator"></i> Home Affordability Calculator</h2>
+            <p>Calculate how much property you can afford based on your income, expenses, and financial profile</p>
+        </div>
+
+        <!-- Calculator Form -->
+        <div class="calculator-form-container">
+            <form id="affordabilityCalculator" class="calculator-form">
+                <!-- Personal Information Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Personal Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="age">Age</label>
+                            <input type="number" id="age" name="age" min="18" max="70" required>
+                            <small>Must be between 18-70 years</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="workExperience">Work Experience (Years)</label>
+                            <input type="number" id="workExperience" name="workExperience" min="0" max="50" required>
+                            <small>Total years of professional experience</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                                                    <div class="form-group">
+                                <label for="cibilScore">CIBIL Score Range</label>
+                                <select id="cibilScore" name="cibilScore" required>
+                                    <option value="">Select CIBIL Score</option>
+                                    <option value="750-900">750-900 (Excellent)</option>
+                                    <option value="650-749">650-749 (Good)</option>
+                                    <option value="550-649">550-649 (Fair)</option>
+                                    <option value="300-549">300-549 (Poor)</option>
+                                    <option value="dont-know">Don't Know</option>
+                                </select>
+                                <small>Your credit score range (Don't Know = Medium Risk)</small>
+                            </div>
+                        <div class="form-group">
+                            <label for="propertyOwnership">Current Property Ownership</label>
+                            <select id="propertyOwnership" name="propertyOwnership" required>
+                                <option value="">Select Status</option>
+                                <option value="none">No Property</option>
+                                <option value="renting">Currently Renting</option>
+                                <option value="owned">Own Property</option>
+                            </select>
+                            <small>Your current property situation</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Income & Savings Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-money-bill-wave"></i> Income & Savings</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="grossIncome">Monthly Gross Income (₹)</label>
+                            <input type="number" id="grossIncome" name="grossIncome" min="10000" step="1000" required>
+                            <small>Your monthly salary before deductions</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="savings">Total Savings (₹)</label>
+                            <input type="number" id="savings" name="savings" min="0" step="10000" value="0">
+                            <small>Available savings for down payment (for confidence only)</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="coApplicant">Co-Applicant</label>
+                            <select id="coApplicant" name="coApplicant" onchange="toggleCoApplicantFields()">
+                                <option value="no">No Co-Applicant</option>
+                                <option value="yes">Yes, Add Co-Applicant</option>
+                            </select>
+                            <small>Joint application for better eligibility</small>
+                        </div>
+                        <div class="form-group" id="coApplicantIncomeGroup" style="display: none;">
+                            <label for="coApplicantIncome">Co-Applicant Monthly Income (₹)</label>
+                            <input type="number" id="coApplicantIncome" name="coApplicantIncome" min="0" step="1000">
+                            <small>Co-applicant's monthly salary</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Obligations Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-credit-card"></i> Monthly Obligations</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="existingEMIs">Existing EMIs (₹)</label>
+                            <input type="number" id="existingEMIs" name="existingEMIs" min="0" step="1000" value="0">
+                            <small>Car loan, personal loan, etc.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="rent">Monthly Rent (₹)</label>
+                            <input type="number" id="rent" name="rent" min="0" step="1000" value="0">
+                            <small>Current monthly rent payment</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="utilities">Monthly Utilities (₹)</label>
+                            <input type="number" id="utilities" name="utilities" min="0" step="500" value="0">
+                            <small>Electricity, water, gas, etc.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="groceries">Monthly Groceries (₹)</label>
+                            <input type="number" id="groceries" name="groceries" min="0" step="500" value="0">
+                            <small>Food and household items</small>
+                        </div>
+                    </div>
+                                         <div class="form-row">
+                         <div class="form-group">
+                             <label for="subscriptions">Monthly Subscriptions (₹)</label>
+                             <input type="number" id="subscriptions" name="subscriptions" min="0" step="100" value="0">
+                             <small>Netflix, gym, etc.</small>
+                         </div>
+                         <div class="form-group">
+                             <label for="otherMonthly">Other Monthly Expenses (₹)</label>
+                             <input type="number" id="otherMonthly" name="otherMonthly" min="0" step="500" value="0">
+                             <small>Any other monthly expenses</small>
+                         </div>
+                     </div>
+                     <div class="form-row">
+                         <div class="form-group">
+                             <label for="monthlySavings">Monthly Savings (₹)</label>
+                             <input type="number" id="monthlySavings" name="monthlySavings" min="0" step="1000" value="0">
+                             <small>SIPs, RD, emergency fund, etc.</small>
+                         </div>
+                     </div>
+                </div>
+
+                <!-- Yearly Expenses Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-calendar-alt"></i> Yearly Expenses</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="insurance">Yearly Insurance (₹)</label>
+                            <input type="number" id="insurance" name="insurance" min="0" step="1000" value="0">
+                            <small>Health, life, vehicle insurance</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="schoolFees">Yearly School Fees (₹)</label>
+                            <input type="number" id="schoolFees" name="schoolFees" min="0" step="1000" value="0">
+                            <small>Children's education expenses</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="propertyTax">Yearly Property Tax (₹)</label>
+                            <input type="number" id="propertyTax" name="propertyTax" min="0" step="1000" value="0">
+                            <small>If you own property</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="otherYearly">Other Yearly Expenses (₹)</label>
+                            <input type="number" id="otherYearly" name="otherYearly" min="0" step="1000" value="0">
+                            <small>Any other yearly expenses</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loan Preferences Section -->
+                <div class="form-section">
+                    <h3><i class="fas fa-percentage"></i> Loan Preferences</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="downPayment">Down Payment Amount (₹)</label>
+                            <input type="number" id="downPayment" name="downPayment" min="0" step="10000" required>
+                            <small>How much you can pay upfront</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="interestRate">Expected Interest Rate (%)</label>
+                            <input type="number" id="interestRate" name="interestRate" min="7.5" max="12" step="0.1" value="8.5">
+                            <small>Current home loan interest rate (7.5% - 12%)</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="loanTenure">Preferred Loan Tenure (Years)</label>
+                            <input type="number" id="loanTenure" name="loanTenure" min="5" max="30" value="20">
+                            <small>Loan repayment period</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="loanType">Loan Type</label>
+                            <select id="loanType" name="loanType" onchange="toggleFlexibleOptions()">
+                                <option value="fixed">Fixed Rate Loan</option>
+                                <option value="flexible">Flexible Rate Loan</option>
+                            </select>
+                            <small>Choose your loan type</small>
+                        </div>
+                    </div>
+                    <div class="form-row" id="flexibleOptions" style="display: none;">
+                        <div class="form-group">
+                            <label>EMI Variations (Flexible Loan)</label>
+                            <div class="emi-variations">
+                                <div class="emi-variation">
+                                    <span class="rate-label">Rate - 2%:</span>
+                                    <span class="emi-value" id="emiLower">₹0</span>
+                                </div>
+                                <div class="emi-variation">
+                                    <span class="rate-label">Selected Rate:</span>
+                                    <span class="emi-value" id="emiSelected">₹0</span>
+                                </div>
+                                <div class="emi-variation">
+                                    <span class="rate-label">Rate + 3%:</span>
+                                    <span class="emi-value" id="emiHigher">₹0</span>
+                                </div>
+                            </div>
+                            <small>EMI variations based on interest rate changes</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-calculator"></i> Calculate Affordability
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Reset Form
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section (Hidden initially) -->
+        <div id="resultsSection" class="results-section" style="display: none;">
+            <!-- Results will be populated by JavaScript -->
+            
+            <!-- Income vs EMI Projection Section -->
+            <div class="income-emi-projection">
+                <h4><i class="fas fa-chart-line"></i> Income vs EMI Projection (5 Years)</h4>
+                <p>See how your income growth affects your savings potential over time</p>
+                
+                <div class="projection-controls">
+                    <div class="emi-adjustment-controls">
+                        <label for="emiAdjustment">Adjust EMI (₹):</label>
+                        <input type="range" id="emiAdjustment" min="0" max="100" value="100" step="5">
+                        <span id="emiAdjustmentValue">₹0</span>
+                        <small>Drag to reduce EMI and see increased savings</small>
+                    </div>
+                    
+                    <div class="income-growth-controls">
+                        <label for="incomeGrowthRate">Income Growth Rate (%):</label>
+                        <input type="range" id="incomeGrowthRate" min="0" max="20" value="8" step="1">
+                        <span id="incomeGrowthRateValue">8% per year</span>
+                        <small>Drag to change annual income growth rate</small>
+                    </div>
+                </div>
+                
+                <div class="projection-chart-container">
+                    <canvas id="incomeEMIChart" width="600" height="300"></canvas>
+                </div>
+                
+                <div class="projection-summary">
+                    <div class="projection-metrics">
+                        <div class="projection-metric">
+                            <h6>Amount Left for Your Utilisation</h6>
+                            <div class="metric-value" id="totalSavings5Years">₹0</div>
+                        </div>
+                        <div class="projection-metric">
+                            <h6>Monthly Savings as of Today</h6>
+                            <div class="metric-value" id="monthlySavingsToday">₹0</div>
+                        </div>
+                        <div class="projection-metric">
+                            <h6>Savings (Year 5)</h6>
+                            <div class="metric-value" id="monthlySavingsYear5">₹0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="home-affordability-calculator.js"></script>
+</body>
+</html>
