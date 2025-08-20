@@ -1,190 +1,287 @@
-// Full Pay or Home Loan Calculator JavaScript
+// Full Pay or Home Loan Calculator - Lean & Clean
 
 class FullPayOrLoanCalculator {
     constructor() {
-        this.initializeEventListeners();
-        this.setupFormValidation();
+        this.initializeSliders();
+        this.calculateAndDisplay();
     }
 
-    initializeEventListeners() {
-        const form = document.getElementById('fullPayOrLoanCalculator');
-        if (form) {
-            form.addEventListener('submit', (e) => this.handleFormSubmit(e));
-        }
+    initializeSliders() {
+        // Property Price Slider
+        const propertyPriceSlider = document.getElementById('propertyPrice');
+        const propertyPriceValue = document.getElementById('propertyPriceValue');
+        propertyPriceSlider.addEventListener('input', (e) => {
+            propertyPriceValue.textContent = this.formatNumber(e.target.value);
+            this.updateYourContributionMin(); // Update contribution limits when property price changes
+            this.updateLoanAmountMax(); // Recalculate loan amount
+            this.calculateAndDisplay();
+        });
 
-        // Real-time updates for loan amount
-        const loanAmountInput = document.getElementById('loanAmount');
-        if (loanAmountInput) {
-            loanAmountInput.addEventListener('input', () => this.updateLoanAmountValidation());
-        }
+        // Available Cash Slider
+        const moneyAtHandSlider = document.getElementById('moneyAtHand');
+        const moneyAtHandValue = document.getElementById('moneyAtHandValue');
+        moneyAtHandSlider.addEventListener('input', (e) => {
+            moneyAtHandValue.textContent = this.formatNumber(e.target.value);
+            this.updateYourContributionMin(); // Update contribution limits when cash changes
+            this.updateLoanAmountMax(); // Recalculate loan amount
+            this.validateDownPayment();
+            this.calculateAndDisplay();
+        });
 
-        // Real-time updates for property price
-        const propertyPriceInput = document.getElementById('propertyPrice');
-        if (propertyPriceInput) {
-            propertyPriceInput.addEventListener('input', () => this.updateLoanAmountValidation());
-        }
+        // Your Contribution Slider (Downpayment)
+        const yourContributionSlider = document.getElementById('yourContribution');
+        const yourContributionValue = document.getElementById('yourContributionValue');
+        yourContributionSlider.addEventListener('input', (e) => {
+            yourContributionValue.textContent = this.formatNumber(e.target.value);
+            this.updateLoanAmountMax();
+            this.calculateAndDisplay();
+        });
+
+        // Loan Amount Slider - Now read-only, automatically calculated
+        // const loanAmountSlider = document.getElementById('loanAmount');
+        // const loanAmountValue = document.getElementById('loanAmountValue');
+        // loanAmountSlider.addEventListener('input', (e) => {
+        //     loanAmountValue.textContent = this.formatNumber(e.target.value);
+        //     this.calculateAndDisplay();
+        // });
+
+        // Interest Rate Slider
+        const interestRateSlider = document.getElementById('interestRate');
+        const interestRateValue = document.getElementById('interestRateValue');
+        interestRateSlider.addEventListener('input', (e) => {
+            interestRateValue.textContent = e.target.value;
+            this.calculateAndDisplay();
+        });
+
+        // Loan Tenure Slider
+        const loanTenureSlider = document.getElementById('loanTenure');
+        const loanTenureValue = document.getElementById('loanTenureValue');
+        loanTenureSlider.addEventListener('input', (e) => {
+            loanTenureValue.textContent = e.target.value;
+            this.calculateAndDisplay();
+        });
+
+        // Investment Growth Slider
+        const investmentGrowthSlider = document.getElementById('investmentGrowth');
+        const investmentGrowthValue = document.getElementById('investmentGrowthValue');
+        investmentGrowthSlider.addEventListener('input', (e) => {
+            investmentGrowthValue.textContent = e.target.value;
+            this.calculateAndDisplay();
+        });
+
+        // House Rate Increase Slider
+        const houseRateIncreaseSlider = document.getElementById('houseRateIncrease');
+        const houseRateIncreaseValue = document.getElementById('houseRateIncreaseValue');
+        houseRateIncreaseSlider.addEventListener('input', (e) => {
+            houseRateIncreaseValue.textContent = e.target.value;
+            this.calculateAndDisplay();
+        });
+
+        // Set initial values and validation
+        this.setInitialValues();
+        this.updateYourContributionMin();
+        this.updateLoanAmountMax();
+        this.validateDownPayment();
     }
 
-    setupFormValidation() {
-        const form = document.getElementById('fullPayOrLoanCalculator');
-        if (form) {
-            form.addEventListener('input', (e) => this.validateInput(e.target));
-        }
-    }
-
-    validateInput(input) {
-        const value = parseFloat(input.value);
-        const min = parseFloat(input.min);
-        const max = parseFloat(input.max);
-
-        if (value < min) {
-            input.setCustomValidity(`Value must be at least ${this.formatNumber(min)}`);
-        } else if (value > max) {
-            input.setCustomValidity(`Value must be at most ${this.formatNumber(max)}`);
-        } else {
-            input.setCustomValidity('');
-        }
-    }
-
-    updateLoanAmountValidation() {
-        const propertyPrice = parseFloat(document.getElementById('propertyPrice').value) || 0;
-        const loanAmountInput = document.getElementById('loanAmount');
-        const moneyAtHand = parseFloat(document.getElementById('moneyAtHand').value) || 0;
-
-        if (propertyPrice > 0) {
-            loanAmountInput.max = propertyPrice;
-            loanAmountInput.setCustomValidity('');
-        }
-
-        if (loanAmountInput.value > propertyPrice) {
-            loanAmountInput.setCustomValidity('Loan amount cannot exceed property price');
-        } else {
-            loanAmountInput.setCustomValidity('');
-        }
-    }
-
-    handleFormSubmit(e) {
-        e.preventDefault();
+    setInitialValues() {
+        const propertyPrice = parseInt(document.getElementById('propertyPrice').value);
+        const availableCash = parseInt(document.getElementById('moneyAtHand').value);
         
-        if (this.validateForm()) {
-            const formData = this.collectFormData();
-            const results = this.calculateResults(formData);
-            this.displayResults(results);
-            this.showResultsSection();
+        // Set Your Contribution to 20% of property price (minimum downpayment)
+        const minContribution = Math.round(propertyPrice * 0.2);
+        const maxContribution = Math.max(minContribution, availableCash);
+        
+        // Use minimum contribution, but ensure it doesn't exceed maximum
+        const initialContribution = Math.min(minContribution, maxContribution);
+        
+        const yourContributionSlider = document.getElementById('yourContribution');
+        yourContributionSlider.value = initialContribution;
+        document.getElementById('yourContributionValue').textContent = this.formatNumber(initialContribution);
+        
+        // Set Loan Amount to remaining amount
+        const initialLoanAmount = propertyPrice - initialContribution;
+        const loanAmountSlider = document.getElementById('loanAmount');
+        loanAmountSlider.value = initialLoanAmount;
+        document.getElementById('loanAmountValue').textContent = this.formatNumber(initialLoanAmount);
+    }
+
+    updateYourContributionMin() {
+        const propertyPrice = parseInt(document.getElementById('propertyPrice').value);
+        const availableCash = parseInt(document.getElementById('moneyAtHand').value);
+        const yourContributionSlider = document.getElementById('yourContribution');
+        const minContribution = Math.round(propertyPrice * 0.2); // 20% minimum downpayment
+        
+        // Your contribution max = Available cash (but not less than minimum)
+        const maxContribution = Math.max(minContribution, availableCash);
+        
+        yourContributionSlider.min = minContribution;
+        yourContributionSlider.max = maxContribution;
+        
+        // Adjust contribution if it's below new minimum or above new maximum
+        if (parseInt(yourContributionSlider.value) < minContribution) {
+            yourContributionSlider.value = minContribution;
+            document.getElementById('yourContributionValue').textContent = this.formatNumber(minContribution);
+        } else if (parseInt(yourContributionSlider.value) > maxContribution) {
+            yourContributionSlider.value = maxContribution;
+            document.getElementById('yourContributionValue').textContent = this.formatNumber(maxContribution);
         }
     }
 
-    validateForm() {
-        const form = document.getElementById('fullPayOrLoanCalculator');
-        return form.checkValidity();
+    updateLoanAmountMax() {
+        const propertyPrice = parseInt(document.getElementById('propertyPrice').value);
+        const yourContribution = parseInt(document.getElementById('yourContribution').value);
+        const loanAmountSlider = document.getElementById('loanAmount');
+        
+        // Loan amount = Property price - Your contribution
+        const calculatedLoanAmount = propertyPrice - yourContribution;
+        
+        // Set loan amount to calculated value (ensuring it always equals property price - your contribution)
+        loanAmountSlider.value = calculatedLoanAmount;
+        loanAmountSlider.max = calculatedLoanAmount;
+        loanAmountSlider.min = 0;
+        
+        // Update the display
+        document.getElementById('loanAmountValue').textContent = this.formatNumber(calculatedLoanAmount);
     }
 
-    collectFormData() {
+    validateDownPayment() {
+        const propertyPrice = parseInt(document.getElementById('propertyPrice').value);
+        const availableCash = parseInt(document.getElementById('moneyAtHand').value);
+        const minDownpayment = Math.round(propertyPrice * 0.2);
+        const validationMessage = document.getElementById('validationMessage');
+        const validationText = document.getElementById('validationText');
+        
+        if (availableCash < minDownpayment) {
+            validationText.textContent = `You need at least ₹${this.formatNumber(minDownpayment)} for the mandatory 20% downpayment. Current cash: ₹${this.formatNumber(availableCash)}`;
+            validationMessage.style.display = 'flex';
+        } else {
+            validationMessage.style.display = 'none';
+        }
+        
+        // Also validate that loan amount + your contribution equals property price
+        this.validateTotalEqualsPrice();
+    }
+
+    validateTotalEqualsPrice() {
+        const propertyPrice = parseInt(document.getElementById('propertyPrice').value);
+        const yourContribution = parseInt(document.getElementById('yourContribution').value);
+        const loanAmount = parseInt(document.getElementById('loanAmount').value);
+        
+        if (yourContribution + loanAmount !== propertyPrice) {
+            console.warn('Total mismatch detected, adjusting loan amount...');
+            this.updateLoanAmountMax();
+        }
+    }
+
+    calculateAndDisplay() {
+        // Ensure loan amount is always correct before calculations
+        this.validateTotalEqualsPrice();
+        
+        const data = this.collectSliderData();
+        const results = this.calculateResults(data);
+        this.displayResults(results);
+    }
+
+    collectSliderData() {
         return {
-            propertyPrice: parseFloat(document.getElementById('propertyPrice').value),
-            moneyAtHand: parseFloat(document.getElementById('moneyAtHand').value),
-            loanAmount: parseFloat(document.getElementById('loanAmount').value) || 0,
+            propertyPrice: parseInt(document.getElementById('propertyPrice').value),
+            availableCash: parseInt(document.getElementById('moneyAtHand').value),
+            yourContribution: parseInt(document.getElementById('yourContribution').value),
+            loanAmount: parseInt(document.getElementById('loanAmount').value),
             interestRate: parseFloat(document.getElementById('interestRate').value),
-            loanTenure: parseFloat(document.getElementById('loanTenure').value),
-            investmentReturn: parseFloat(document.getElementById('investmentReturn').value)
+            loanTenure: parseInt(document.getElementById('loanTenure').value),
+            investmentGrowth: parseFloat(document.getElementById('investmentGrowth').value),
+            houseRateIncrease: parseFloat(document.getElementById('houseRateIncrease').value)
         };
     }
 
     calculateResults(data) {
-        const results = {
-            fullPayOption: this.calculateFullPayOption(data),
-            loanOption: this.calculateLoanOption(data),
-            comparison: this.compareOptions(data),
-            recommendation: this.generateRecommendation(data),
-            whatIfScenarios: this.generateWhatIfScenarios(data)
-        };
+        const mainOption = this.calculateFullPayOption(data);
+        const recommendation = this.generateRecommendation(data);
 
-        return results;
+        return {
+            mainOption,
+            recommendation
+        };
     }
 
     calculateFullPayOption(data) {
-        const remainingCash = data.moneyAtHand - data.propertyPrice;
-        const investmentValue = remainingCash > 0 ? 
-            remainingCash * Math.pow(1 + data.investmentReturn / 100, data.loanTenure) : 0;
-
-        return {
-            totalPaid: data.propertyPrice,
-            remainingCash: remainingCash,
-            investmentValue: investmentValue,
-            netWorth: data.propertyPrice + investmentValue
-        };
-    }
-
-    calculateLoanOption(data) {
-        if (data.loanAmount <= 0) {
-            return this.calculateFullPayOption(data);
-        }
-
+        // Cash left after home purchase = Available cash - Your contribution
+        const cashLeft = data.availableCash - data.yourContribution;
+        
+        // Loan component = Property value - Your contribution
+        const loanComponent = data.propertyPrice - data.yourContribution;
+        
+        // Calculate EMI for the loan component
         const monthlyRate = data.interestRate / 100 / 12;
         const totalMonths = data.loanTenure * 12;
+        const emi = loanComponent > 0 ? 
+            loanComponent * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
+            (Math.pow(1 + monthlyRate, totalMonths) - 1) : 0;
         
-        // EMI Calculation
-        const emi = data.loanAmount * 
-            (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
-            (Math.pow(1 + monthlyRate, totalMonths) - 1);
+        // Total Interest = EMI * 12 * Loan Tenure
+        const totalInterest = emi * 12 * data.loanTenure;
+        
+        // Total Paid = Purchase Price + Total Interest
+        const totalPaid = data.propertyPrice + totalInterest;
+        
+        // Investment value using compound interest formula
+        const investmentValue = cashLeft > 0 ? 
+            cashLeft * Math.pow(1 + data.investmentGrowth / 100, data.loanTenure) : 0;
 
-        const totalInterest = (emi * totalMonths) - data.loanAmount;
-        const totalPayment = data.loanAmount + totalInterest;
-        
-        // Remaining cash for investment
-        const remainingCash = data.moneyAtHand - (data.propertyPrice - data.loanAmount);
-        const investmentValue = remainingCash > 0 ? 
-            remainingCash * Math.pow(1 + data.investmentReturn / 100, data.loanTenure) : 0;
+        // Property appreciation using compound interest formula
+        const propertyAppreciation = data.propertyPrice * Math.pow(1 + data.houseRateIncrease / 100, data.loanTenure);
+
+        // Gain/Loss from purchasing property = Property Appreciation - Total Paid
+        const gainLossFromProperty = propertyAppreciation - totalPaid;
+
+        // Final Net Worth = Gain/Loss from Property + Investment Value
+        const finalNetWorth = gainLossFromProperty + investmentValue;
 
         return {
+            propertyPrice: data.propertyPrice,
+            availableCash: data.availableCash,
+            yourContribution: data.yourContribution,
+            cashLeft: cashLeft,
+            loanComponent: loanComponent,
             emi: emi,
+            loanTenure: data.loanTenure,
             totalInterest: totalInterest,
-            totalPayment: totalPayment,
-            remainingCash: remainingCash,
+            totalPaid: totalPaid,
+            propertyAppreciation: propertyAppreciation,
+            gainLossFromProperty: gainLossFromProperty,
             investmentValue: investmentValue,
-            netWorth: data.propertyPrice + investmentValue - totalInterest
+            finalNetWorth: finalNetWorth
         };
     }
 
-    compareOptions(data) {
-        const fullPay = this.calculateFullPayOption(data);
-        const loan = this.calculateLoanOption(data);
 
-        return {
-            fullPayNetWorth: fullPay.netWorth,
-            loanNetWorth: loan.netWorth,
-            difference: loan.netWorth - fullPay.netWorth,
-            betterOption: loan.netWorth > fullPay.netWorth ? 'loan' : 'fullPay',
-            savings: Math.abs(loan.netWorth - fullPay.netWorth)
-        };
-    }
+
+
 
     generateRecommendation(data) {
-        const comparison = this.compareOptions(data);
-        const fullPay = this.calculateFullPayOption(data);
-        const loan = this.calculateLoanOption(data);
+        const mainOption = this.calculateFullPayOption(data);
 
         let recommendation = '';
         let explanation = '';
 
-        if (comparison.betterOption === 'loan') {
-            recommendation = 'Consider taking a home loan and investing the remaining funds';
-            explanation = `With this approach, you can potentially increase your net worth by ₹${this.formatNumber(comparison.savings)} over ${data.loanTenure} years while still owning your dream home. The investment returns on your remaining cash can outweigh the loan interest costs.`;
+        if (mainOption.finalNetWorth > 0) {
+            recommendation = 'Property investment looks favorable';
+            explanation = `Your property investment strategy shows a positive net worth of ₹${this.formatNumber(mainOption.finalNetWorth)} after ${data.loanTenure} years.`;
         } else {
-            recommendation = 'Consider paying the full amount in cash';
-            explanation = `Paying in full cash saves you ₹${this.formatNumber(comparison.savings)} in interest payments and gives you peace of mind with no monthly EMI obligations. You'll own your home outright from day one.`;
+            recommendation = 'Consider alternative investment strategies';
+            explanation = `Your current scenario shows a negative net worth of ₹${this.formatNumber(Math.abs(mainOption.finalNetWorth))} after ${data.loanTenure} years.`;
         }
 
         // Additional insights
         let insights = '';
-        if (data.loanAmount > 0 && data.loanAmount < data.propertyPrice) {
-            const downPayment = data.propertyPrice - data.loanAmount;
-            const downPaymentPercentage = ((downPayment / data.propertyPrice) * 100).toFixed(1);
-            insights = `Your down payment of ₹${this.formatNumber(downPayment)} (${downPaymentPercentage}%) reduces your loan burden and monthly EMI.`;
+        if (data.investmentGrowth > data.interestRate) {
+            insights += ` Your expected investment return (${data.investmentGrowth}%) is higher than the loan interest rate (${data.interestRate}%), which helps offset loan costs.`;
         }
 
-        if (data.investmentReturn > data.interestRate) {
-            insights += ` Your expected investment return (${data.investmentReturn}%) is higher than the loan interest rate (${data.interestRate}%), which favors the loan + investment strategy.`;
+        if (data.houseRateIncrease > 0) {
+            insights += ` With an average ${data.houseRateIncrease}% annual property appreciation, your property value will grow significantly over ${data.loanTenure} years.`;
         }
 
         return {
@@ -194,66 +291,6 @@ class FullPayOrLoanCalculator {
         };
     }
 
-    generateWhatIfScenarios(data) {
-        const scenarios = [];
-
-        // Scenario 1: Different interest rates
-        const baseLoan = this.calculateLoanOption(data);
-        const lowerRate = { ...data, interestRate: Math.max(7.5, data.interestRate - 1) };
-        const higherRate = { ...data, interestRate: Math.min(12, data.interestRate + 1) };
-        
-        const lowerRateLoan = this.calculateLoanOption(lowerRate);
-        const higherRateLoan = this.calculateLoanOption(higherRate);
-
-        scenarios.push({
-            title: 'Interest Rate Impact',
-            description: 'How changing interest rates affect your loan',
-            metrics: [
-                { label: 'Rate - 1%', value: `₹${this.formatNumber(lowerRateLoan.emi)}`, change: `-${this.formatNumber(baseLoan.emi - lowerRateLoan.emi)}` },
-                { label: 'Current Rate', value: `₹${this.formatNumber(baseLoan.emi)}`, change: 'Base' },
-                { label: 'Rate + 1%', value: `₹${this.formatNumber(higherRateLoan.emi)}`, change: `+${this.formatNumber(higherRateLoan.emi - baseLoan.emi)}` }
-            ]
-        });
-
-        // Scenario 2: Different investment returns
-        const lowerReturn = { ...data, investmentReturn: Math.max(5, data.investmentReturn - 2) };
-        const higherReturn = { ...data, investmentReturn: Math.min(15, data.investmentReturn + 2) };
-        
-        const lowerReturnFullPay = this.calculateFullPayOption(lowerReturn);
-        const higherReturnFullPay = this.calculateFullPayOption(higherReturn);
-        const lowerReturnLoan = this.calculateLoanOption(lowerReturn);
-        const higherReturnLoan = this.calculateLoanOption(higherReturn);
-
-        scenarios.push({
-            title: 'Investment Return Impact',
-            description: 'How investment returns affect your wealth',
-            metrics: [
-                { label: 'Return - 2%', value: `₹${this.formatNumber(lowerReturnLoan.netWorth)}`, change: 'Lower returns' },
-                { label: 'Current Return', value: `₹${this.formatNumber(this.calculateLoanOption(data).netWorth)}`, change: 'Base' },
-                { label: 'Return + 2%', value: `₹${this.formatNumber(higherReturnLoan.netWorth)}`, change: 'Higher returns' }
-            ]
-        });
-
-        // Scenario 3: Different loan tenures
-        const shorterTenure = { ...data, loanTenure: Math.max(5, data.loanTenure - 5) };
-        const longerTenure = { ...data, loanTenure: Math.min(30, data.loanTenure + 5) };
-        
-        const shorterTenureLoan = this.calculateLoanOption(shorterTenure);
-        const longerTenureLoan = this.calculateLoanOption(longerTenure);
-
-        scenarios.push({
-            title: 'Loan Tenure Impact',
-            description: 'How loan tenure affects your payments',
-            metrics: [
-                { label: 'Tenure - 5 years', value: `₹${this.formatNumber(shorterTenureLoan.emi)}`, change: 'Higher EMI, less interest' },
-                { label: 'Current Tenure', value: `₹${this.formatNumber(baseLoan.emi)}`, change: 'Base' },
-                { label: 'Tenure + 5 years', value: `₹${this.formatNumber(longerTenureLoan.emi)}`, change: 'Lower EMI, more interest' }
-            ]
-        });
-
-        return scenarios;
-    }
-
     displayResults(results) {
         const resultsSection = document.getElementById('resultsSection');
         if (!resultsSection) return;
@@ -261,60 +298,74 @@ class FullPayOrLoanCalculator {
         resultsSection.innerHTML = this.generateResultsHTML(results);
     }
 
-    generateResultsHTML(results) {
-        const fullPay = results.fullPayOption;
-        const loan = results.loanOption;
-        const comparison = results.comparison;
+        generateResultsHTML(results) {
+        const mainOption = results.mainOption;
         const recommendation = results.recommendation;
 
         return `
             <div class="results-header">
-                <h3><i class="fas fa-chart-pie"></i> Financial Comparison Results</h3>
-                <p>Detailed analysis of both payment options</p>
+                <h3><i class="fas fa-chart-pie"></i> Property Investment Analysis</h3>
+                <p>Real-time analysis of your property investment strategy</p>
             </div>
 
-            <div class="comparison-grid">
-                <div class="comparison-card full-pay">
-                    <h4><i class="fas fa-money-bill-wave"></i> Full Cash Payment</h4>
+            <div class="main-results">
+                <div class="results-card">
+                    <h4><i class="fas fa-home"></i> Investment Details</h4>
                     <div class="metric">
-                        <span class="metric-label">Total Amount Paid</span>
-                        <span class="metric-value highlight">₹${this.formatNumber(fullPay.totalPaid)}</span>
+                        <span class="metric-label">Property Price</span>
+                        <span class="metric-value">₹${this.formatNumber(mainOption.propertyPrice)}</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">Remaining Cash</span>
-                        <span class="metric-value">₹${this.formatNumber(fullPay.remainingCash)}</span>
+                        <span class="metric-label">Available Cash</span>
+                        <span class="metric-value">₹${this.formatNumber(mainOption.availableCash)}</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">Investment Value (${document.getElementById('investmentReturn').value}% return)</span>
-                        <span class="metric-value">₹${this.formatNumber(fullPay.investmentValue)}</span>
+                        <span class="metric-label">Your Contribution</span>
+                        <span class="metric-value">₹${this.formatNumber(mainOption.yourContribution)}</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">Net Worth</span>
-                        <span class="metric-value highlight">₹${this.formatNumber(fullPay.netWorth)}</span>
+                        <span class="metric-label">Cash Left</span>
+                        <span class="metric-value">₹${this.formatNumber(mainOption.cashLeft)}</span>
                     </div>
-                </div>
-
-                <div class="comparison-card loan-option">
-                    <h4><i class="fas fa-home"></i> Home Loan Option</h4>
                     <div class="metric">
-                        <span class="metric-label">Monthly EMI</span>
-                        <span class="metric-value">₹${this.formatNumber(loan.emi)}</span>
+                        <span class="metric-label">Loan Component</span>
+                        <span class="metric-value">₹${this.formatNumber(mainOption.loanComponent)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">EMI</span>
+                        <span class="metric-value">₹${this.formatNumber(mainOption.emi)}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Loan Tenure</span>
+                        <span class="metric-value">${mainOption.loanTenure} years</span>
                     </div>
                     <div class="metric">
                         <span class="metric-label">Total Interest Paid</span>
-                        <span class="metric-value warning">₹${this.formatNumber(loan.totalInterest)}</span>
+                        <span class="metric-value warning">₹${this.formatNumber(mainOption.totalInterest)}</span>
+                    </div>
+                </div>
+
+                <div class="summary-section">
+                    <h4><i class="fas fa-calculator"></i> Summary after ${mainOption.loanTenure} years</h4>
+                    <div class="metric">
+                        <span class="metric-label">Total Paid</span>
+                        <span class="metric-value">₹${this.formatNumber(mainOption.totalPaid)}</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">Total House Payment</span>
-                        <span class="metric-value">₹${this.formatNumber(loan.totalPayment)}</span>
+                        <span class="metric-label">Price Appreciation</span>
+                        <span class="metric-value highlight">₹${this.formatNumber(mainOption.propertyAppreciation)}</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">Investment Value (${document.getElementById('investmentReturn').value}% return)</span>
-                        <span class="metric-value">₹${this.formatNumber(loan.investmentValue)}</span>
+                        <span class="metric-label">Gain/Loss from Purchasing Property</span>
+                        <span class="metric-value ${mainOption.gainLossFromProperty >= 0 ? 'highlight' : 'warning'}">₹${this.formatNumber(mainOption.gainLossFromProperty)}</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">Net Worth</span>
-                        <span class="metric-value highlight">₹${this.formatNumber(loan.netWorth)}</span>
+                        <span class="metric-label">Investment Value</span>
+                        <span class="metric-value">₹${this.formatNumber(mainOption.investmentValue)}</span>
+                    </div>
+                    <div class="metric final-result">
+                        <span class="metric-label">Final Net Worth</span>
+                        <span class="metric-value ${mainOption.finalNetWorth >= 0 ? 'highlight' : 'warning'}">₹${this.formatNumber(mainOption.finalNetWorth)}</span>
                     </div>
                 </div>
             </div>
@@ -327,59 +378,61 @@ class FullPayOrLoanCalculator {
             </div>
 
             <div class="what-if-section">
-                <h4><i class="fas fa-question-circle"></i> What-If Scenarios</h4>
-                <p>Explore how different factors affect your financial outcome</p>
-                
-                ${results.whatIfScenarios.map(scenario => `
-                    <div class="scenario-group" style="margin-top: 1.5rem;">
-                        <h5 style="color: #2c3e50; margin-bottom: 1rem;">${scenario.title}</h5>
-                        <p style="color: #6c757d; margin-bottom: 1rem;">${scenario.description}</p>
-                        <div class="what-if-grid">
-                            ${scenario.metrics.map(metric => `
-                                <div class="what-if-card">
-                                    <h6>${metric.label}</h6>
-                                    <div class="value">${metric.value}</div>
-                                    <small style="color: #6c757d;">${metric.change}</small>
-                                </div>
-                            `).join('')}
-                        </div>
+                <h4><i class="fas fa-question-circle"></i> Key Insights</h4>
+                <div class="what-if-grid">
+                    <div class="what-if-card">
+                        <h6>Investment Growth</h6>
+                        <div class="value">${document.getElementById('investmentGrowth').value}%</div>
+                        <small>Annual return rate</small>
                     </div>
-                `).join('')}
-            </div>
-
-            <div class="formulas-section" style="background: #f8f9fa; border-radius: 15px; padding: 1.5rem; margin-top: 2rem; border: 1px solid #e9ecef;">
-                <h4><i class="fas fa-calculator"></i> Formulas Used</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
-                    <div>
-                        <h6 style="color: #2c3e50; margin-bottom: 0.5rem;">EMI Calculation</h6>
-                        <p style="font-family: monospace; font-size: 0.9rem; color: #6c757d;">
-                            EMI = L × [r/12 × (1 + r/12)^(n×12)] / [(1 + r/12)^(n×12) – 1]
-                        </p>
-                        <small style="color: #6c757d;">Where: L = Loan amount, r = annual interest rate, n = tenure in years</small>
+                    <div class="what-if-card">
+                        <h6>Property Appreciation</h6>
+                        <div class="value">${document.getElementById('houseRateIncrease').value}%</div>
+                        <small>Annual growth rate</small>
                     </div>
-                    <div>
-                        <h6 style="color: #2c3e50; margin-bottom: 0.5rem;">Compound Investment</h6>
-                        <p style="font-family: monospace; font-size: 0.9rem; color: #6c757d;">
-                            Future Value = P × (1 + r/100)^n
-                        </p>
-                        <small style="color: #6c757d;">Where: P = Principal, r = annual return %, n = years</small>
+                    <div class="what-if-card">
+                        <h6>Interest Rate</h6>
+                        <div class="value">${document.getElementById('interestRate').value}%</div>
+                        <small>Loan interest rate</small>
                     </div>
                 </div>
             </div>
         `;
     }
 
-    showResultsSection() {
-        const resultsSection = document.getElementById('resultsSection');
-        if (resultsSection) {
-            resultsSection.style.display = 'block';
-            resultsSection.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-
     formatNumber(num) {
         if (isNaN(num) || num === null || num === undefined) return '0';
-        return Math.round(num).toLocaleString('en-IN');
+        
+        // Convert to number and round
+        const roundedNum = Math.round(parseFloat(num));
+        
+        // Convert to string and add Indian currency formatting
+        const numStr = roundedNum.toString();
+        
+        // Handle negative numbers
+        const isNegative = roundedNum < 0;
+        const absNumStr = isNegative ? numStr.substring(1) : numStr;
+        
+        // Add commas according to Indian numbering system (last 3 digits, then groups of 2)
+        let formatted = '';
+        const len = absNumStr.length;
+        
+        if (len <= 3) {
+            formatted = absNumStr;
+        } else {
+            // Last 3 digits
+            formatted = absNumStr.substring(len - 3);
+            
+            // Remaining digits in groups of 2 from right to left
+            for (let i = len - 3; i > 0; i -= 2) {
+                const start = Math.max(0, i - 2);
+                const group = absNumStr.substring(start, i);
+                formatted = group + ',' + formatted;
+            }
+        }
+        
+        // Add negative sign back if needed
+        return (isNegative ? '-' : '') + formatted;
     }
 }
 
@@ -388,12 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
     new FullPayOrLoanCalculator();
 });
 
-// Global functions for form interactions
-function toggleFlexibleOptions() {
-    // This function can be used for future enhancements
-    console.log('Toggle flexible options');
-}
-
+// Global functions
 function goBackToHome() {
     window.location.href = '../index.html';
 }

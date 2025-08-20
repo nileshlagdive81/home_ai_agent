@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header - Matching Real Estate App Theme -->
+    <!-- Header -->
     <header class="header">
         <div class="header-content">
             <h1><i class="fas fa-layer-group"></i> Real Estate Search</h1>
@@ -25,75 +25,78 @@
 
     <!-- Main Calculator Container -->
     <div class="calculator-container">
-        <!-- Calculator Header -->
         <div class="calculator-header">
-            <h2><i class="fas fa-balance-scale"></i> Full Pay or Home Loan Calculator</h2>
-            <p>Compare paying fully in cash vs taking a home loan and investing the remaining funds</p>
+            <h2><i class="fas fa-balance-scale"></i> Full Pay or Home Loan</h2>
+            <p>Compare cash payment vs loan + investment strategy</p>
         </div>
 
-        <!-- Calculator Form -->
-        <div class="calculator-form-container">
-            <form id="fullPayOrLoanCalculator" class="calculator-form">
-                <!-- Property Details Section -->
-                <div class="form-section">
-                    <h3><i class="fas fa-home"></i> Property Details</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="propertyPrice">Property Total Price (₹)</label>
-                            <input type="number" id="propertyPrice" name="propertyPrice" min="100000" step="10000" required>
-                            <small>Total cost of the property</small>
+                          <!-- Simple Form with Sliders -->
+          <div class="slider-container">
+              <!-- Note: All amounts limited to ₹5 Crores (₹5,00,00,000) -->
+              <!-- Row 1: Property Price and Money at Hand -->
+              <div class="slider-row">
+                                     <div class="slider-group">
+                       <label for="propertyPrice">Property Price: ₹<span id="propertyPriceValue">50,00,000</span></label>
+                       <input type="range" id="propertyPrice" min="1000000" max="50000000" value="5000000" step="100000">
+                   </div>
+                   
+                                          <div class="slider-group">
+                            <label for="moneyAtHand">Available Cash: ₹<span id="moneyAtHandValue">30,00,000</span></label>
+                            <input type="range" id="moneyAtHand" min="100000" max="50000000" value="3000000" step="100000">
                         </div>
-                        <div class="form-group">
-                            <label for="moneyAtHand">Money at Hand (₹)</label>
-                            <input type="number" id="moneyAtHand" name="moneyAtHand" min="0" step="10000" required>
-                            <small>Total cash available with you</small>
-                        </div>
-                    </div>
-                </div>
+              </div>
+              
+              <!-- Row 2: Your Contribution and Loan Amount -->
+              <div class="slider-row">
+                                     <div class="slider-group">
+                       <label for="yourContribution">Your Contribution: ₹<span id="yourContributionValue">10,00,000</span></label>
+                       <input type="range" id="yourContribution" min="0" max="50000000" value="1000000" step="100000">
+                       <small>Minimum 20% downpayment required by banks. Maximum: Available Cash</small>
+                   </div>
+                   
+                   <div class="slider-group">
+                       <label for="loanAmount">Loan Amount: ₹<span id="loanAmountValue">40,00,000</span></label>
+                       <input type="range" id="loanAmount" min="0" max="50000000" value="4000000" step="100000" disabled>
+                       <small>Automatically calculated (Property Price - Your Contribution)</small>
+                   </div>
+              </div>
+              
+              <!-- Row 3: Interest Rate and Loan Tenure -->
+              <div class="slider-row">
+                  <div class="slider-group">
+                      <label for="interestRate">Interest Rate: <span id="interestRateValue">8.5</span>%</label>
+                      <input type="range" id="interestRate" min="7.5" max="12" value="8.5" step="0.1">
+                  </div>
+                  
+                  <div class="slider-group">
+                      <label for="loanTenure">Loan Tenure: <span id="loanTenureValue">20</span> years</label>
+                      <input type="range" id="loanTenure" min="5" max="30" value="20" step="1">
+                  </div>
+              </div>
+              
+                             <!-- Row 4: Investment Growth Rate and House Rate Increase -->
+               <div class="slider-row">
+                   <div class="slider-group">
+                       <label for="investmentGrowth">Investment Growth Rate: <span id="investmentGrowthValue">10</span>%</label>
+                       <input type="range" id="investmentGrowth" min="5" max="15" value="10" step="0.5">
+                   </div>
+                   
+                   <div class="slider-group">
+                       <label for="houseRateIncrease">Avg House Rate Increase: <span id="houseRateIncreaseValue">5</span>%</label>
+                       <input type="range" id="houseRateIncrease" min="0" max="10" value="5" step="0.5">
+                       <small>Annual property appreciation rate</small>
+                   </div>
+               </div>
+              
+              <!-- Validation Message -->
+              <div id="validationMessage" class="validation-message" style="display: none;">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <span id="validationText"></span>
+              </div>
+          </div>
 
-                <!-- Loan Details Section -->
-                <div class="form-section">
-                    <h3><i class="fas fa-percentage"></i> Loan Details</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="loanAmount">Loan Amount (₹)</label>
-                            <input type="number" id="loanAmount" name="loanAmount" min="0" step="10000" value="0">
-                            <small>How much loan you want to take (0 for full cash payment)</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="interestRate">Home Loan Interest Rate (%)</label>
-                            <input type="number" id="interestRate" name="interestRate" min="7.5" max="12" step="0.1" value="8.5">
-                            <small>Current home loan interest rate (7.5% - 12%)</small>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="loanTenure">Loan Tenure (Years)</label>
-                            <input type="number" id="loanTenure" name="loanTenure" min="5" max="30" value="20">
-                            <small>Loan repayment period</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="investmentReturn">Investment Annual Return (%)</label>
-                            <input type="number" id="investmentReturn" name="investmentReturn" min="5" max="15" step="0.5" value="10">
-                            <small>Expected annual return on invested funds</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Calculate Button -->
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-calculator"></i> Compare Options
-                    </button>
-                    <button type="reset" class="btn btn-secondary">
-                        <i class="fas fa-redo"></i> Reset Form
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Results Section (Hidden initially) -->
-        <div id="resultsSection" class="results-section" style="display: none;">
+        <!-- Results Visualization -->
+        <div id="resultsSection" class="results-section">
             <!-- Results will be populated by JavaScript -->
         </div>
     </div>
