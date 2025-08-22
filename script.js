@@ -540,14 +540,26 @@ async function simulateAIResponse(message) {
 • "3 BHK houses in Baner"<br>
 • "Luxury properties above 2 crore"`);
     } else {
-        // All other messages are treated as property searches
-        console.log('🏠 Processing as Property Search:', message);
-        searchProperties(message);
+        // Check if this is a knowledge query
+        const knowledgePatterns = [
+            'what is', 'how to', 'tell me about', 'explain', 'define', 'what does',
+            'what are', 'how do', 'why', 'when', 'where', 'which'
+        ];
+        
+        const isKnowledgeQuery = knowledgePatterns.some(pattern => messageLower.startsWith(pattern));
+        
+        if (isKnowledgeQuery) {
+            console.log('📚 Processing as Knowledge Query:', message);
+            handleKnowledgeQuery(message);
+        } else {
+            // All other messages are treated as property searches
+            console.log('🏠 Processing as Property Search:', message);
+            searchProperties(message);
+        }
     }
 }
 
-// Handle knowledge base queries - COMMENTED OUT FOR NOW
-/*
+// Handle knowledge base queries
 async function handleKnowledgeQuery(message) {
     try {
         // Show typing indicator
@@ -626,10 +638,8 @@ async function handleKnowledgeQuery(message) {
         `);
     }
 }
-*/
 
-// Remove typing indicator - COMMENTED OUT FOR NOW
-/*
+// Remove typing indicator
 function removeTypingIndicator() {
     const typingIndicator = document.querySelector('.typing-indicator');
     if (typingIndicator) {
@@ -878,10 +888,8 @@ function askKnowledgeQuestion(question) {
     // Process the knowledge query
     handleKnowledgeQuery(question);
 }
-*/
 
-// Close modal when clicking outside - COMMENTED OUT FOR NOW
-/*
+// Close modal when clicking outside
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('knowledgeModal');
     
@@ -898,7 +906,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-*/
 
 // Filter state management functions
 function updateFilterState(newFilters) {
