@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator Layout Wireframe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .wireframe-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #374151;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .section {
+            background: #4b5563;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2563eb;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fbbf24;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #6b7280;
+            padding-bottom: 8px;
+        }
+        .calculation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #6b7280;
+        }
+        .calculation-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            color: #fbbf24;
+        }
+        .label {
+            color: #d1d5db;
+        }
+        .value {
+            color: #10b981;
+            font-weight: 500;
+        }
+        .indent {
+            margin-left: 20px;
+        }
+        .total-row {
+            background: #1f2937;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            border: 1px solid #6b7280;
+        }
+        .final-result {
+            background: #059669;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .note {
+            font-size: 12px;
+            color: #9ca3af;
+            font-style: italic;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wireframe-container">
+        <h1 style="text-align: center; color: #fbbf24; margin-bottom: 30px;">Calculator Layout Wireframe</h1>
+        
+        <!-- Your Input Section -->
+        <div class="section">
+            <div class="section-title">Your Input</div>
+            <div class="calculation-row">
+                <span class="label">Property Price:</span>
+                <span class="value">₹50,00,000</span>
+            </div>
+            <div class="calculation-row indent">
+                <span class="label">+ Your Contribution:</span>
+                <span class="value">₹10,00,000</span>
+            </div>
+            <div class="calculation-row indent">
+                <span class="label">+ Loan Amount:</span>
+                <span class="value">₹40,00,000</span>
+            </div>
+        </div>
+
+        <!-- Loan Section -->
+        <div class="section">
+            <div class="section-title">Loan Section</div>
+            <div class="calculation-row">
+                <span class="label">Loan Amount:</span>
+                <span class="value">₹40,00,000</span>
+            </div>
+            <div class="calculation-row indent">
+                <span class="label">+ EMI:</span>
+                <span class="value">₹34,713 (at 8.5% interest)</span>
+            </div>
+            <div class="calculation-row indent">
+                <span class="label">+ Loan Tenure:</span>
+                <span class="value">20 years</span>
+            </div>
+            <div class="calculation-row total-row">
+                <span class="label">= Total Interest Paid:</span>
+                <span class="value">₹43,31,120</span>
+            </div>
+        </div>
+
+        <!-- Your Investments -->
+        <div class="section">
+            <div class="section-title">Your Investments</div>
+            <div class="calculation-row indent">
+                <span class="label">+ Cash left to invest:</span>
+                <span class="value">₹15,00,000</span>
+            </div>
+            <div class="calculation-row indent">
+                <span class="label">+ Rent Amount:</span>
+                <span class="value">₹2,00,000 (4% of property price)</span>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div class="section">
+            <div class="section-title">Summary After 20 Years</div>
+            
+            <div style="margin-bottom: 20px;">
+                <div style="font-weight: bold; color: #fbbf24; margin-bottom: 10px;">Home Appreciation Gains/Loss:</div>
+                <div class="calculation-row indent">
+                    <span class="label">+ Home price forecast:</span>
+                    <span class="value">₹1,23,45,678 (with 4.5% YOY gain)</span>
+                </div>
+                <div class="calculation-row indent">
+                    <span class="label">- Total Expenses:</span>
+                    <span class="value">₹83,31,120 (Loan + Interest)</span>
+                </div>
+                <div class="calculation-row total-row">
+                    <span class="label">= Home Appreciation Gains/Loss:</span>
+                    <span class="value">₹40,14,558</span>
+                </div>
+            </div>
+
+            <div class="calculation-row indent">
+                <span class="label">+ Rent Income:</span>
+                <span class="value">₹45,67,890 (5% YOY increase)</span>
+            </div>
+            <div class="calculation-row indent">
+                <span class="label">+ Investments Gain:</span>
+                <span class="value">₹67,89,012 (12% YOY rate)</span>
+            </div>
+
+            <div class="final-result">
+                With the details you provided, you will gain: ₹1,53,71,460
+                <div class="note">(Home Appreciation Gains/Loss + Rent Income + Investments Gain)</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

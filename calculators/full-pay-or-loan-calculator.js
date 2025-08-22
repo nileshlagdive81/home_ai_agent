@@ -76,9 +76,9 @@ class FullPayOrLoanCalculator {
         // Handle checkbox change
         rentCheckbox.addEventListener('change', (e) => {
             if (e.target.checked) {
-                rentSliderContainer.classList.remove('hidden');
+                rentSliderContainer.classList.add('show');
             } else {
-                rentSliderContainer.classList.add('hidden');
+                rentSliderContainer.classList.remove('show');
             }
             this.calculateAndDisplay();
         });
@@ -101,6 +101,11 @@ class FullPayOrLoanCalculator {
         this.setInitialValues();
         this.updateYourContributionMin();
         this.validateDownPayment();
+        
+        // Initialize rent slider visibility
+        if (rentCheckbox.checked) {
+            rentSliderContainer.classList.add('show');
+        }
     }
 
     setInitialValues() {
@@ -342,110 +347,96 @@ class FullPayOrLoanCalculator {
         const mainOption = results.mainOption;
         const recommendation = results.recommendation;
 
-        return `
+                return `
             <div class="results-header">
                 <h3><i class="fas fa-chart-pie"></i> Property Investment Analysis</h3>
                 <p>Real-time analysis of your property investment strategy</p>
             </div>
 
-            <div class="main-results">
-                <div class="results-card">
-                    <h4><i class="fas fa-home"></i> Investment Details</h4>
-                    <div class="metric">
-                        <span class="metric-label">Property Price</span>
-                        <span class="metric-value">₹${this.formatNumber(mainOption.propertyPrice)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Available Cash</span>
-                        <span class="metric-value">₹${this.formatNumber(mainOption.availableCash)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Your Contribution</span>
-                        <span class="metric-value">₹${this.formatNumber(mainOption.yourContribution)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Cash Left</span>
-                        <span class="metric-value">₹${this.formatNumber(mainOption.cashLeft)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Loan Component</span>
-                        <span class="metric-value">₹${this.formatNumber(mainOption.loanComponent)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">EMI</span>
-                        <span class="metric-value">₹${this.formatNumber(mainOption.emi)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Loan Tenure</span>
-                        <span class="metric-value">${mainOption.loanTenure} years</span>
-                    </div>
-                    ${mainOption.initialRentAmount > 0 ? `
-                    <div class="metric">
-                        <span class="metric-label">Rent Amount</span>
-                        <span class="metric-value highlight">₹${this.formatNumber(mainOption.initialRentAmount)}</span>
-                    </div>
-                    ` : ''}
-                    <div class="metric">
-                        <span class="metric-label">Total Interest Paid</span>
-                        <span class="metric-value warning">₹${this.formatNumber(mainOption.totalInterest)}</span>
+            <div class="results-grid">
+                <!-- Your Input Section -->
+                <div class="results-section">
+                    <h4><i class="fas fa-calculator"></i> Your Input</h4>
+                    <div class="report-content">
+                        <p>Property Price: <strong class="highlight-amount">₹${this.formatNumber(mainOption.propertyPrice)}</strong></p>
+                        <p class="indent">+ Own Contribution: <strong>₹${this.formatNumber(mainOption.yourContribution)}</strong></p>
+                        <p class="indent">+ Cash to Invest: <strong class="green-amount">₹${this.formatNumber(mainOption.cashLeft)}</strong></p>
+                        ${mainOption.totalRentIncome > 0 ? `
+                        <p class="indent">+ Rent Amount: <strong class="green-amount">₹${this.formatNumber(mainOption.initialRentAmount)}</strong> (${document.getElementById('rent').value}% of property price)</p>
+                        ` : ''}
                     </div>
                 </div>
 
-                <div class="summary-section">
-                    <h4><i class="fas fa-calculator"></i> Summary after ${mainOption.loanTenure} years</h4>
-                    <div class="metric">
-                        <span class="metric-label">Total Paid (Loan amount + Interest)</span>
-                        <span class="metric-value">₹${this.formatNumber(mainOption.totalPaid)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Probable House Price</span>
-                        <span class="metric-value highlight">₹${this.formatNumber(mainOption.propertyAppreciation)}</span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-label">Gain/Loss from Purchasing Property (Home Value - Total Paid)</span>
-                        <span class="metric-value ${mainOption.gainLossFromProperty >= 0 ? 'highlight' : 'warning'}">₹${this.formatNumber(mainOption.gainLossFromProperty)}</span>
-                    </div>
-                    ${mainOption.totalRentIncome > 0 ? `
-                    <div class="metric">
-                        <span class="metric-label">Rent Income (5% YOY increase)</span>
-                        <span class="metric-value highlight">₹${this.formatNumber(mainOption.totalRentIncome)}</span>
-                    </div>
-                    ` : ''}
-                    <div class="metric">
-                        <span class="metric-label">Investment Value (Cash in hand)</span>
-                        <span class="metric-value">₹${this.formatNumber(mainOption.investmentValue)}</span>
-                    </div>
-                    <div class="metric final-result">
-                        <span class="metric-label">Final Net Worth (Home + Investment):</span>
-                        <span class="metric-value ${mainOption.finalNetWorth >= 0 ? 'highlight' : 'warning'}">₹${this.formatNumber(mainOption.finalNetWorth)}</span>
+                <!-- Loan Section -->
+                <div class="results-section">
+                    <h4><i class="fas fa-credit-card"></i> Loan Details</h4>
+                    <div class="report-content">
+                        <p>Loan Amount: <strong>₹${this.formatNumber(mainOption.loanComponent)}</strong></p>
+                        <p class="indent">+ EMI: <strong>₹${this.formatNumber(mainOption.emi)}</strong> @ ${document.getElementById('interestRate').value}%</p>
+                        <p class="indent">+ Loan Tenure: <strong>${mainOption.loanTenure} years</strong></p>
+                        <p class="total-line">= Total Interest: <strong class="highlight-amount">₹${this.formatNumber(mainOption.totalInterest)}</strong></p>
                     </div>
                 </div>
-            </div>
 
-            <div class="recommendation-section">
-                <h4><i class="fas fa-lightbulb"></i> AI Recommendation</h4>
-                <p><strong>${recommendation.recommendation}</strong></p>
-                <p>${recommendation.explanation}</p>
-                ${recommendation.insights ? `<p><em>${recommendation.insights}</em></p>` : ''}
-            </div>
+                <!-- Summary Section -->
+                <div class="results-section">
+                    <h4><i class="fas fa-chart-bar"></i> Summary After ${mainOption.loanTenure} Years</h4>
+                    <div class="report-content">
+                        <div class="subsection">
+                            <h5>Home Appreciation Gains/Loss:</h5>
+                            <p class="indent">+ Home price forecast: <strong class="${mainOption.propertyAppreciation >= mainOption.propertyPrice ? 'green-amount' : 'red-amount'}">₹${this.formatNumber(mainOption.propertyAppreciation)}</strong> (with ${document.getElementById('houseRateIncrease').value}% YOY gain)</p>
+                            <p class="indent">- Total Expenses: <strong class="red-amount">₹${this.formatNumber(mainOption.totalPaid)}</strong> (Loan + Interest)</p>
+                            <p class="total-line">= Home Appreciation Gains/Loss: <strong class="${mainOption.gainLossFromProperty >= 0 ? 'amount-positive' : 'amount-negative'}">₹${this.formatNumber(mainOption.gainLossFromProperty)}</strong></p>
+                        </div>
 
-            <div class="what-if-section">
-                <h4><i class="fas fa-question-circle"></i> Key Insights</h4>
-                <div class="what-if-grid">
-                    <div class="what-if-card">
-                        <h6>Investment Growth</h6>
-                        <div class="value">${document.getElementById('investmentGrowth').value}%</div>
-                        <small>Annual return rate</small>
+                        ${mainOption.totalRentIncome > 0 ? `
+                        <p class="indent">+ Rent Income: <strong class="green-amount">₹${this.formatNumber(mainOption.totalRentIncome)}</strong> (5% YOY increase)</p>
+                        ` : ''}
+                        <p class="indent">+ Investments Gain: <strong class="${mainOption.investmentValue > 0 ? 'green-amount' : ''}">₹${this.formatNumber(mainOption.investmentValue)}</strong> (${document.getElementById('investmentGrowth').value}% YOY rate)</p>
+
+                        <div class="final-result">
+                            <p><strong>With the details you provided, you will ${mainOption.finalNetWorth >= 0 ? 'gain' : 'lose'}: <span class="${mainOption.finalNetWorth >= 0 ? 'amount-positive' : 'amount-negative'}">₹${this.formatNumber(Math.abs(mainOption.finalNetWorth))}</span></strong></p>
+                            <p class="note">(Home Appreciation Gains/Loss + Rent Income + Investments Gain)</p>
+                        </div>
                     </div>
-                    <div class="what-if-card">
-                        <h6>Property Appreciation</h6>
-                        <div class="value">${document.getElementById('houseRateIncrease').value}%</div>
-                        <small>Annual growth rate</small>
+                </div>
+
+                <!-- Our Recommendation Section -->
+                <div class="recommendation-section">
+                    <div class="recommendation-content">
+                        <h4><i class="fas fa-lightbulb"></i> Our Recommendation</h4>
+                        <p><strong>${recommendation.recommendation}</strong></p>
+                        <p>${recommendation.explanation}</p>
+                        ${recommendation.insights ? `<p><em>${recommendation.insights}</em></p>` : ''}
                     </div>
-                    <div class="what-if-card">
-                        <h6>Interest Rate</h6>
-                        <div class="value">${document.getElementById('interestRate').value}%</div>
-                        <small>Loan interest rate</small>
+                    <div class="matching-properties-section">
+                        <h4><i class="fas fa-home"></i> Find Your Perfect Home</h4>
+                        <p>Ready to explore properties that match your criteria?</p>
+                        <button class="matching-properties-btn" onclick="showMatchingProperties()">
+                            <i class="fas fa-search"></i> Show Matching Properties
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Key Insights Section -->
+                <div class="what-if-section">
+                    <h4><i class="fas fa-question-circle"></i> Key Insights</h4>
+                    <div class="what-if-grid">
+                        <div class="what-if-card">
+                            <h6>Investment Growth</h6>
+                            <div class="value">${document.getElementById('investmentGrowth').value}%</div>
+                            <small>Annual return rate</small>
+                        </div>
+                        <div class="what-if-card">
+                            <h6>Property Appreciation (YOY)</h6>
+                            <div class="value">${document.getElementById('houseRateIncrease').value}%</div>
+                            <small>Annual growth rate</small>
+                        </div>
+                        <div class="what-if-card">
+                            <h6>Interest Rate</h6>
+                            <div class="value">${document.getElementById('interestRate').value}%</div>
+                            <small>Loan interest rate</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -468,7 +459,7 @@ class FullPayOrLoanCalculator {
             return (isNegative ? '-' : '') + crores.toFixed(2) + ' cr';
         } else if (absNum >= 100000) { // 1 lakh = 100,000
             const lakhs = absNum / 100000;
-            return (isNegative ? '-' : '') + lakhs.toFixed(2) + ' lakhs';
+            return (isNegative ? '-' : '') + lakhs.toFixed(2) + ' L';
         } else {
             // For numbers less than 1 lakh, use regular formatting with 2 decimals
             const numStr = absNum.toFixed(2);
@@ -511,4 +502,28 @@ function goBackToHome() {
 
 function goBackToCalculators() {
     window.location.href = 'calculators.html';
+}
+
+function showMatchingProperties() {
+    // Get current calculator values
+    const propertyPrice = document.getElementById('propertyPrice').value;
+    const interestRate = document.getElementById('interestRate').value;
+    const loanTenure = document.getElementById('loanTenure').value;
+    
+    // Create search parameters
+    const searchParams = new URLSearchParams({
+        maxPrice: propertyPrice,
+        interestRate: interestRate,
+        loanTenure: loanTenure,
+        source: 'calculator'
+    });
+    
+    // Redirect to property search page (you can customize this URL)
+    const searchUrl = `../property-search.html?${searchParams.toString()}`;
+    
+    // For now, show an alert with the search criteria
+    alert(`Searching for properties with:\n• Max Price: ₹${new FullPayOrLoanCalculator().formatNumber(propertyPrice)}\n• Interest Rate: ${interestRate}%\n• Loan Tenure: ${loanTenure} years\n\nRedirecting to property search...`);
+    
+    // Uncomment the line below when you have a property search page
+    // window.location.href = searchUrl;
 }

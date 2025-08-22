@@ -5,6 +5,36 @@
     box-sizing: border-box;
 }
 
+/* App Container - Same as index.html */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* Sidebar Styles - Same as index.html */
+.sidebar {
+    width: 320px;
+    background: #0f0f23;
+    border-right: 1px solid #2a2a3e;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+}
+
+/* Main Content - Same as index.html */
+.main-content {
+    flex: 1;
+    margin-left: 320px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 body {
     font-family: 'Benton-Book', Arial, sans-serif;
     background: #0f0f23;
@@ -115,7 +145,33 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+    .sidebar {
+        width: 280px;
+    }
+    
+    .main-content {
+        margin-left: 280px;
+    }
+}
+
 @media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        order: 2;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        order: 1;
+    }
+    
     .calculators-container {
         padding: 1rem;
     }

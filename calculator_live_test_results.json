@@ -1,0 +1,70 @@
+{
+  "budget_first": {
+    "user_data": {
+      "grossIncome": 75000,
+      "age": 30,
+      "workExperience": 5,
+      "cibilScore": "650-749",
+      "savings": 500000,
+      "existingEMIs": 15000,
+      "rent": 12000,
+      "utilities": 3000,
+      "groceries": 8000,
+      "subscriptions": 2000,
+      "insurance": 24000,
+      "schoolFees": 0,
+      "propertyTax": 0,
+      "otherYearly": 12000,
+      "coApplicant": "no",
+      "coApplicantIncome": 0,
+      "coApplicantEMIs": 0
+    },
+    "monthly_obligations": 43000.0,
+    "monthly_income": 75000,
+    "foir": 57.333333333333336,
+    "foir_status": {
+      "status": "Poor",
+      "color": "#ef4444",
+      "risk": "High"
+    },
+    "max_loan_amount": 0,
+    "max_property_price": 500000,
+    "max_emi": 0,
+    "affordable": false
+  },
+  "property_first": {
+    "property_data": {
+      "propertyPrice": 5000000,
+      "propertyLocation": "maharashtra",
+      "pfGrossIncome": 80000,
+      "pfAge": 32,
+      "pfWorkExperience": 6,
+      "pfCibilScore": "750-900",
+      "pfSavings": 1000000,
+      "pfExistingEMIs": 10000,
+      "pfRent": 15000,
+      "pfUtilities": 4000,
+      "pfGroceries": 10000,
+      "pfSubscriptions": 3000,
+      "interestRate": 8.5,
+      "loanTenure": 20
+    },
+    "monthly_obligations": 42000,
+    "monthly_income": 80000,
+    "foir": 52.5,
+    "foir_status": {
+      "status": "Poor",
+      "color": "#ef4444",
+      "risk": "High"
+    },
+    "stamp_duty": 250000,
+    "registration": 50000,
+    "total_cost": 5300000,
+    "required_loan_amount": 4300000,
+    "required_emi": 37316,
+    "max_loan_amount": 0,
+    "max_emi": 0,
+    "affordable": false,
+    "down_payment": 1000000.0
+  }
+}

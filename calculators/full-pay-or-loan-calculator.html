@@ -68,86 +68,99 @@
             <p>Find out how paying by cash vs taking a home loan plays out</p>
         </div>
 
-                          <!-- Simple Form with Sliders -->
-          <div class="slider-container">
-              <!-- Note: All amounts limited to ₹5 Crores (₹5,00,00,000) -->
-              <!-- Row 1: Property Price and Money at Hand -->
-              <div class="slider-row">
-                                     <div class="slider-group">
-                       <label for="propertyPrice">Property Price: ₹<span id="propertyPriceValue">50,00,000</span></label>
-                       <input type="range" id="propertyPrice" min="1000000" max="50000000" value="5000000" step="100000">
-                   </div>
-                   
-                                          <div class="slider-group">
-                            <label for="moneyAtHand">Available Cash: ₹<span id="moneyAtHandValue">30,00,000</span></label>
-                            <input type="range" id="moneyAtHand" min="100000" max="50000000" value="3000000" step="100000">
-                        </div>
-              </div>
-              
-              <!-- Row 2: Your Contribution and Loan Amount -->
-              <div class="slider-row">
-                                     <div class="slider-group">
-                       <label for="yourContribution">Your Contribution: ₹<span id="yourContributionValue">10,00,000</span></label>
-                       <input type="range" id="yourContribution" min="0" max="50000000" value="1000000" step="100000">
-                       <small>Minimum 20% downpayment required by banks. Maximum: Available Cash</small>
-                   </div>
-                   
-                   <div class="slider-group">
+        <!-- Left Panel - Sliders -->
+        <div class="slider-container">
+            <!-- Note: All amounts limited to ₹5 Crores (₹5,00,00,000) -->
+            <!-- Row 1: Property Price and Money at Hand -->
+            <div class="slider-row">
+                <div class="slider-group">
+                    <label for="propertyPrice">Property Price: ₹<span id="propertyPriceValue">50,00,000</span></label>
+                    <input type="range" id="propertyPrice" min="1000000" max="50000000" value="5000000" step="100000">
+                </div>
+            </div>
+            
+            <!-- Row 2: Available Cash -->
+            <div class="slider-row">
+                <div class="slider-group">
+                    <label for="moneyAtHand">Available Cash: ₹<span id="moneyAtHandValue">30,00,000</span></label>
+                    <input type="range" id="moneyAtHand" min="100000" max="50000000" value="3000000" step="100000">
+                </div>
+            </div>
+            
+            <!-- Row 3: Your Contribution -->
+            <div class="slider-row">
+                <div class="slider-group">
+                    <label for="yourContribution">Your Contribution: ₹<span id="yourContributionValue">10,00,000</span></label>
+                    <input type="range" id="yourContribution" min="0" max="50000000" value="1000000" step="100000">
+                    <small>Minimum 20% downpayment required by banks. Maximum: Available Cash</small>
+                </div>
+            </div>
+            
+            <!-- Row 4: Rent Checkbox and Slider -->
+            <div class="slider-row">
+                                   <div class="slider-group">
                        <div class="rent-header-container">
                            <label class="field-header">Giving on rent?</label>
                            <div class="rent-checkbox-container">
                                <label class="checkbox-label">
                                    <input type="checkbox" id="rentCheckbox" checked>
                                    <span class="checkmark"></span>
-                                   Yes
                                </label>
                            </div>
                        </div>
-                       <div id="rentSliderContainer" class="rent-slider-container">
+                       <div id="rentSliderContainer" class="rent-slider-container show">
                            <label for="rent">Rent: <span id="rentValue">4</span>%</label>
                            <input type="range" id="rent" min="1" max="15" value="4" step="0.5">
                            <small>% of Property price, 4% is good</small>
                        </div>
                    </div>
-              </div>
-              
-              <!-- Row 3: Interest Rate and Loan Tenure -->
-              <div class="slider-row">
-                  <div class="slider-group">
-                      <label for="interestRate">Interest Rate: <span id="interestRateValue">8.5</span>%</label>
-                      <input type="range" id="interestRate" min="7.5" max="12" value="8.5" step="0.1">
-                  </div>
-                  
-                  <div class="slider-group">
-                      <label for="loanTenure">Loan Tenure: <span id="loanTenureValue">20</span> years</label>
-                      <input type="range" id="loanTenure" min="5" max="30" value="20" step="1">
-                  </div>
-              </div>
-              
-                             <!-- Row 4: Investment Growth Rate and House Rate Increase -->
-               <div class="slider-row">
-                   <div class="slider-group">
-                       <label for="investmentGrowth">Investment Growth Rate: <span id="investmentGrowthValue">10</span>%</label>
-                       <input type="range" id="investmentGrowth" min="5" max="15" value="10" step="0.5">
-                   </div>
-                   
-                   <div class="slider-group">
-                       <label for="houseRateIncrease">Avg House Rate Increase: <span id="houseRateIncreaseValue">5</span>%</label>
-                       <input type="range" id="houseRateIncrease" min="0" max="10" value="5" step="0.5">
-                       <small>Annual property appreciation rate</small>
-                   </div>
-               </div>
-              
-              <!-- Validation Message -->
-              <div id="validationMessage" class="validation-message" style="display: none;">
-                  <i class="fas fa-exclamation-triangle"></i>
-                  <span id="validationText"></span>
-              </div>
-          </div>
+            </div>
+            
+            <!-- Row 5: Interest Rate -->
+            <div class="slider-row">
+                <div class="slider-group">
+                    <label for="interestRate">Interest Rate: <span id="interestRateValue">8.5</span>%</label>
+                    <input type="range" id="interestRate" min="7.5" max="12" value="8.5" step="0.1">
+                </div>
+            </div>
+            
+            <!-- Row 6: Loan Tenure -->
+            <div class="slider-row">
+                <div class="slider-group">
+                    <label for="loanTenure">Loan Tenure: <span id="loanTenureValue">20</span> years</label>
+                    <input type="range" id="loanTenure" min="5" max="30" value="20" step="1">
+                </div>
+            </div>
+            
+            <!-- Row 7: Investment Growth Rate -->
+            <div class="slider-row">
+                <div class="slider-group">
+                    <label for="investmentGrowth">Investment Growth Rate: <span id="investmentGrowthValue">10</span>%</label>
+                    <input type="range" id="investmentGrowth" min="5" max="15" value="10" step="0.5">
+                </div>
+            </div>
+            
+            <!-- Row 8: House Rate Increase -->
+            <div class="slider-row">
+                <div class="slider-group">
+                    <label for="houseRateIncrease">Avg House Rate Increase: <span id="houseRateIncreaseValue">5</span>%</label>
+                    <input type="range" id="houseRateIncrease" min="0" max="10" value="5" step="0.5">
+                    <small>Annual property appreciation rate</small>
+                </div>
+            </div>
+            
+            <!-- Validation Message -->
+            <div id="validationMessage" class="validation-message" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="validationText"></span>
+            </div>
+        </div>
 
-        <!-- Results Visualization -->
-        <div id="resultsSection" class="results-section">
-            <!-- Results will be populated by JavaScript -->
+                <!-- Right Panel - Results -->
+        <div class="analysis-report-container">
+            <div id="resultsSection" class="results-section">
+                <!-- Results will be populated by JavaScript -->
+            </div>
         </div>
     </div>
         </div>
