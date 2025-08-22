@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Pronto Homes - AI Powered Real Estate Search</title>
             <link rel="stylesheet" href="styles.css?v=19">
-    <link rel="stylesheet" href="chat-component.css?v=2">
+    <link rel="stylesheet" href="chat-component.css?v=11">
     <link rel="stylesheet" href="header-component.css?v=1">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -22,34 +22,9 @@
                     New Query
                 </button>
             </div>
-            
 
-            
-            <div class="chat-container">
-                <div class="ai-assistant">
-                    <h3>AI Agent</h3>
-                                                                                  <div class="assistant-message">
-                         <p><strong>💡 Try these property search queries:</strong><br><br>
-                         <strong>🏠 Property Search Examples:</strong><br>
-                          • "2 BHK apartments under 1 crore in Pune"<br>
-                          • "3 BHK houses above 50 lakhs"<br>
-                          • "Properties in Baner area"<br>
-                          • "Luxury homes above 2 crore"<br>
-                          • "1 BHK flats under 75 lakhs in Hinjewadi"<br>
-                          • "Ready to move properties in Pune"</p>
-                     </div>
-
-                </div>
-                
-                <div class="message-input">
-                    <textarea placeholder="Type your message" id="chatInput" rows="1"></textarea>
-                    <button class="send-btn">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-                
-
-            </div>
+            <!-- Include Reusable Chat Component -->
+            <div id="chatComponentContainer"></div>
         </div>
         
         <!-- Main Content Area -->
@@ -100,19 +75,19 @@
                         <!-- Landing Page Content (shown by default) -->
             <div class="landing-content" id="landingContent">
                                  <div class="suggested-searches">
-                     <div class="search-card" onclick="searchProperties('2 BHK apartments under 1 crore in Pune')">
+                     <div class="search-card" onclick="console.log('Size card clicked'); searchProperties('2 BHK apartments under 1 crore in Pune')">
                          <h3>Size</h3>
                          <p>Show me 2 BHK apartments under 1 crore in Pune</p>
                      </div>
-                     <div class="search-card" onclick="searchProperties('3 BHK houses above 50 lakhs in Baner')">
+                     <div class="search-card" onclick="console.log('Budget card clicked'); searchProperties('3 BHK houses above 50 lakhs in Baner')">
                          <h3>Budget</h3>
                          <p>Find 3 BHK houses above 50 lakhs in Baner</p>
                      </div>
-                     <div class="search-card" onclick="searchProperties('1 BHK flats under 75 lakhs in Hinjewadi')">
+                     <div class="search-card" onclick="console.log('Locality card clicked'); searchProperties('1 BHK flats under 75 lakhs in Hinjewadi')">
                          <h3>Locality</h3>
                          <p>1 BHK flats under 75 lakhs in Hinjewadi</p>
                      </div>
-                     <div class="search-card" onclick="searchProperties('Luxury properties above 2 crore in Mumbai')">
+                     <div class="search-card" onclick="console.log('Status card clicked'); searchProperties('Luxury properties above 2 crore in Mumbai')">
                          <h3>Status</h3>
                          <p>Luxury properties above 2 crore in Mumbai</p>
                      </div>
@@ -175,6 +150,7 @@
     </footer>
     
                     <script src="script.js?v=26"></script>
+                    <script src="chat-component.js?v=1"></script>
                     <script>
                         // Load header component
                         document.addEventListener('DOMContentLoaded', function() {
@@ -184,6 +160,32 @@
                                     document.getElementById('header-placeholder').innerHTML = html;
                                 })
                                 .catch(error => console.error('Error loading header:', error));
+                        });
+                        
+                        // Load chat component
+                        document.addEventListener('DOMContentLoaded', function() {
+                            console.log('Loading chat component...');
+                            
+                            const container = document.getElementById('chatComponentContainer');
+                            console.log('Chat component container:', container);
+                            console.log('Container innerHTML before:', container.innerHTML);
+                            
+                            fetch('chat-component.html?v=' + Date.now())
+                                .then(response => response.text())
+                                .then(html => {
+                                    console.log('Chat component HTML loaded, length:', html.length);
+                                    console.log('HTML preview:', html.substring(0, 200));
+                                    document.getElementById('chatComponentContainer').innerHTML = html;
+                                    
+                                    console.log('Chat component HTML inserted, initializing...');
+                                    console.log('Container innerHTML after:', container.innerHTML);
+                                    // Initialize chat component
+                                    new ChatComponent();
+                                    console.log('ChatComponent initialized successfully');
+                                })
+                                .catch(error => {
+                                    console.error('Error loading chat component:', error);
+                                });
                         });
                     </script>
 </body>

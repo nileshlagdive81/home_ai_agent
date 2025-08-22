@@ -19,28 +19,8 @@
                 </button>
             </div>
             
-            <div class="chat-container">
-                <div class="ai-assistant">
-                    <h3>AI Agent</h3>
-                    <div class="assistant-message">
-                        <p><strong>💡 Ask me about real estate:</strong><br><br>
-                        <strong>🏠 Property Questions:</strong><br>
-                         • "2 BHK apartments under 1 crore in Pune"<br>
-                         • "What is carpet area?"<br>
-                         • "How to apply for home loan?"<br>
-                         • "Tell me about RERA"<br>
-                         • "Calculate ROI for my property"<br>
-                         • "Help me understand affordability"</p>
-                    </div>
-                </div>
-                
-                <div class="message-input">
-                    <textarea placeholder="Ask about properties, loans, or real estate..." id="chatInput" rows="1"></textarea>
-                    <button class="send-btn">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
+            <!-- Include Reusable Chat Component -->
+            <div id="chatComponentContainer"></div>
         </div>
         
         <!-- Main Content Area -->
@@ -378,5 +358,58 @@
     <!-- JavaScript -->
     <script src="home-affordability-calculator.js"></script>
     <script src="../script.js"></script>
+    
+    <!-- Include Reusable Chat Component -->
+    <script src="../chat-component.js"></script>
+    <script>
+        // Function to load chat component
+        function loadChatComponent() {
+            fetch('../chat-component.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('chatComponentContainer').innerHTML = html;
+                    // Re-initialize chat component after loading HTML
+                    new ChatComponent();
+                })
+                .catch(error => console.error('Error loading chat component:', error));
+        }
+
+        // Load chat component when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if chat component already exists
+            const chatContainer = document.getElementById('chatComponentContainer');
+            if (chatContainer && !chatContainer.querySelector('.chat-container')) {
+                loadChatComponent();
+            } else {
+                // Load normally
+                loadChatComponent();
+            }
+        });
+
+        // Also load chat component when page becomes visible (for back button navigation)
+        document.addEventListener('pageshow', function(event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                // Page was loaded from back-forward cache or back button
+                setTimeout(loadChatComponent, 100);
+            }
+        });
+
+        // Additional fallback for back button navigation
+        window.addEventListener('focus', function() {
+            // Check if chat component is missing
+            const chatContainer = document.getElementById('chatComponentContainer');
+            if (chatContainer && !chatContainer.querySelector('.chat-container')) {
+                loadChatComponent();
+            }
+        });
+
+        // Periodic check to ensure chat component is always visible
+        setInterval(function() {
+            const chatContainer = document.getElementById('chatComponentContainer');
+            if (chatContainer && !chatContainer.querySelector('.chat-container')) {
+                loadChatComponent();
+            }
+        }, 2000); // Check every 2 seconds
+    </script>
 </body>
 </html>

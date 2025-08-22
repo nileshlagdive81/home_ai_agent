@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Search Results - Real Estate</title>
+    <link rel="stylesheet" href="styles.css?v=19">
+    <link rel="stylesheet" href="chat-component.css?v=11">
+    <link rel="stylesheet" href="search-results.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Left Sidebar - AI Assistant -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn">
+                    <i class="fas fa-plus"></i>
+                    New Query
+                </button>
+            </div>
+            
+            <!-- Include Reusable Chat Component -->
+            <div id="chatComponentContainer"></div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <h1><i class="fas fa-home"></i> Real Estate Search</h1>
+                    <div class="header-right">
+                        <a href="index.html" class="header-link">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                        <a href="calculators/calculators.html" class="header-link">
+                            <i class="fas fa-calculator"></i> Calculators
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Search Results Content -->
+            <div class="search-results-container">
+
+                <div class="search-header">
+                    <h2><i class="fas fa-search"></i> Search Results</h2>
+                    <div id="searchQueryDisplay" class="search-query">
+                        <!-- Search query will be displayed here -->
+                    </div>
+                </div>
+
+                <div class="search-filters">
+                    <div class="filter-group">
+                        <label for="priceRange">Price Range:</label>
+                        <select id="priceRange">
+                            <option value="">Any Price</option>
+                            <option value="0-5000000">Under 50 Lakhs</option>
+                            <option value="5000000-10000000">50 Lakhs - 1 Crore</option>
+                            <option value="10000000-20000000">1 Crore - 2 Crores</option>
+                            <option value="20000000+">Above 2 Crores</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="propertyType">Property Type:</label>
+                        <select id="propertyType">
+                            <option value="">Any Type</option>
+                            <option value="apartment">Apartment</option>
+                            <option value="house">House</option>
+                            <option value="villa">Villa</option>
+                            <option value="plot">Plot</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="bhk">BHK:</label>
+                        <select id="bhk">
+                            <option value="">Any BHK</option>
+                            <option value="1">1 BHK</option>
+                            <option value="2">2 BHK</option>
+                            <option value="3">3 BHK</option>
+                            <option value="4">4 BHK</option>
+                            <option value="4+">4+ BHK</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="location">Location:</label>
+                        <input type="text" id="location" placeholder="Enter location...">
+                    </div>
+                </div>
+
+                <div class="results-stats">
+                    <p>Showing <span id="resultsCount">0</span> properties</p>
+                </div>
+
+                <div id="searchResults" class="search-results">
+                    <!-- Search results will be populated here -->
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>No properties found</h3>
+                        <p>Try adjusting your search criteria or browse our featured properties below.</p>
+                    </div>
+                </div>
+
+                <!-- Featured Properties Section -->
+                <div class="featured-properties">
+                    <h3><i class="fas fa-star"></i> Featured Properties</h3>
+                    <div class="featured-grid">
+                        <div class="featured-card">
+                            <div class="property-image">
+                                <img src="images/Project Images/Sample Project Image.jpg" alt="Property 1">
+                                <div class="property-badge">Featured</div>
+                            </div>
+                            <div class="property-details">
+                                <h4>Luxury 3 BHK Apartment</h4>
+                                <p class="location"><i class="fas fa-map-marker-alt"></i> Pune, Maharashtra</p>
+                                <p class="price">₹1.2 Crores</p>
+                                <p class="area">1,200 sq ft</p>
+                                <div class="property-features">
+                                    <span><i class="fas fa-bed"></i> 3 BHK</span>
+                                    <span><i class="fas fa-bath"></i> 2 Bath</span>
+                                    <span><i class="fas fa-car"></i> 1 Parking</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="featured-card">
+                            <div class="property-image">
+                                <img src="images/Project Images/Sample Project Image.jpg" alt="Property 2">
+                                <div class="property-badge">Featured</div>
+                            </div>
+                            <div class="property-details">
+                                <h4>Modern 2 BHK Flat</h4>
+                                <p class="location"><i class="fas fa-map-marker-alt"></i> Mumbai, Maharashtra</p>
+                                <p class="price">₹85 Lakhs</p>
+                                <p class="area">950 sq ft</p>
+                                <div class="property-features">
+                                    <span><i class="fas fa-bed"></i> 2 BHK</span>
+                                    <span><i class="fas fa-bath"></i> 2 Bath</span>
+                                    <span><i class="fas fa-car"></i> 1 Parking</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#" class="footer-link">
+                <i class="fas fa-check"></i>
+                About Us
+            </a>
+            <a href="#" class="footer-link">
+                <i class="fas fa-chart-line"></i>
+                Price Trends
+            </a>
+            <a href="#" class="footer-link">
+                <i class="fas fa-dollar-sign"></i>
+                $ ROI
+            </a>
+            <a href="calculators/calculators.html" class="footer-link">
+                <i class="fas fa-calculator"></i>
+                Calculators
+            </a>
+            <a href="#" class="footer-link">
+                <i class="fas fa-star"></i>
+                Services
+            </a>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+    <script src="chat-component.js"></script>
+    <script>
+        // Load chat component HTML
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('chat-component.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('chatComponentContainer').innerHTML = html;
+                    // Re-initialize chat component after loading HTML
+                    new ChatComponent();
+                })
+                .catch(error => console.error('Error loading chat component:', error));
+
+            // Display search query from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchQuery = urlParams.get('q');
+            const source = urlParams.get('source');
+
+            if (searchQuery) {
+                document.getElementById('searchQueryDisplay').innerHTML = `
+                    <p><strong>Search Query:</strong> "${searchQuery}"</p>
+                    ${source === 'chat' ? '<p><em>Search initiated from chat</em></p>' : ''}
+                `;
+                
+                // Simulate search results
+                simulateSearchResults(searchQuery);
+            }
+        });
+
+        function simulateSearchResults(query) {
+            // This is a placeholder - in real implementation, this would call your backend API
+            const resultsContainer = document.getElementById('searchResults');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            // Simulate loading
+            resultsContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+            
+            setTimeout(() => {
+                // Mock results based on query
+                const mockResults = generateMockResults(query);
+                resultsCount.textContent = mockResults.length;
+                
+                if (mockResults.length > 0) {
+                    resultsContainer.innerHTML = mockResults.map(property => `
+                        <div class="property-card">
+                            <div class="property-image">
+                                <img src="${property.image}" alt="${property.title}">
+                            </div>
+                            <div class="property-details">
+                                <h4>${property.title}</h4>
+                                <p class="location"><i class="fas fa-map-marker-alt"></i> ${property.location}</p>
+                                <p class="price">${property.price}</p>
+                                <p class="area">${property.area}</p>
+                                <div class="property-features">
+                                    <span><i class="fas fa-bed"></i> ${property.bhk}</span>
+                                    <span><i class="fas fa-bath"></i> ${property.bathrooms}</span>
+                                    <span><i class="fas fa-car"></i> ${property.parking}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    resultsContainer.innerHTML = `
+                        <div class="no-results">
+                            <i class="fas fa-search"></i>
+                            <h3>No properties found for "${query}"</h3>
+                            <p>Try adjusting your search criteria or browse our featured properties below.</p>
+                        </div>
+                    `;
+                }
+            }, 1500);
+        }
+
+        function generateMockResults(query) {
+            const lowerQuery = query.toLowerCase();
+            const mockProperties = [
+                {
+                    title: "Luxury 3 BHK Apartment",
+                    location: "Pune, Maharashtra",
+                    price: "₹1.2 Crores",
+                    area: "1,200 sq ft",
+                    bhk: "3 BHK",
+                    bathrooms: "2 Bath",
+                    parking: "1 Parking",
+                    image: "images/Project Images/Sample Project Image.jpg"
+                },
+                {
+                    title: "Modern 2 BHK Flat",
+                    location: "Mumbai, Maharashtra",
+                    price: "₹85 Lakhs",
+                    area: "950 sq ft",
+                    bhk: "2 BHK",
+                    bathrooms: "2 Bath",
+                    parking: "1 Parking",
+                    image: "images/Project Images/Sample Project Image.jpg"
+                }
+            ];
+
+            // Filter based on query keywords
+            if (lowerQuery.includes('pune') || lowerQuery.includes('3 bhk') || lowerQuery.includes('apartment')) {
+                return [mockProperties[0]];
+            } else if (lowerQuery.includes('mumbai') || lowerQuery.includes('2 bhk') || lowerQuery.includes('flat')) {
+                return [mockProperties[1]];
+            } else if (lowerQuery.includes('bhk') || lowerQuery.includes('property') || lowerQuery.includes('house')) {
+                return mockProperties;
+            }
+
+            return [];
+        }
+        
+        // Function to load chat component
+        function loadChatComponent() {
+            fetch('chat-component.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('chatComponentContainer').innerHTML = html;
+                    // Re-initialize chat component after loading HTML
+                    new ChatComponent();
+                })
+                .catch(error => console.error('Error loading chat component:', error));
+        }
+
+        // Load chat component when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if chat component already exists
+            const chatContainer = document.getElementById('chatComponentContainer');
+            if (chatContainer && !chatContainer.querySelector('.chat-container')) {
+                loadChatComponent();
+            } else {
+                // Load normally
+                loadChatComponent();
+            }
+        });
+
+        // Also load chat component when page becomes visible (for back button navigation)
+        document.addEventListener('pageshow', function(event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                // Page was loaded from back-forward cache or back button
+                setTimeout(loadChatComponent, 100);
+            }
+        });
+
+        // Additional fallback for back button navigation
+        window.addEventListener('focus', function() {
+            // Check if chat component is missing
+            const chatContainer = document.getElementById('chatComponentContainer');
+            if (chatContainer && !chatContainer.querySelector('.chat-container')) {
+                loadChatComponent();
+            }
+        });
+
+        // Periodic check to ensure chat component is always visible
+        setInterval(function() {
+            const chatContainer = document.getElementById('chatComponentContainer');
+            if (chatContainer && !chatContainer.querySelector('.chat-container')) {
+                loadChatComponent();
+            }
+        }, 2000); // Check every 2 seconds
+    </script>
+            
+            </div> <!-- Close search-results-container -->
+        </div> <!-- Close main-content -->
+    </div> <!-- Close app-container -->
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#" class="footer-link">
+                <i class="fas fa-check"></i>
+                About Us
+            </a>
+            <a href="#" class="footer-link">
+                <i class="fas fa-chart-line"></i>
+                Price Trends
+            </a>
+            <a href="#" class="footer-link">
+                <i class="fas fa-dollar-sign"></i>
+                $ ROI
+            </a>
+            <a href="calculators/calculators.html" class="footer-link">
+                <i class="fas fa-calculator"></i>
+                Calculators
+            </a>
+            <a href="#" class="footer-link">
+                <i class="fas fa-star"></i>
+                Services
+            </a>
+        </div>
+    </footer>
+</body>
+</html>

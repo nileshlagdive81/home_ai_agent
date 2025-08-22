@@ -193,6 +193,8 @@ class RealEstateNLPEngine:
     
     def _extract_bhk_entities(self, doc, entities, text_lower):
         """Extract BHK entities with semantic understanding"""
+        print(f"🔍 BHK Extraction: Analyzing text: '{text_lower}'")
+        
         # Look for BHK patterns in the context of property specifications
         bhk_patterns = [
             r'(\d+(?:\.\d+)?)\s*bhk',
@@ -203,8 +205,10 @@ class RealEstateNLPEngine:
         for pattern in bhk_patterns:
             matches = re.finditer(pattern, text_lower)
             for match in matches:
+                print(f"🔍 BHK Pattern match: '{match.group(0)}' with value: {match.group(1)}")
                 # INTENT-DRIVEN: Check if this is actually about property BHK, not just a number
                 context_words = self._get_context_words(text_lower, match.start(), match.end(), 10)
+                print(f"🔍 BHK Context words: {context_words}")
                 # More flexible context checking - if it's in a query with location, it's likely a property search
                 if any(word in context_words for word in ["property", "flat", "apartment", "house", "real estate", "bhk"]) or any(word in text_lower for word in ["mumbai", "delhi", "bangalore", "hyderabad", "chennai", "kolkata", "pune", "baner", "wakad", "hinjewadi", "kharadi", "viman nagar", "koregaon park", "kalyani nagar", "aundh", "bavdhan", "pimpri", "chinchwad", "nigdi", "akurdi", "ravet", "moshi", "chakan", "talegaon", "lonavala", "khandala", "alibaug", "karjat", "panvel", "thane", "navi mumbai", "kalyan", "vasai", "vashi", "nerul", "belapur", "panvel", "ulwe", "dronagiri", "kharghar", "seawoods", "ghansoli", "airoli", "rabale", "mahape", "turbhe", "kopar khairane", "sanpada", "juinagar", "nerul", "seawoods", "belapur", "panvel", "ulwe", "dronagiri", "kharghar", "seawoods", "ghansoli", "airoli", "rabale", "mahape", "turbhe", "kopar khairane", "sanpada", "juinagar"]):
                     entities.append(ExtractedEntity(
@@ -216,6 +220,8 @@ class RealEstateNLPEngine:
                         context={"value": float(match.group(1)), "operator": "=", "unit": "bhk"}
                     ))
                     print(f"🔍 INTENT-DRIVEN: Found BHK entity: '{match.group(0)}' in property context")
+                else:
+                    print(f"🔍 BHK Context check failed - not in property context")
     
     def _extract_price_entities_with_context(self, doc, entities, text_lower):
         """INTENT-DRIVEN: Extract price entities with full semantic context"""
@@ -376,7 +382,14 @@ class RealEstateNLPEngine:
             r'area\s+(?:under|below|less\s+than)\s+(\d{3,5})',
             r'area\s+(?:above|over|more\s+than)\s+(\d{3,5})',
             # Direct number patterns for area
-            r'(\d{3,5})\s+(?:sqft|square\s+feet)\s+(?:carpet\s+)?area'
+            r'(\d{3,5})\s+(?:sqft|square\s+feet)\s+(?:carpet\s+)?area',
+            # Natural language patterns for area constraints
+            r'(?:under|below|less\s+than)\s+(\d{3,5})\s*(?:sqft|square\s+feet)',
+            r'(?:under|below|less\s+than)\s+(\d{3,5})',
+            r'(\d{3,5})\s*(?:sqft|square\s+feet)?\s+(?:or\s+)?(?:less|below|under)',
+            # Simple area constraints
+            r'carpet\s+less\s+than\s+(\d{3,5})',
+            r'area\s+less\s+than\s+(\d{3,5})'
         ]
         
         for pattern in area_patterns:

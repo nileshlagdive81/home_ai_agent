@@ -1,0 +1,51 @@
+<!-- Reusable Chat Component -->
+<!-- Include this file on any page where you want the chat functionality -->
+<div class="chat-container">
+    <!-- Chat Agent Image Section -->
+    <div class="chat-agent-image">
+        <img src="images/Kavya.JPG" alt="Kavya - AI Real Estate Agent" class="agent-avatar">
+    </div>
+    
+    <div class="ai-assistant">
+        <div class="assistant-message">
+            <p><strong>Hi, I'm Kavya!</strong><br>
+            What are you looking for today? I can help you find properties and answer any real estate questions you may have<br><br>
+            🏠 Property Questions:<br>
+             • "2 BHK apartments under 1 crore in Pune"<br>
+             • "3 BHK in Mumbai with carpet area less than 1500 sqft ?"<br>
+             • "Flats in Pune within 2 Kms of a NMV school?"<br>
+             • "What documents to check before buying a property?"<br>
+             • "Tell me about RERA"<br>
+             • "What is a redy reckoner rate?"<br><br>
+            <em>Psst. check our calculators & trends to make an informed decision</em></p>
+        </div>
+    </div>
+    
+    <div class="message-input">
+        <textarea placeholder="Ask about properties, loans, or real estate..." id="chatInput" rows="1"></textarea>
+        <button class="send-btn" id="sendBtn">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Lean Popup for Non-Property Queries -->
+<div class="query-popup" id="queryPopup">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3 class="popup-title" id="popupTitle">Query Response</h3>
+            <button class="popup-close" id="popupClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="popup-body" id="popupBody">
+            <!-- Popup content will be populated here -->
+        </div>
+        <div class="popup-footer">
+            <button class="back-to-chat-btn" id="backToChatBtn">
+                <i class="fas fa-arrow-left"></i>
+                Back to Chat
+            </button>
+        </div>
+    </div>
+</div>

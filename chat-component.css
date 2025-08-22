@@ -1,5 +1,6 @@
 /* Reusable Chat Component Styles */
 /* This file contains all chat-related styles that should be consistent across pages */
+/* Version: v11 - Updated with no scrollbars on textarea */
 
 /* Chat Container - Unified Component */
 .chat-container {
@@ -8,9 +9,9 @@
     border-radius: 12px;
     background: #1a1a2e;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    height: calc(100vh - 80px);
-    max-height: calc(100vh - 80px);
-    min-height: 600px;
+    height: calc(100vh - 120px); /* Reduced height to avoid taskbar */
+    max-height: calc(100vh - 120px);
+    min-height: 500px; /* Reduced minimum height */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -18,7 +19,40 @@
     flex: 1;
 }
 
-/* AI Assistant Section */
+/* Chat Agent Image Section - Takes 20% of chat box height */
+.chat-agent-image {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%) !important;
+    border-bottom: 2px solid #3a3a4e;
+    border-radius: 12px 12px 0 0;
+    flex-shrink: 0;
+    height: 20%;
+    min-height: 120px !important;
+    max-height: 150px;
+    /* No border */
+    border: none !important;
+    visibility: visible !important;
+}
+
+.agent-avatar {
+    width: 120px !important;
+    height: 120px !important;
+    border-radius: 50%;
+    border: 3px solid #10b981 !important;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    object-fit: cover;
+    flex-shrink: 0;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+
+
+/* AI Assistant Section - Adjusted height to accommodate image */
 .ai-assistant {
     margin-bottom: 0;
     flex: 1;
@@ -30,11 +64,13 @@
     min-height: 0;
     position: relative;
     background: transparent;
-    border-radius: 12px 12px 0 0;
+    border-radius: 0;
     padding: 20px;
     border: none;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
+    /* Chat behavior - scroll to bottom when new messages arrive */
+    scroll-behavior: smooth;
 }
 
 .ai-assistant h3 {
@@ -160,7 +196,9 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
     resize: none;
-    overflow-y: auto;
+    overflow-y: hidden;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
 
 .message-input textarea:focus {
@@ -173,6 +211,10 @@
 .message-input textarea::placeholder {
     color: #9ca3af;
     font-style: italic;
+}
+
+.message-input textarea::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
 /* Send Button */
@@ -302,11 +344,163 @@
     border-bottom: none;
 }
 
+/* Lean Popup for Non-Property Queries */
+.query-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.query-popup.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.popup-content {
+    background: #1f2937;
+    border: 2px solid #374151;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.query-popup.show .popup-content {
+    transform: scale(1);
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #374151;
+}
+
+.popup-title {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.popup-close {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-close:hover {
+    background: rgba(156, 163, 175, 0.1);
+    color: #e5e7eb;
+}
+
+.popup-body {
+    color: #d1d5db;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.popup-body h3 {
+    color: #fbbf24;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.popup-body p {
+    margin-bottom: 1rem;
+    color: #e5e7eb;
+}
+
+.popup-body ul {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.popup-body li {
+    margin-bottom: 0.5rem;
+    color: #d1d5db;
+}
+
+.popup-footer {
+    text-align: center;
+}
+
+.back-to-chat-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.back-to-chat-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.back-to-chat-btn i {
+    font-size: 0.9rem;
+}
+
 /* Responsive Design */
 @media (max-width: 1200px) {
     .chat-container {
         height: calc(100vh - 120px);
         min-height: 500px;
+    }
+    
+    .chat-agent-image {
+        min-height: 100px;
+        max-height: 120px;
+        padding: 15px;
+    }
+    
+    .agent-avatar {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .agent-info h3 {
+        font-size: 16px;
+    }
+    
+    .agent-info p {
+        font-size: 13px;
     }
 }
 
@@ -316,6 +510,27 @@
         min-height: 400px;
         margin: 10px;
         width: calc(100% - 20px);
+    }
+    
+    .chat-agent-image {
+        min-height: 80px;
+        max-height: 100px;
+        padding: 12px;
+        gap: 12px;
+    }
+    
+    .agent-avatar {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .agent-info h3 {
+        font-size: 15px;
+        margin-bottom: 3px;
+    }
+    
+    .agent-info p {
+        font-size: 12px;
     }
     
     .ai-assistant {
@@ -329,5 +544,27 @@
     .message-input textarea {
         min-height: 50px;
         font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-agent-image {
+        min-height: 70px;
+        max-height: 90px;
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    .agent-avatar {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .agent-info h3 {
+        font-size: 14px;
+    }
+    
+    .agent-info p {
+        font-size: 11px;
     }
 }

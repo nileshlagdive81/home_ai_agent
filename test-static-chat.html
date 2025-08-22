@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Chat Component Test</title>
+    <link rel="stylesheet" href="chat-component.css?v=11">
+    <style>
+        body {
+            background: #0f0f23;
+            color: white;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            width: 350px;
+            border: 2px solid #333;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Static Chat Component Test</h1>
+    <p>Testing the chat component with Kavya image statically included:</p>
+    
+    <div class="test-container">
+        <!-- Chat Component HTML directly included -->
+        <div class="chat-container">
+            <!-- Chat Agent Image Section -->
+            <div class="chat-agent-image">
+                <img src="images/Kavya.JPG" alt="Kavya - AI Real Estate Agent" class="agent-avatar">
+                            <div class="agent-info">
+                <div class="status-online">
+                    <span class="status-dot"></span>
+                    Status: Online
+                </div>
+                <h3>Kavya</h3>
+                <p class="specialization">Specialization: Indian Real Estate</p>
+            </div>
+            </div>
+            
+            <div class="ai-assistant">
+                <div class="assistant-message">
+                    <p><strong>💡 Ask me about real estate:</strong><br><br>
+                    <strong>🏠 Property Questions:</strong><br>
+                     • "2 BHK apartments under 1 crore in Pune"<br>
+                     • "What is carpet area?"<br>
+                     • "How to apply for home loan?"<br>
+                     • "Tell me about RERA"<br>
+                     • "Calculate ROI for my property"<br>
+                     • "Help me understand affordability"</p>
+                </div>
+            </div>
+            
+            <div class="message-input">
+                <textarea placeholder="Ask about properties, loans, or real estate..." id="chatInput" rows="1"></textarea>
+                <button class="send-btn" id="sendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <h3>Debug Information:</h3>
+        <p>Image path: <code>images/Kavya.JPG</code></p>
+        <p>Direct image test: <img src="images/Kavya.JPG" width="50" height="50" style="border: 1px solid white;"></p>
+    </div>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</body>
+</html>

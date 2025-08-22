@@ -1179,8 +1179,23 @@ function addUserMessage(message) {
 
 // Search properties function
 async function searchProperties(query) {
+    console.log('🚀 searchProperties function called with query:', query);
+    
     // Set search as active
     isSearchActive = true;
+    
+    // Clear global filter state for new search to prevent mixing with previous queries
+    globalFilterState = {
+        city: null,
+        locality: null,
+        bhk: null,
+        price: null,
+        carpet_area: null,
+        amenities: [],
+        status: null
+    };
+    
+    console.log('🧹 Cleared global filter state for new search:', query);
     
     // Check if we're on the home page (has search functionality)
     const isHomePage = document.querySelector('.main-content .search-header');
@@ -1192,6 +1207,15 @@ async function searchProperties(query) {
         window.location.href = `index.html?search=${encodedQuery}`;
         return;
     }
+    
+    // Get DOM elements when function is called (in case they weren't available at script load)
+    const landingContent = document.getElementById('landingContent');
+    const searchResults = document.getElementById('searchResults');
+    const propertyGrid = document.getElementById('propertyGrid');
+    const resultCount = document.getElementById('resultCount');
+    const filtersBar = document.getElementById('filtersBar');
+    
+    console.log('🔍 DOM elements found:', { landingContent, searchResults, propertyGrid, resultCount, filtersBar });
     
     // Check if there are any meaningful filters or search criteria
     const hasValidFilters = hasMeaningfulFilters(query);
@@ -1223,7 +1247,6 @@ async function searchProperties(query) {
         }
         
         // Hide filters bar and result count for no-filter searches
-        const filtersBar = document.getElementById('filtersBar');
         if (filtersBar) {
             filtersBar.style.display = 'none';
         }
@@ -1249,7 +1272,6 @@ async function searchProperties(query) {
     }
     
     // Show filters bar
-    const filtersBar = document.getElementById('filtersBar');
     if (filtersBar) {
         filtersBar.style.display = 'flex';
     }

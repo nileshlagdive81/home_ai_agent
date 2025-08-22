@@ -72,6 +72,65 @@ body {
     margin-right: 0.5rem;
 }
 
+/* App Container */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    background: #0f0f23;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 350px;
+    background: #1a1a2e;
+    border-right: 2px solid #2a2a3e;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #2a2a3e;
+    background: #0f0f23;
+}
+
+.new-chat-btn {
+    width: 100%;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    white-space: nowrap;
+}
+
+.new-chat-btn:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
 /* Main Container */
 .calculator-container {
     max-width: 1400px;
@@ -858,6 +917,21 @@ body {
 
 /* Responsive Design */
 @media (max-width: 1200px) {
+    .app-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        order: 2;
+    }
+    
+    .main-content {
+        order: 1;
+    }
+    
     .calculator-container {
         grid-template-columns: 1fr;
         gap: 2rem;
@@ -895,6 +969,25 @@ body {
 }
 
 @media (max-width: 768px) {
+    .app-container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 1rem;
+    }
+    
+    .sidebar-header {
+        padding: 15px;
+    }
+    
+    .new-chat-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    
     .calculator-container {
         padding: 0 1rem;
         margin: 1rem auto;
@@ -940,12 +1033,34 @@ body {
 }
 
 @media (max-width: 480px) {
-    .calculator-header h2 {
-        font-size: 2rem;
+    .sidebar {
+        padding: 0.5rem;
+    }
+    
+    .sidebar-header {
+        padding: 10px;
+    }
+    
+    .new-chat-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .calculator-container {
+        padding: 0 0.5rem;
+        margin: 0.5rem auto;
     }
     
     .slider-container {
         padding: 1rem;
+    }
+    
+    .header-content {
+        padding: 0 0.5rem;
+    }
+    
+    .calculator-header h2 {
+        font-size: 2rem;
     }
     
     .results-section {

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Component Test</title>
+    <link rel="stylesheet" href="chat-component.css?v=3">
+    <script src="chat-component.js?v=1"></script>
+</head>
+<body style="background: #0f0f23; color: white; padding: 20px;">
+    <h1>Chat Component Test</h1>
+    
+    <div style="width: 350px; border: 1px solid #333;">
+        <div id="chatComponentContainer"></div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, loading chat component...');
+            
+            fetch('chat-component.html')
+                .then(response => response.text())
+                .then(html => {
+                    console.log('Chat component HTML loaded:', html.substring(0, 100) + '...');
+                    document.getElementById('chatComponentContainer').innerHTML = html;
+                    
+                    console.log('Initializing ChatComponent...');
+                    new ChatComponent();
+                    console.log('ChatComponent initialized successfully');
+                })
+                .catch(error => {
+                    console.error('Error loading chat component:', error);
+                });
+        });
+    </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project Details - Skyline Residency</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="chat-component.css?v=2">
+    <link rel="stylesheet" href="chat-component.css?v=11">
     <link rel="stylesheet" href="header-component.css?v=1">
     <link rel="stylesheet" href="project_details.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -21,28 +21,8 @@
                 </button>
             </div>
             
-            <div class="chat-container">
-                <div class="ai-assistant">
-                    <h3>AI Agent</h3>
-                    <div class="assistant-message">
-                        <p><strong>💡 Try these property search queries:</strong><br><br>
-                        <strong>🏠 Property Search Examples:</strong><br>
-                         • "2 BHK apartments under 1 crore in Pune"<br>
-                         • "3 BHK houses above 50 lakhs"<br>
-                         • "Properties in Baner area"<br>
-                         • "Luxury homes above 2 crore"<br>
-                         • "1 BHK flats under 75 lakhs in Hinjewadi"<br>
-                         • "Ready to move properties in Pune"</p>
-                    </div>
-                </div>
-                
-                <div class="message-input">
-                    <textarea placeholder="Type your message" id="chatInput" rows="1"></textarea>
-                    <button class="send-btn">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
+            <!-- Include Reusable Chat Component -->
+            <div id="chatComponentContainer"></div>
         </div>
         
         <!-- Main Content Area -->
@@ -366,6 +346,7 @@
 
     <script src="script.js"></script>
     <script src="project_details.js"></script>
+    <script src="chat-component.js"></script>
     <script>
         // Load header component
         document.addEventListener('DOMContentLoaded', function() {
@@ -376,6 +357,55 @@
                 })
                 .catch(error => console.error('Error loading header:', error));
         });
+        
+        // Function to load chat component
+        function loadChatComponent() {
+            fetch('chat-component.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('chatComponentContainer').innerHTML = html;
+                    // Re-initialize chat component after loading HTML
+                    new ChatComponent();
+                })
+                .catch(error => console.error('Error loading chat component:', error));
+        }
+
+        // Load chat component when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if chat component already exists
+            const chatContainer = document.getElementById('chatComponentContainer');
+            if (chatContainer && !chatContainer.querySelector('.chat-container')) {
+                loadChatComponent();
+            } else {
+                // Load normally
+                loadChatComponent();
+            }
+        });
+
+        // Also load chat component when page becomes visible (for back button navigation)
+        document.addEventListener('pageshow', function(event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                // Page was loaded from back-forward cache or back button
+                setTimeout(loadChatComponent, 100);
+            }
+        });
+
+        // Additional fallback for back button navigation
+        window.addEventListener('focus', function() {
+            // Check if chat component is missing
+            const chatContainer = document.getElementById('chatComponentContainer');
+            if (chatContainer && !chatContainer.querySelector('.chat-container')) {
+                loadChatComponent();
+            }
+        });
+
+        // Periodic check to ensure chat component is always visible
+        setInterval(function() {
+            const chatContainer = document.getElementById('chatComponentContainer');
+            if (chatContainer && !chatContainer.querySelector('.chat-container')) {
+                loadChatComponent();
+            }
+        }, 2000); // Check every 2 seconds
     </script>
 </body>
 </html>
