@@ -186,8 +186,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     if (isHomePage) {
-        // Check for search parameter in URL (for redirects from project details page)
-        checkURLSearchParameter();
+        // Note: checkURLSearchParameter() is now called after chat component loads in index.html
         
         // Initialize static search boxes
         initializeStaticSearchBoxes();
@@ -243,27 +242,44 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Check for search parameter in URL and perform search if found
+// This function is called after the chat component is fully loaded to ensure all DOM elements are available
 function checkURLSearchParameter() {
+    console.log('🔍 checkURLSearchParameter called');
     const urlParams = new URLSearchParams(window.location.search);
     const searchQuery = urlParams.get('search');
     
+    console.log('🔍 URL search params:', window.location.search);
+    console.log('🔍 Extracted search query:', searchQuery);
+    
     if (searchQuery) {
-        console.log('Found search parameter in URL:', searchQuery);
+        console.log('✅ Found search parameter in URL:', searchQuery);
         
-        // Set the search query in the chat input
+        // Set the search query in the chat input if available
         const chatInput = getChatInputElement();
         if (chatInput) {
+            console.log('✅ Chat input found, setting value');
             chatInput.value = searchQuery;
+        } else {
+            console.log('⚠️ Chat input not found yet');
         }
         
-        // Perform the search automatically
+        // Perform the search automatically - call searchProperties directly
         setTimeout(() => {
-            handleChatMessage();
-        }, 500);
+            console.log('🚀 Executing search from URL parameter:', searchQuery);
+            console.log('🚀 Current page elements:', {
+                landingContent: document.getElementById('landingContent'),
+                searchResults: document.getElementById('searchResults'),
+                propertyGrid: document.getElementById('propertyGrid')
+            });
+            searchProperties(searchQuery);
+        }, 1000); // Increased delay to ensure page is fully loaded
         
         // Clear the search parameter from URL to prevent re-searching on refresh
         const newUrl = window.location.pathname;
         window.history.replaceState({}, document.title, newUrl);
+        console.log('🧹 Cleared search parameter from URL');
+    } else {
+        console.log('❌ No search parameter found in URL');
     }
 }
 
@@ -1180,6 +1196,7 @@ function addUserMessage(message) {
 // Search properties function
 async function searchProperties(query) {
     console.log('🚀 searchProperties function called with query:', query);
+    console.log('🚀 Function called from:', new Error().stack.split('\n')[2]);
     
     // Set search as active
     isSearchActive = true;

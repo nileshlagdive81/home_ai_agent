@@ -1,6 +1,6 @@
 /* Reusable Chat Component Styles */
 /* This file contains all chat-related styles that should be consistent across pages */
-/* Version: v11 - Updated with no scrollbars on textarea */
+/* Version: v12 - Fixed image paths and added reusable search navigation */
 
 /* Chat Container - Unified Component */
 .chat-container {

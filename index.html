@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Pronto Homes - AI Powered Real Estate Search</title>
             <link rel="stylesheet" href="styles.css?v=19">
-    <link rel="stylesheet" href="chat-component.css?v=11">
+    <link rel="stylesheet" href="chat-component.css?v=12">
     <link rel="stylesheet" href="header-component.css?v=1">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -150,7 +150,7 @@
     </footer>
     
                     <script src="script.js?v=26"></script>
-                    <script src="chat-component.js?v=1"></script>
+                    <script src="chat-component.js?v=2"></script>
                     <script>
                         // Load header component
                         document.addEventListener('DOMContentLoaded', function() {
@@ -182,6 +182,14 @@
                                     // Initialize chat component
                                     new ChatComponent();
                                     console.log('ChatComponent initialized successfully');
+                                    
+                                    // Now that chat component is loaded, check for URL search parameters
+                                    if (typeof checkURLSearchParameter === 'function') {
+                                        console.log('🔍 Calling checkURLSearchParameter after chat component load');
+                                        checkURLSearchParameter();
+                                    } else {
+                                        console.log('⚠️ checkURLSearchParameter function not available yet');
+                                    }
                                 })
                                 .catch(error => {
                                     console.error('Error loading chat component:', error);

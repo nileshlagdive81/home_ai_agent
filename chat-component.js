@@ -9,6 +9,7 @@ class ChatComponent {
         this.initializeChat();
         this.setupEventListeners();
         this.setupPopupEventListeners();
+        this.setupImagePath();
     }
 
     initializeChat() {
@@ -208,14 +209,9 @@ class ChatComponent {
     }
 
     generatePropertySearchResponse(message) {
-        // Call the existing searchProperties function on the home page
-        if (typeof searchProperties === 'function') {
-            searchProperties(message);
-            return `Searching for "${message}"...`;
-        } else {
-            // Fallback if not on home page
-            return `I understand you're looking for properties. Please use the search on our home page to find "${message}".`;
-        }
+        // Navigate to home page for property search since results are always displayed there
+        this.navigateToHomePageForSearch(message);
+        return `Searching for "${message}"...`;
     }
 
     generateCalculatorResponse(message) {
@@ -471,6 +467,68 @@ class ChatComponent {
         aiAssistant.innerHTML = '';
         if (initialMessage) {
             aiAssistant.appendChild(initialMessage);
+        }
+    }
+
+    // Method to setup image path dynamically based on current page
+    setupImagePath() {
+        const imageElement = document.getElementById('kavyaImage');
+        if (!imageElement) return;
+
+        // Determine the correct image path based on current page location
+        const currentPath = window.location.pathname;
+        let imagePath = '';
+
+        if (currentPath.includes('/calculators/')) {
+            // We're on a calculator page, need to go up one level
+            imagePath = '../images/Kavya.JPG';
+        } else {
+            // We're on the home page or other pages
+            imagePath = 'images/Kavya.JPG';
+        }
+
+        imageElement.src = imagePath;
+        console.log('Set image path to:', imagePath);
+        
+        // Add error handling for image loading
+        imageElement.onerror = function() {
+            console.error('Failed to load image from:', imagePath);
+            // Try alternative path
+            const altPath = imagePath.includes('../') ? 'images/Kavya.JPG' : '../images/Kavya.JPG';
+            console.log('Trying alternative path:', altPath);
+            imageElement.src = altPath;
+        };
+        
+        imageElement.onload = function() {
+            console.log('Image loaded successfully from:', imagePath);
+        };
+    }
+
+    // Reusable method to navigate to home page for property search
+    navigateToHomePageForSearch(searchQuery) {
+        // Encode the search query for URL
+        const encodedQuery = encodeURIComponent(searchQuery);
+        
+        // Navigate to home page with search query
+        const homePageUrl = this.getHomePageUrl();
+        const searchUrl = `${homePageUrl}?search=${encodedQuery}`;
+        
+        console.log('Navigating to home page for search:', searchUrl);
+        
+        // Navigate to home page
+        window.location.href = searchUrl;
+    }
+
+    // Helper method to get the correct home page URL
+    getHomePageUrl() {
+        const currentPath = window.location.pathname;
+        
+        if (currentPath.includes('/calculators/')) {
+            // We're on a calculator page, need to go up one level
+            return '../index.html';
+        } else {
+            // We're on the home page or other pages
+            return 'index.html';
         }
     }
 }
