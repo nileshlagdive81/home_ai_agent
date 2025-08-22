@@ -5,11 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Full Pay or Home Loan Calculator - Real Estate App</title>
     <link rel="stylesheet" href="full-pay-or-loan-calculator.css">
+    <link rel="stylesheet" href="../chat-component.css">
+    <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
+    <div class="app-container">
+        <!-- Left Sidebar - AI Assistant -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn">
+                    <i class="fas fa-plus"></i>
+                    New Query
+                </button>
+            </div>
+            
+            <div class="chat-container">
+                <div class="ai-assistant">
+                    <h3>AI Agent</h3>
+                    <div class="assistant-message">
+                        <p><strong>💡 Ask me about real estate:</strong><br><br>
+                        <strong>🏠 Property Questions:</strong><br>
+                         • "2 BHK apartments under 1 crore in Pune"<br>
+                         • "What is carpet area?"<br>
+                         • "How to apply for home loan?"<br>
+                         • "Tell me about RERA"<br>
+                         • "Calculate ROI for my property"<br>
+                         • "Help me understand affordability"</p>
+                    </div>
+                </div>
+                
+                <div class="message-input">
+                    <textarea placeholder="Ask about properties, loans, or real estate..." id="chatInput" rows="1"></textarea>
+                    <button class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
         <div class="header-content">
             <h1><i class="fas fa-layer-group"></i> Real Estate Search</h1>
             <div class="header-right">
@@ -26,8 +64,8 @@
     <!-- Main Calculator Container -->
     <div class="calculator-container">
         <div class="calculator-header">
-            <h2><i class="fas fa-balance-scale"></i> Full Pay or Home Loan</h2>
-            <p>Compare cash payment vs loan + investment strategy</p>
+            <h2>Full Pay or Home Loan Calculator</h2>
+            <p>Find out how paying by cash vs taking a home loan plays out</p>
         </div>
 
                           <!-- Simple Form with Sliders -->
@@ -55,9 +93,21 @@
                    </div>
                    
                    <div class="slider-group">
-                       <label for="loanAmount">Loan Amount: ₹<span id="loanAmountValue">40,00,000</span></label>
-                       <input type="range" id="loanAmount" min="0" max="50000000" value="4000000" step="100000" disabled>
-                       <small>Automatically calculated (Property Price - Your Contribution)</small>
+                       <div class="rent-header-container">
+                           <label class="field-header">Giving on rent?</label>
+                           <div class="rent-checkbox-container">
+                               <label class="checkbox-label">
+                                   <input type="checkbox" id="rentCheckbox" checked>
+                                   <span class="checkmark"></span>
+                                   Yes
+                               </label>
+                           </div>
+                       </div>
+                       <div id="rentSliderContainer" class="rent-slider-container">
+                           <label for="rent">Rent: <span id="rentValue">4</span>%</label>
+                           <input type="range" id="rent" min="1" max="15" value="4" step="0.5">
+                           <small>% of Property price, 4% is good</small>
+                       </div>
                    </div>
               </div>
               
@@ -100,8 +150,37 @@
             <!-- Results will be populated by JavaScript -->
         </div>
     </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#" class="footer-link">
+                    <i class="fas fa-check"></i>
+                    About Us
+                </a>
+                <a href="#" class="footer-link">
+                    <i class="fas fa-chart-line"></i>
+                    Price Trends
+                </a>
+                <a href="#" class="footer-link">
+                    <i class="fas fa-dollar-sign"></i>
+                    $ ROI
+                </a>
+                <a href="calculators.html" class="footer-link">
+                    <i class="fas fa-calculator"></i>
+                    Calculators
+                </a>
+                <a href="#" class="footer-link">
+                    <i class="fas fa-star"></i>
+                    Services
+                </a>
+            </div>
+        </footer>
+    </div>
 
     <!-- JavaScript -->
     <script src="full-pay-or-loan-calculator.js"></script>
+    <script src="../script.js"></script>
 </body>
 </html>

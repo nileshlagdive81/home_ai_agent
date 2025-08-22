@@ -13,7 +13,6 @@ class FullPayOrLoanCalculator {
         propertyPriceSlider.addEventListener('input', (e) => {
             propertyPriceValue.textContent = this.formatNumber(e.target.value);
             this.updateYourContributionMin(); // Update contribution limits when property price changes
-            this.updateLoanAmountMax(); // Recalculate loan amount
             this.calculateAndDisplay();
         });
 
@@ -23,7 +22,6 @@ class FullPayOrLoanCalculator {
         moneyAtHandSlider.addEventListener('input', (e) => {
             moneyAtHandValue.textContent = this.formatNumber(e.target.value);
             this.updateYourContributionMin(); // Update contribution limits when cash changes
-            this.updateLoanAmountMax(); // Recalculate loan amount
             this.validateDownPayment();
             this.calculateAndDisplay();
         });
@@ -33,7 +31,7 @@ class FullPayOrLoanCalculator {
         const yourContributionValue = document.getElementById('yourContributionValue');
         yourContributionSlider.addEventListener('input', (e) => {
             yourContributionValue.textContent = this.formatNumber(e.target.value);
-            this.updateLoanAmountMax();
+            this.updateLoanAmount();
             this.calculateAndDisplay();
         });
 
@@ -69,6 +67,28 @@ class FullPayOrLoanCalculator {
             this.calculateAndDisplay();
         });
 
+        // Rent Checkbox and Slider
+        const rentCheckbox = document.getElementById('rentCheckbox');
+        const rentSliderContainer = document.getElementById('rentSliderContainer');
+        const rentSlider = document.getElementById('rent');
+        const rentValue = document.getElementById('rentValue');
+        
+        // Handle checkbox change
+        rentCheckbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                rentSliderContainer.classList.remove('hidden');
+            } else {
+                rentSliderContainer.classList.add('hidden');
+            }
+            this.calculateAndDisplay();
+        });
+        
+        // Handle rent slider change
+        rentSlider.addEventListener('input', (e) => {
+            rentValue.textContent = e.target.value;
+            this.calculateAndDisplay();
+        });
+
         // House Rate Increase Slider
         const houseRateIncreaseSlider = document.getElementById('houseRateIncrease');
         const houseRateIncreaseValue = document.getElementById('houseRateIncreaseValue');
@@ -80,7 +100,6 @@ class FullPayOrLoanCalculator {
         // Set initial values and validation
         this.setInitialValues();
         this.updateYourContributionMin();
-        this.updateLoanAmountMax();
         this.validateDownPayment();
     }
 
@@ -92,18 +111,14 @@ class FullPayOrLoanCalculator {
         const minContribution = Math.round(propertyPrice * 0.2);
         const maxContribution = Math.max(minContribution, availableCash);
         
-        // Use minimum contribution, but ensure it doesn't exceed maximum
-        const initialContribution = Math.min(minContribution, maxContribution);
+        // Always start with minimum contribution (20% of property price)
+        const initialContribution = minContribution;
         
         const yourContributionSlider = document.getElementById('yourContribution');
         yourContributionSlider.value = initialContribution;
         document.getElementById('yourContributionValue').textContent = this.formatNumber(initialContribution);
         
-        // Set Loan Amount to remaining amount
-        const initialLoanAmount = propertyPrice - initialContribution;
-        const loanAmountSlider = document.getElementById('loanAmount');
-        loanAmountSlider.value = initialLoanAmount;
-        document.getElementById('loanAmountValue').textContent = this.formatNumber(initialLoanAmount);
+        // Loan amount is auto-calculated, no need to display separately
     }
 
     updateYourContributionMin() {
@@ -118,31 +133,17 @@ class FullPayOrLoanCalculator {
         yourContributionSlider.min = minContribution;
         yourContributionSlider.max = maxContribution;
         
-        // Adjust contribution if it's below new minimum or above new maximum
-        if (parseInt(yourContributionSlider.value) < minContribution) {
-            yourContributionSlider.value = minContribution;
-            document.getElementById('yourContributionValue').textContent = this.formatNumber(minContribution);
-        } else if (parseInt(yourContributionSlider.value) > maxContribution) {
-            yourContributionSlider.value = maxContribution;
-            document.getElementById('yourContributionValue').textContent = this.formatNumber(maxContribution);
-        }
+        // Always reset to 20% of property price when property price changes
+        yourContributionSlider.value = minContribution;
+        document.getElementById('yourContributionValue').textContent = this.formatNumber(minContribution);
+        
+        // Always ensure loan amount is recalculated
+        this.updateLoanAmount();
     }
 
-    updateLoanAmountMax() {
-        const propertyPrice = parseInt(document.getElementById('propertyPrice').value);
-        const yourContribution = parseInt(document.getElementById('yourContribution').value);
-        const loanAmountSlider = document.getElementById('loanAmount');
-        
-        // Loan amount = Property price - Your contribution
-        const calculatedLoanAmount = propertyPrice - yourContribution;
-        
-        // Set loan amount to calculated value (ensuring it always equals property price - your contribution)
-        loanAmountSlider.value = calculatedLoanAmount;
-        loanAmountSlider.max = calculatedLoanAmount;
-        loanAmountSlider.min = 0;
-        
-        // Update the display
-        document.getElementById('loanAmountValue').textContent = this.formatNumber(calculatedLoanAmount);
+    updateLoanAmount() {
+        // Loan amount is auto-calculated in collectSliderData, no UI update needed
+        return;
     }
 
     validateDownPayment() {
@@ -160,39 +161,37 @@ class FullPayOrLoanCalculator {
         }
         
         // Also validate that loan amount + your contribution equals property price
-        this.validateTotalEqualsPrice();
+        // this.validateTotalEqualsPrice(); // Removed - no longer needed
     }
 
-    validateTotalEqualsPrice() {
-        const propertyPrice = parseInt(document.getElementById('propertyPrice').value);
-        const yourContribution = parseInt(document.getElementById('yourContribution').value);
-        const loanAmount = parseInt(document.getElementById('loanAmount').value);
-        
-        if (yourContribution + loanAmount !== propertyPrice) {
-            console.warn('Total mismatch detected, adjusting loan amount...');
-            this.updateLoanAmountMax();
-        }
-    }
+    // validateTotalEqualsPrice function removed - no longer needed since loan amount is auto-calculated
 
     calculateAndDisplay() {
+        console.log('calculateAndDisplay called');
         // Ensure loan amount is always correct before calculations
-        this.validateTotalEqualsPrice();
+        this.updateLoanAmount();
         
         const data = this.collectSliderData();
+        console.log('Collected data:', data);
         const results = this.calculateResults(data);
+        console.log('Calculated results:', results);
         this.displayResults(results);
     }
 
     collectSliderData() {
+        const propertyPrice = parseInt(document.getElementById('propertyPrice').value);
+        const yourContribution = parseInt(document.getElementById('yourContribution').value);
+        
         return {
-            propertyPrice: parseInt(document.getElementById('propertyPrice').value),
+            propertyPrice: propertyPrice,
             availableCash: parseInt(document.getElementById('moneyAtHand').value),
-            yourContribution: parseInt(document.getElementById('yourContribution').value),
-            loanAmount: parseInt(document.getElementById('loanAmount').value),
+            yourContribution: yourContribution,
+            loanAmount: propertyPrice - yourContribution, // Calculate loan amount
             interestRate: parseFloat(document.getElementById('interestRate').value),
             loanTenure: parseInt(document.getElementById('loanTenure').value),
             investmentGrowth: parseFloat(document.getElementById('investmentGrowth').value),
-            houseRateIncrease: parseFloat(document.getElementById('houseRateIncrease').value)
+            houseRateIncrease: parseFloat(document.getElementById('houseRateIncrease').value),
+            rentPercentage: parseFloat(document.getElementById('rent').value)
         };
     }
 
@@ -226,18 +225,49 @@ class FullPayOrLoanCalculator {
         // Total Paid = Purchase Price + Total Interest
         const totalPaid = data.propertyPrice + totalInterest;
         
+        // Debug logging for Total Paid
+        console.log('=== TOTAL PAID CALCULATION DEBUG ===');
+        console.log('EMI:', emi);
+        console.log('Monthly Interest:', emi * 12);
+        console.log('Total Interest:', totalInterest);
+        console.log('Property Price:', data.propertyPrice);
+        console.log('Total Paid:', totalPaid);
+        console.log('=====================================');
+        
         // Investment value using compound interest formula
         const investmentValue = cashLeft > 0 ? 
             cashLeft * Math.pow(1 + data.investmentGrowth / 100, data.loanTenure) : 0;
 
+        // Rent calculations (only if giving on rent)
+        const isGivingOnRent = document.getElementById('rentCheckbox').checked;
+        const initialRentAmount = isGivingOnRent ? data.propertyPrice * (data.rentPercentage / 100) : 0;
+        const totalRentIncome = isGivingOnRent ? initialRentAmount * ((Math.pow(1.05, data.loanTenure) - 1) / 0.05) : 0; // 5% YOY increase
+
         // Property appreciation using compound interest formula
         const propertyAppreciation = data.propertyPrice * Math.pow(1 + data.houseRateIncrease / 100, data.loanTenure);
 
-        // Gain/Loss from purchasing property = Property Appreciation - Total Paid
+        // Gain/Loss from purchasing property = Property Appreciation - Total Paid (should not include rent)
         const gainLossFromProperty = propertyAppreciation - totalPaid;
+        
+        // Debug logging
+        console.log('=== GAIN/LOSS CALCULATION DEBUG ===');
+        console.log('Property Price:', data.propertyPrice);
+        console.log('House Rate Increase:', data.houseRateIncrease + '%');
+        console.log('Loan Tenure:', data.loanTenure + ' years');
+        console.log('Property Appreciation:', propertyAppreciation);
+        console.log('Total Paid:', totalPaid);
+        console.log('Gain/Loss (without rent):', gainLossFromProperty);
+        console.log('=====================================');
 
-        // Final Net Worth = Gain/Loss from Property + Investment Value
-        const finalNetWorth = gainLossFromProperty + investmentValue;
+        // Final Net Worth = Gain/Loss from Property + Rent Income + Investment Value
+        const finalNetWorth = gainLossFromProperty + totalRentIncome + investmentValue;
+        
+        console.log('=== FINAL NET WORTH CALCULATION DEBUG ===');
+        console.log('Gain/Loss from Property:', gainLossFromProperty);
+        console.log('Total Rent Income:', totalRentIncome);
+        console.log('Investment Value:', investmentValue);
+        console.log('Final Net Worth:', finalNetWorth);
+        console.log('==========================================');
 
         return {
             propertyPrice: data.propertyPrice,
@@ -249,6 +279,8 @@ class FullPayOrLoanCalculator {
             loanTenure: data.loanTenure,
             totalInterest: totalInterest,
             totalPaid: totalPaid,
+            initialRentAmount: initialRentAmount,
+            totalRentIncome: totalRentIncome,
             propertyAppreciation: propertyAppreciation,
             gainLossFromProperty: gainLossFromProperty,
             investmentValue: investmentValue,
@@ -292,10 +324,18 @@ class FullPayOrLoanCalculator {
     }
 
     displayResults(results) {
+        console.log('displayResults called with:', results);
         const resultsSection = document.getElementById('resultsSection');
-        if (!resultsSection) return;
+        console.log('resultsSection element:', resultsSection);
+        if (!resultsSection) {
+            console.error('Results section not found!');
+            return;
+        }
 
-        resultsSection.innerHTML = this.generateResultsHTML(results);
+        const htmlContent = this.generateResultsHTML(results);
+        console.log('Generated HTML length:', htmlContent.length);
+        resultsSection.innerHTML = htmlContent;
+        console.log('Results displayed successfully');
     }
 
         generateResultsHTML(results) {
@@ -339,6 +379,12 @@ class FullPayOrLoanCalculator {
                         <span class="metric-label">Loan Tenure</span>
                         <span class="metric-value">${mainOption.loanTenure} years</span>
                     </div>
+                    ${mainOption.initialRentAmount > 0 ? `
+                    <div class="metric">
+                        <span class="metric-label">Rent Amount</span>
+                        <span class="metric-value highlight">₹${this.formatNumber(mainOption.initialRentAmount)}</span>
+                    </div>
+                    ` : ''}
                     <div class="metric">
                         <span class="metric-label">Total Interest Paid</span>
                         <span class="metric-value warning">₹${this.formatNumber(mainOption.totalInterest)}</span>
@@ -348,23 +394,29 @@ class FullPayOrLoanCalculator {
                 <div class="summary-section">
                     <h4><i class="fas fa-calculator"></i> Summary after ${mainOption.loanTenure} years</h4>
                     <div class="metric">
-                        <span class="metric-label">Total Paid</span>
+                        <span class="metric-label">Total Paid (Loan amount + Interest)</span>
                         <span class="metric-value">₹${this.formatNumber(mainOption.totalPaid)}</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">Price Appreciation</span>
+                        <span class="metric-label">Probable House Price</span>
                         <span class="metric-value highlight">₹${this.formatNumber(mainOption.propertyAppreciation)}</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-label">Gain/Loss from Purchasing Property</span>
+                        <span class="metric-label">Gain/Loss from Purchasing Property (Home Value - Total Paid)</span>
                         <span class="metric-value ${mainOption.gainLossFromProperty >= 0 ? 'highlight' : 'warning'}">₹${this.formatNumber(mainOption.gainLossFromProperty)}</span>
                     </div>
+                    ${mainOption.totalRentIncome > 0 ? `
                     <div class="metric">
-                        <span class="metric-label">Investment Value</span>
+                        <span class="metric-label">Rent Income (5% YOY increase)</span>
+                        <span class="metric-value highlight">₹${this.formatNumber(mainOption.totalRentIncome)}</span>
+                    </div>
+                    ` : ''}
+                    <div class="metric">
+                        <span class="metric-label">Investment Value (Cash in hand)</span>
                         <span class="metric-value">₹${this.formatNumber(mainOption.investmentValue)}</span>
                     </div>
                     <div class="metric final-result">
-                        <span class="metric-label">Final Net Worth</span>
+                        <span class="metric-label">Final Net Worth (Home + Investment):</span>
                         <span class="metric-value ${mainOption.finalNetWorth >= 0 ? 'highlight' : 'warning'}">₹${this.formatNumber(mainOption.finalNetWorth)}</span>
                     </div>
                 </div>
@@ -403,36 +455,47 @@ class FullPayOrLoanCalculator {
     formatNumber(num) {
         if (isNaN(num) || num === null || num === undefined) return '0';
         
-        // Convert to number and round
-        const roundedNum = Math.round(parseFloat(num));
-        
-        // Convert to string and add Indian currency formatting
-        const numStr = roundedNum.toString();
+        // Convert to number and round to 2 decimal places
+        const roundedNum = Math.round(parseFloat(num) * 100) / 100;
         
         // Handle negative numbers
         const isNegative = roundedNum < 0;
-        const absNumStr = isNegative ? numStr.substring(1) : numStr;
+        const absNum = Math.abs(roundedNum);
         
-        // Add commas according to Indian numbering system (last 3 digits, then groups of 2)
-        let formatted = '';
-        const len = absNumStr.length;
-        
-        if (len <= 3) {
-            formatted = absNumStr;
+        // Convert to lakhs and crores format with 2 decimal places
+        if (absNum >= 10000000) { // 1 crore = 10,000,000
+            const crores = absNum / 10000000;
+            return (isNegative ? '-' : '') + crores.toFixed(2) + ' cr';
+        } else if (absNum >= 100000) { // 1 lakh = 100,000
+            const lakhs = absNum / 100000;
+            return (isNegative ? '-' : '') + lakhs.toFixed(2) + ' lakhs';
         } else {
-            // Last 3 digits
-            formatted = absNumStr.substring(len - 3);
+            // For numbers less than 1 lakh, use regular formatting with 2 decimals
+            const numStr = absNum.toFixed(2);
+            let formatted = '';
+            const parts = numStr.split('.');
+            const wholePart = parts[0];
+            const decimalPart = parts[1];
             
-            // Remaining digits in groups of 2 from right to left
-            for (let i = len - 3; i > 0; i -= 2) {
-                const start = Math.max(0, i - 2);
-                const group = absNumStr.substring(start, i);
-                formatted = group + ',' + formatted;
+            if (wholePart.length <= 3) {
+                formatted = wholePart;
+            } else {
+                // Last 3 digits
+                formatted = wholePart.substring(wholePart.length - 3);
+                
+                // Remaining digits in groups of 2 from right to left
+                for (let i = wholePart.length - 3; i > 0; i -= 2) {
+                    const start = Math.max(0, i - 2);
+                    const group = wholePart.substring(start, i);
+                    formatted = group + ',' + formatted;
+                }
             }
+            
+            // Add decimal part
+            formatted = formatted + '.' + decimalPart;
+            
+            return (isNegative ? '-' : '') + formatted;
         }
-        
-        // Add negative sign back if needed
-        return (isNegative ? '-' : '') + formatted;
     }
 }
 

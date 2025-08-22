@@ -5,10 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real Estate Calculators - Pronto Homes</title>
     <link rel="stylesheet" href="calculators.css">
+    <link rel="stylesheet" href="../chat-component.css">
+    <link rel="stylesheet" href="../styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="calculators-container">
+    <div class="app-container">
+        <!-- Left Sidebar - AI Assistant -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn">
+                    <i class="fas fa-plus"></i>
+                    New Query
+                </button>
+            </div>
+            
+            <div class="chat-container">
+                <div class="ai-assistant">
+                    <h3>AI Agent</h3>
+                    <div class="assistant-message">
+                        <p><strong>💡 Ask me about real estate:</strong><br><br>
+                        <strong>🏠 Property Questions:</strong><br>
+                         • "2 BHK apartments under 1 crore in Pune"<br>
+                         • "What is carpet area?"<br>
+                         • "How to apply for home loan?"<br>
+                         • "Tell me about RERA"<br>
+                         • "Calculate ROI for my property"<br>
+                         • "Help me understand affordability"</p>
+                    </div>
+                </div>
+                
+                <div class="message-input">
+                    <textarea placeholder="Ask about properties, loans, or real estate..." id="chatInput" rows="1"></textarea>
+                    <button class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="calculators-container">
         <div class="calculators-header">
             <h1><i class="fas fa-calculator"></i> Real Estate Calculators</h1>
             <p>Choose the calculator that fits your needs</p>
@@ -32,9 +70,37 @@
             <button class="btn btn-primary" onclick="goBackToHome()">
                 <i class="fas fa-arrow-left"></i> Back to Home
             </button>
+            </div>
         </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="#" class="footer-link">
+                    <i class="fas fa-check"></i>
+                    About Us
+                </a>
+                <a href="#" class="footer-link">
+                    <i class="fas fa-chart-line"></i>
+                    Price Trends
+                </a>
+                <a href="#" class="footer-link">
+                    <i class="fas fa-dollar-sign"></i>
+                    $ ROI
+                </a>
+                <a href="calculators.html" class="footer-link">
+                    <i class="fas fa-calculator"></i>
+                    Calculators
+                </a>
+                <a href="#" class="footer-link">
+                    <i class="fas fa-star"></i>
+                    Services
+                </a>
+            </div>
+        </footer>
     </div>
     
     <script src="calculators.js"></script>
+    <script src="../script.js"></script>
 </body>
 </html>
