@@ -254,16 +254,8 @@ function checkURLSearchParameter() {
     if (searchQuery) {
         console.log('✅ Found search parameter in URL:', searchQuery);
         
-        // Set the search query in the chat input if available
-        const chatInput = getChatInputElement();
-        if (chatInput) {
-            console.log('✅ Chat input found, setting value');
-            chatInput.value = searchQuery;
-        } else {
-            console.log('⚠️ Chat input not found yet');
-        }
-        
         // Perform the search automatically - call searchProperties directly
+        // No need to modify chat input - keep chat completely isolated
         setTimeout(() => {
             console.log('🚀 Executing search from URL parameter:', searchQuery);
             console.log('🚀 Current page elements:', {
@@ -272,7 +264,7 @@ function checkURLSearchParameter() {
                 propertyGrid: document.getElementById('propertyGrid')
             });
             searchProperties(searchQuery);
-        }, 1000); // Increased delay to ensure page is fully loaded
+        }, 500); // Reduced delay for smoother experience
         
         // Clear the search parameter from URL to prevent re-searching on refresh
         const newUrl = window.location.pathname;
@@ -1200,7 +1192,7 @@ function addUserMessage(message) {
     aiAssistant.scrollTop = aiAssistant.scrollHeight;
 }
 
-// Search properties function
+// Search properties function - ONLY updates search results section, NEVER touches chat component
 async function searchProperties(query) {
     console.log('🚀 searchProperties function called with query:', query);
     console.log('🚀 Function called from:', new Error().stack.split('\n')[2]);

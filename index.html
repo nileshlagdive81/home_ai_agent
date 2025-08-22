@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Pronto Homes - AI Powered Real Estate Search</title>
             <link rel="stylesheet" href="styles.css?v=19">
-    <link rel="stylesheet" href="chat-component.css?v=12">
+    <link rel="stylesheet" href="chat-component.css?v=13">
     <link rel="stylesheet" href="header-component.css?v=1">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -17,7 +17,7 @@
         <!-- Left Sidebar - AI Assistant -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <button class="new-chat-btn">
+                <button class="new-chat-btn" onclick="clearChatHistory()">
                     <i class="fas fa-plus"></i>
                     New Query
                 </button>
@@ -149,8 +149,8 @@
         </div>
     </footer>
     
-                    <script src="script.js?v=26"></script>
-                    <script src="chat-component.js?v=2"></script>
+                    <script src="script.js?v=27"></script>
+                    <script src="chat-component.js?v=7"></script>
                     <script>
                         // Load header component
                         document.addEventListener('DOMContentLoaded', function() {
@@ -168,33 +168,59 @@
                             
                             const container = document.getElementById('chatComponentContainer');
                             console.log('Chat component container:', container);
-                            console.log('Container innerHTML before:', container.innerHTML);
                             
-                            fetch('chat-component.html?v=' + Date.now())
+                            // Create a promise for HTML loading
+                            const loadChatHTML = fetch('chat-component.html?v=' + Date.now())
                                 .then(response => response.text())
                                 .then(html => {
-                                    console.log('Chat component HTML loaded, length:', html.length);
-                                    console.log('HTML preview:', html.substring(0, 200));
-                                    document.getElementById('chatComponentContainer').innerHTML = html;
-                                    
-                                    console.log('Chat component HTML inserted, initializing...');
-                                    console.log('Container innerHTML after:', container.innerHTML);
-                                    // Initialize chat component
-                                    new ChatComponent();
-                                    console.log('ChatComponent initialized successfully');
-                                    
-                                    // Now that chat component is loaded, check for URL search parameters
-                                    if (typeof checkURLSearchParameter === 'function') {
-                                        console.log('🔍 Calling checkURLSearchParameter after chat component load');
-                                        checkURLSearchParameter();
-                                    } else {
-                                        console.log('⚠️ checkURLSearchParameter function not available yet');
-                                    }
+                                    container.innerHTML = html;
+                                    console.log('Chat component HTML loaded and inserted');
+                                    return true; // Signal HTML is ready
                                 })
                                 .catch(error => {
                                     console.error('Error loading chat component:', error);
+                                    return false;
                                 });
+                            
+                            // Create a promise for JavaScript initialization
+                            const initializeChatJS = new Promise((resolve) => {
+                                loadChatHTML.then((htmlLoaded) => {
+                                    if (htmlLoaded) {
+                                        // Use requestAnimationFrame to ensure DOM is updated
+                                        requestAnimationFrame(() => {
+                                            if (!window.chatComponentInstance) {
+                                                console.log('🔄 Creating new ChatComponent instance');
+                                                window.chatComponentInstance = new ChatComponent();
+                                            } else {
+                                                console.log('⚠️ ChatComponent already exists, skipping initialization');
+                                            }
+                                            resolve();
+                                        });
+                                    } else {
+                                        resolve(); // Resolve even if HTML failed to load
+                                    }
+                                });
+                            });
+                            
+                            // Initialize everything in sequence
+                            initializeChatJS.then(() => {
+                                // Now check URL parameters
+                                if (typeof checkURLSearchParameter === 'function') {
+                                    console.log('🔍 Calling checkURLSearchParameter after chat component initialization');
+                                    checkURLSearchParameter();
+                                } else {
+                                    console.log('⚠️ checkURLSearchParameter function not available yet');
+                                }
+                            });
                         });
+                        
+                        // Function to clear chat history
+                        function clearChatHistory() {
+                            if (window.chatComponentInstance) {
+                                window.chatComponentInstance.clearChat();
+                                console.log('Chat history cleared');
+                            }
+                        }
                     </script>
 </body>
 </html>

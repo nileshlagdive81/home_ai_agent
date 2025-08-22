@@ -1,21 +1,52 @@
 /**
- * Reusable Chat Component JavaScript
+ * Reusable Chat Component JavaScript - Updated for Knowledge Queries & Property Search
  * This file provides consistent chat functionality across all pages
- * Includes property search and navigation to search results
+ * Includes property search without page refresh and knowledge query popups
  */
 
 class ChatComponent {
     constructor() {
+        console.log('🚀 ChatComponent constructor called');
+        
+        // Check if already initialized
+        if (this.initialized) {
+            console.log('⚠️ ChatComponent already initialized, skipping');
+            return;
+        }
+        
+        this.initialized = true;
+        
+        // Initialize immediately since HTML is guaranteed to be loaded
+        console.log('✅ Initializing chat component...');
         this.initializeChat();
         this.setupEventListeners();
         this.setupPopupEventListeners();
         this.setupImagePath();
+        
+        // Test if elements are accessible
+        requestAnimationFrame(() => {
+            console.log('🧪 Testing DOM element accessibility...');
+            const testInput = document.getElementById('chatInput');
+            const testBtn = document.getElementById('sendBtn');
+            console.log('Test - Chat input:', testInput);
+            console.log('Test - Send button:', testBtn);
+            
+            if (testInput && testBtn) {
+                console.log('✅ All elements are accessible');
+            } else {
+                console.error('❌ Some elements are not accessible');
+            }
+        });
     }
 
     initializeChat() {
+        console.log('🔧 Initializing chat...');
+        
         // Auto-resize textarea
         const chatInput = document.getElementById('chatInput');
         if (chatInput) {
+            console.log('✅ Chat input found, setting up event listeners');
+            
             chatInput.addEventListener('input', () => {
                 chatInput.style.height = 'auto';
                 chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
@@ -25,18 +56,27 @@ class ChatComponent {
             chatInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
+                    console.log('⏎ Enter key pressed, calling handleSendMessage');
                     this.handleSendMessage();
                 }
             });
+        } else {
+            console.error('❌ Chat input not found during initialization');
         }
     }
 
     setupEventListeners() {
+        console.log('🔧 Setting up event listeners...');
+        
         const sendBtn = document.getElementById('sendBtn');
         if (sendBtn) {
+            console.log('✅ Send button found, setting up click listener');
             sendBtn.addEventListener('click', () => {
+                console.log('🖱️ Send button clicked, calling handleSendMessage');
                 this.handleSendMessage();
             });
+        } else {
+            console.error('❌ Send button not found');
         }
     }
 
@@ -75,69 +115,102 @@ class ChatComponent {
     }
 
     async handleSendMessage() {
+        console.log('📤 handleSendMessage called');
+        
         const chatInput = document.getElementById('chatInput');
-        if (!chatInput) return;
+        console.log('🔍 Chat input element:', chatInput);
+        
+        if (!chatInput) {
+            console.error('❌ chatInput element not found');
+            return;
+        }
 
         const message = chatInput.value.trim();
-        if (!message) return;
+        console.log('📝 Message value:', message);
+        
+        if (!message) {
+            console.log('⚠️ Empty message, not sending');
+            return;
+        }
 
-        // Clear input
+        console.log('✅ Sending message:', message);
+
+        // Add user message to chat FIRST
+        console.log('💬 About to add user message to chat');
+        this.addMessageToChat(message, 'user');
+        console.log('✅ User message added to chat');
+
+        // Clear input AFTER adding message
         chatInput.value = '';
         chatInput.style.height = 'auto';
+        console.log('🧹 Input cleared');
 
-        // Add user message to chat
-        this.addMessageToChat(message, 'user');
-
-        // Show typing indicator
-        this.showTypingIndicator();
-
-        try {
-            // Process the message and get response
-            const response = await this.processMessage(message);
-            
-            // Hide typing indicator
-            this.hideTypingIndicator();
-            
-            // Add AI response to chat
-            this.addMessageToChat(response, 'assistant');
-
-            // Show non-property queries in popup (property searches are handled by searchProperties function)
-            if (!this.isPropertySearchQuery(message)) {
-                this.showQueryPopup(message, response);
+        // Check if it's a property search query and handle it
+        if (this.isPropertySearchQuery(message)) {
+            console.log('🏠 Property search detected, calling searchProperties directly');
+            // Call the existing searchProperties function instead of navigating
+            if (typeof searchProperties === 'function') {
+                searchProperties(message);
+            } else {
+                console.error('❌ searchProperties function not found');
             }
-
-        } catch (error) {
-            console.error('Error processing message:', error);
-            this.hideTypingIndicator();
-            this.addMessageToChat('Sorry, I encountered an error. Please try again.', 'assistant');
+        } else {
+            console.log('💡 Knowledge query detected, processing for popup response');
+            // Process the message to get a response and show it in popup
+            try {
+                const response = await this.processMessage(message);
+                this.showQueryPopup(message, response);
+            } catch (error) {
+                console.error('Error processing knowledge query:', error);
+            }
         }
     }
 
     addMessageToChat(message, sender) {
         const aiAssistant = document.querySelector('.ai-assistant');
-        if (!aiAssistant) return;
-
-        const messageDiv = document.createElement('div');
-        messageDiv.className = sender === 'user' ? 'user-message' : 'assistant-message';
-        
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
-        
-        if (sender === 'user') {
-            messageContent.textContent = message;
-        } else {
-            // Parse markdown-like content for AI responses
-            messageContent.innerHTML = this.parseResponse(message);
+        if (!aiAssistant) {
+            console.error('ai-assistant element not found');
+            return;
         }
-        
-        messageDiv.appendChild(messageContent);
-        aiAssistant.appendChild(messageDiv);
-        
-        // Scroll to bottom
-        aiAssistant.scrollTop = aiAssistant.scrollHeight;
+
+        // Ensure message is a string
+        if (typeof message !== 'string') {
+            console.warn('addMessageToChat received non-string message:', message);
+            message = String(message || '');
+        }
+
+        console.log(`Adding ${sender} message:`, message);
+
+        // For user messages, always add them below the "Agent: Kavya" message
+        if (sender === 'user') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'user-message';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = message;
+            
+            messageDiv.appendChild(messageContent);
+            aiAssistant.appendChild(messageDiv);
+            
+            console.log(`User message added to chat. Total messages:`, aiAssistant.children.length);
+            
+            // Scroll to bottom with smooth animation
+            setTimeout(() => {
+                aiAssistant.scrollTop = aiAssistant.scrollHeight;
+                console.log('Scrolled to bottom');
+            }, 100);
+        }
+        // For now, ignore assistant messages
     }
 
     parseResponse(response) {
+        // Ensure response is a string before parsing
+        if (typeof response !== 'string') {
+            console.warn('parseResponse received non-string response:', response);
+            return String(response || '');
+        }
+        
         // Simple markdown parsing for AI responses
         return response
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -188,13 +261,25 @@ class ChatComponent {
     }
 
     isPropertySearchQuery(message) {
+        const lowerMessage = message.toLowerCase();
+        
+        // First check if it's a knowledge query (should not be treated as property search)
+        const knowledgePatterns = [
+            'what is', 'how to', 'tell me about', 'explain', 'define', 'meaning of',
+            'what are', 'how do', 'can you explain', 'i want to know about'
+        ];
+        
+        if (knowledgePatterns.some(pattern => lowerMessage.includes(pattern))) {
+            return false; // This is a knowledge query, not a property search
+        }
+        
+        // Then check for property-specific keywords
         const propertyKeywords = [
             'bhk', 'apartment', 'house', 'property', 'flat', 'villa', 'pune', 'mumbai', 'bangalore',
             'delhi', 'chennai', 'hyderabad', 'kolkata', 'ahmedabad', 'price', 'cost', 'area',
             'sq ft', 'sqft', 'square feet', 'bedroom', 'bedrooms', 'location', 'locality'
         ];
         
-        const lowerMessage = message.toLowerCase();
         return propertyKeywords.some(keyword => lowerMessage.includes(keyword));
     }
 
@@ -462,11 +547,11 @@ class ChatComponent {
         const aiAssistant = document.querySelector('.ai-assistant');
         if (!aiAssistant) return;
 
-        // Keep the initial message
-        const initialMessage = aiAssistant.querySelector('.assistant-message');
+        // Keep only the first message (which should be "I am Kavya")
+        const firstMessage = aiAssistant.children[0];
         aiAssistant.innerHTML = '';
-        if (initialMessage) {
-            aiAssistant.appendChild(initialMessage);
+        if (firstMessage) {
+            aiAssistant.appendChild(firstMessage);
         }
     }
 
@@ -531,14 +616,49 @@ class ChatComponent {
             return 'index.html';
         }
     }
+    
+    // Test method to verify functionality
+    testChatFunctionality() {
+        console.log('🧪 Testing chat functionality...');
+        
+        // Test if we can find the elements
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const aiAssistant = document.querySelector('.ai-assistant');
+        
+        console.log('Test results:');
+        console.log('- Chat input:', chatInput);
+        console.log('- Send button:', sendBtn);
+        console.log('- AI assistant:', aiAssistant);
+        
+        // Test if we can add a message
+        if (aiAssistant) {
+            console.log('✅ Testing message addition...');
+            this.addMessageToChat('Test message from console', 'user');
+        }
+        
+        return {
+            chatInput: !!chatInput,
+            sendBtn: !!sendBtn,
+            aiAssistant: !!aiAssistant
+        };
+    }
 }
 
-// Initialize chat component when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new ChatComponent();
-});
+// Chat component initialization is now handled by index.html
+// This prevents duplicate initialization and ensures proper sequencing
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ChatComponent;
 }
+
+// Global test function for debugging
+window.testChat = function() {
+    if (window.chatComponentInstance) {
+        return window.chatComponentInstance.testChatFunctionality();
+    } else {
+        console.error('❌ ChatComponent not initialized');
+        return null;
+    }
+};
