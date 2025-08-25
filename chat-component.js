@@ -160,9 +160,22 @@ class ChatComponent {
             // Process the message to get a response and show it in popup
             try {
                 const response = await this.processMessage(message);
-                this.showQueryPopup(message, response);
+                console.log('📥 Response from processMessage:', response);
+                
+                if (response && typeof response === 'object' && response.title && response.content) {
+                    console.log('✅ Knowledge base response received, showing popup');
+                    this.showQueryPopup(message, response);
+                } else {
+                    console.log('⚠️ No valid knowledge response, showing default popup');
+                    this.showQueryPopup(message, response);
+                }
             } catch (error) {
                 console.error('Error processing knowledge query:', error);
+                // Show error in popup
+                this.showQueryPopup(message, {
+                    title: "Error",
+                    content: `Sorry, I encountered an error while processing your query: ${error.message}`
+                });
             }
         }
     }
@@ -257,6 +270,33 @@ class ChatComponent {
             return this.generateCalculatorResponse(message);
         }
 
+        // Check if it's a knowledge query and call the API
+        if (this.isKnowledgeQuery(message)) {
+            try {
+                console.log('🔍 Knowledge query detected, calling knowledge base API...');
+                console.log('📝 Query:', message);
+                const knowledgeResponse = await this.callKnowledgeBaseAPI(message);
+                console.log('📥 Raw API response:', knowledgeResponse);
+                
+                if (knowledgeResponse && knowledgeResponse.success) {
+                    console.log('✅ Knowledge base response received:', knowledgeResponse);
+                    const formattedResponse = {
+                        title: `Knowledge: ${knowledgeResponse.category.replace('_', ' ').toUpperCase()}`,
+                        content: knowledgeResponse.answer,
+                        confidence: knowledgeResponse.confidence
+                    };
+                    console.log('🎯 Formatted response:', formattedResponse);
+                    return formattedResponse;
+                } else {
+                    console.log('⚠️ No knowledge base match found, falling back to default response');
+                    console.log('❌ Response details:', knowledgeResponse);
+                }
+            } catch (error) {
+                console.error('❌ Error calling knowledge base API:', error);
+                console.error('❌ Error stack:', error.stack);
+            }
+        }
+
         // Default response for other queries
         return this.generateDefaultResponse(message);
     }
@@ -265,12 +305,7 @@ class ChatComponent {
         const lowerMessage = message.toLowerCase();
         
         // First check if it's a knowledge query (should not be treated as property search)
-        const knowledgePatterns = [
-            'what is', 'how to', 'tell me about', 'explain', 'define', 'meaning of',
-            'what are', 'how do', 'can you explain', 'i want to know about'
-        ];
-        
-        if (knowledgePatterns.some(pattern => lowerMessage.includes(pattern))) {
+        if (this.isKnowledgeQuery(message)) {
             return false; // This is a knowledge query, not a property search
         }
         
@@ -292,6 +327,59 @@ class ChatComponent {
         
         const lowerMessage = message.toLowerCase();
         return calculatorKeywords.some(keyword => lowerMessage.includes(keyword));
+    }
+
+    isKnowledgeQuery(message) {
+        const lowerMessage = message.toLowerCase();
+        const knowledgePatterns = [
+            'what is', 'how to', 'tell me about', 'explain', 'define', 'meaning of',
+            'what are', 'how do', 'can you explain', 'i want to know about'
+        ];
+        
+        const isKnowledge = knowledgePatterns.some(pattern => lowerMessage.includes(pattern));
+        console.log('🔍 Knowledge query detection:', { message, lowerMessage, isKnowledge, patterns: knowledgePatterns });
+        return isKnowledge;
+    }
+
+    async callKnowledgeBaseAPI(query) {
+        try {
+            console.log('📡 Calling knowledge base API for query:', query);
+            
+            const formData = new FormData();
+            formData.append('query', query);
+            console.log('📋 FormData created:', formData);
+            
+            const apiUrl = 'http://localhost:8000/api/v1/knowledge/query';
+            console.log('🌐 API URL:', apiUrl);
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                body: formData,
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            
+            console.log('📡 HTTP Response status:', response.status);
+            console.log('📡 HTTP Response headers:', response.headers);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ HTTP error response:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+            }
+            
+            const data = await response.json();
+            console.log('📥 Knowledge base API response:', data);
+            return data;
+            
+        } catch (error) {
+            console.error('❌ Error calling knowledge base API:', error);
+            console.error('❌ Error name:', error.name);
+            console.error('❌ Error message:', error.message);
+            throw error;
+        }
     }
 
     generatePropertySearchResponse(message) {
