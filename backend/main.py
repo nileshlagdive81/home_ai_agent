@@ -27,6 +27,7 @@ from models.project_expert_review import ProjectExpertReview
 from models.project_safety_feature import ProjectSafetyFeature
 from models.project_milestone import ProjectMilestone
 from models.nearby_place import NearbyPlace
+from models.room_specification import RoomSpecification
 
 load_dotenv()
 
@@ -102,6 +103,12 @@ async def nlp_search(
         # Build database query based on extracted criteria
         db_query = db.query(Property, Project, Location).join(Project).join(ProjectLocation).join(Location)
         
+        # Globally exclude sold properties (case-insensitive match on 'sold')
+        from sqlalchemy import func
+        db_query = db_query.filter(
+            (Property.status.is_(None)) | (~func.lower(Property.status).like('%sold%'))
+        )
+        
         # Apply filters based on extracted entities
         if "location" in search_criteria["filters"]:
             location = search_criteria["filters"]["location"]
@@ -112,6 +119,32 @@ async def nlp_search(
             )
             print(f"✅ Applied location filter: {location}")
         
+        # Apply project-level status filters inferred from query text
+        try:
+            from sqlalchemy import func
+            qlower = (query or "").lower()
+            project_status_filter_applied = False
+            if "ready to move" in qlower or "ready-to-move" in qlower or "ready to occupy" in qlower:
+                db_query = db_query.filter(func.lower(Project.project_status).like('%ready%move%'))
+                project_status_filter_applied = True
+                print("✅ Applied project status filter: Ready to move")
+            elif "under construction" in qlower or "under-construction" in qlower or "uc" in qlower:
+                db_query = db_query.filter(func.lower(Project.project_status).like('%under%construction%'))
+                project_status_filter_applied = True
+                print("✅ Applied project status filter: Under construction")
+            elif "completed" in qlower or "ready" in qlower and "move" not in qlower:
+                # Broad 'completed' catch; avoid double-catching ready-to-move which includes 'ready'
+                db_query = db_query.filter(func.lower(Project.project_status).like('%completed%'))
+                project_status_filter_applied = True
+                print("✅ Applied project status filter: Completed")
+            
+            # Note: If needed, extend with more status phrases and mappings
+            if not project_status_filter_applied:
+                print("ℹ️  No explicit project status phrase detected in query")
+        except Exception as _e:
+            # Don't fail search if status parsing fails
+            print(f"⚠️ Skipped project status filter due to error: {_e}")
+
         if "bhk" in search_criteria["filters"]:
             bhk = search_criteria["filters"]["bhk"]
             bhk_operator = search_criteria["filters"].get("bhk_operator", "=")
@@ -360,6 +393,69 @@ async def nlp_search(
                         )
                         print(f"✅ Applied generic nearby place filter: {place_type}")
         
+        # Additional intelligent parsing for special queries
+        try:
+            qlower_full = (query or "").lower()
+            # 1) "within X km of <place>" → use NearbyPlace with distance
+            import re as _re
+            within_match = _re.search(r"within\s+(\d+(?:\.\d+)?)\s*k?m?s?\s+of\s+([^,\.;]+)", qlower_full)
+            if within_match:
+                dist_val = float(within_match.group(1))
+                place_text = within_match.group(2).strip()
+                # Use EXISTS subquery to avoid duplicate joins
+                from sqlalchemy import exists
+                nearby_exists = exists().where(
+                    and_(
+                        NearbyPlace.project_id == Project.id,
+                        NearbyPlace.distance_km <= dist_val,
+                        or_(
+                            NearbyPlace.place_type.ilike(f"%{place_text}%"),
+                            NearbyPlace.place_name.ilike(f"%{place_text}%")
+                        )
+                    )
+                )
+                db_query = db_query.filter(nearby_exists)
+                print(f"✅ Applied nearby distance filter: within {dist_val} km of '{place_text}'")
+
+                # Additionally, apply BHK filter if query contains an explicit BHK number
+                bhk_match = _re.search(r"(\d+)\s*bhk", qlower_full)
+                if bhk_match:
+                    bhk_val = int(bhk_match.group(1))
+                    db_query = db_query.filter(Property.bhk_count == bhk_val)
+                    print(f"✅ Applied BHK filter from query: {bhk_val} BHK")
+
+            # 2) "with N balconies" → properties having at least N balcony room specs
+            balc_match = _re.search(r"(\d+)\s+balcon(?:y|ies)", qlower_full)
+            if balc_match:
+                min_balconies = int(balc_match.group(1))
+                from sqlalchemy import select, literal_column
+                # Subquery: property_ids having at least N balconies
+                balc_subq = (
+                    db.query(RoomSpecification.property_id.label("prop_id"))
+                    .filter(func.lower(RoomSpecification.room_type) == 'balcony')
+                    .group_by(RoomSpecification.property_id)
+                    .having(func.count(RoomSpecification.id) >= min_balconies)
+                    .subquery()
+                )
+                db_query = db_query.filter(Property.id.in_(select(balc_subq.c.prop_id)))
+                print(f"✅ Applied balconies filter: >= {min_balconies} balconies")
+
+            # 3) "garden view" → any room_specifications.features contains 'garden view'
+            if 'garden view' in qlower_full:
+                # Subquery using Postgres unnest to do case-insensitive contains
+                garden_subq = (
+                    db.query(RoomSpecification.property_id.label("prop_id"))
+                    .filter(
+                        text("EXISTS (SELECT 1 FROM unnest(room_specifications.features) f WHERE lower(f) like '%garden view%')")
+                    )
+                    .group_by(RoomSpecification.property_id)
+                    .subquery()
+                )
+                db_query = db_query.filter(Property.id.in_(select(garden_subq.c.prop_id)))
+                print("✅ Applied feature filter: Garden View")
+        except Exception as _parse_e:
+            print(f"⚠️ Skipped special query parsing due to error: {_parse_e}")
+
         # Execute the query
         query_results = db_query.limit(20).all()
         
@@ -608,8 +704,10 @@ async def get_project_property_configurations(project_id: str, db: Session = Dep
     """Get all property configurations (BHK types) for a specific project with floor plans"""
     try:
         # Query properties for the given project
+        from sqlalchemy import func
         properties = db.query(Property).filter(
-            Property.project_id == project_id
+            Property.project_id == project_id,
+            (Property.status.is_(None)) | (~func.lower(Property.status).like('%sold%'))
         ).order_by(Property.bhk_count).all()
         
         # Format results
@@ -739,9 +837,13 @@ async def search_by_nearby_places(
         # Get projects with nearby places
         projects = query.distinct().all()
         
-        # Get properties for these projects
+        # Get properties for these projects, excluding sold
+        from sqlalchemy import func
         project_ids = [str(project.id) for project in projects]
-        properties = db.query(Property).filter(Property.project_id.in_(project_ids)).all()
+        properties = db.query(Property).filter(
+            Property.project_id.in_(project_ids),
+            (Property.status.is_(None)) | (~func.lower(Property.status).like('%sold%'))
+        ).all()
         
         # Format results with nearby place information
         results = []

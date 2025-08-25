@@ -2,6 +2,7 @@
  * Reusable Chat Component JavaScript - Updated for Knowledge Queries & Property Search
  * This file provides consistent chat functionality across all pages
  * Includes property search without page refresh and knowledge query popups
+ * Version: v8 - Fixed infinite refresh loop for property searches
  */
 
 class ChatComponent {
@@ -150,7 +151,7 @@ class ChatComponent {
             console.log('🏠 Property search detected, calling searchProperties directly');
             // Call the existing searchProperties function instead of navigating
             if (typeof searchProperties === 'function') {
-                searchProperties(message);
+                searchProperties(message, true); // Mark as user input to avoid duplicate chat messages
             } else {
                 console.error('❌ searchProperties function not found');
             }
@@ -294,8 +295,23 @@ class ChatComponent {
     }
 
     generatePropertySearchResponse(message) {
-        // Navigate to home page for property search since results are always displayed there
-        this.navigateToHomePageForSearch(message);
+        // Check if we're already on the home page
+        const isHomePage = document.querySelector('.landing-content') && document.querySelector('.search-results');
+        
+        if (isHomePage) {
+            // We're on home page, call searchProperties directly
+            console.log('🏠 On home page, calling searchProperties directly');
+            if (typeof searchProperties === 'function') {
+                searchProperties(message, true); // Mark as user input to avoid duplicate chat messages
+            } else {
+                console.error('❌ searchProperties function not found');
+            }
+        } else {
+            // We're on another page, navigate to home page
+            console.log('🚀 On different page, navigating to home page for search');
+            this.navigateToHomePageForSearch(message);
+        }
+        
         return `Searching for "${message}"...`;
     }
 

@@ -125,7 +125,7 @@ let globalFilterState = {
 };
 
 // Header scroll effect - only on home page
-if (document.querySelector('.main-content .search-header')) {
+if (document.querySelector('.landing-content') && document.querySelector('.search-results')) {
     window.addEventListener('scroll', () => {
         const header = document.querySelector('.main-header');
         if (header && window.scrollY > 50) {
@@ -145,10 +145,42 @@ function getChatInputElement() {
     return null;
 }
 
+// Function to add query to chat for tracking
+function addQueryToChat(query) {
+    console.log('💬 Adding query to chat:', query);
+    
+    // Check if chat component exists
+    const aiAssistant = document.querySelector('.ai-assistant');
+    if (!aiAssistant) {
+        console.log('⚠️ Chat component not found, skipping chat message');
+        return;
+    }
+    
+    // Create user message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'user-message';
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.textContent = query;
+    
+    messageDiv.appendChild(messageContent);
+    aiAssistant.appendChild(messageDiv);
+    
+    // Scroll to bottom
+    setTimeout(() => {
+        aiAssistant.scrollTop = aiAssistant.scrollHeight;
+    }, 100);
+    
+    console.log('✅ Query added to chat successfully');
+}
+
+
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     // Check if we're on the home page (has search functionality)
-    const isHomePage = document.querySelector('.main-content .search-header');
+    const isHomePage = document.querySelector('.landing-content') && document.querySelector('.search-results');
     
     // Initialize chat functionality on ALL pages
     const sendBtn = document.querySelector('.send-btn');
@@ -243,37 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Check for search parameter in URL and perform search if found
 // This function is called after the chat component is fully loaded to ensure all DOM elements are available
-function checkURLSearchParameter() {
-    console.log('🔍 checkURLSearchParameter called');
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchQuery = urlParams.get('search');
-    
-    console.log('🔍 URL search params:', window.location.search);
-    console.log('🔍 Extracted search query:', searchQuery);
-    
-    if (searchQuery) {
-        console.log('✅ Found search parameter in URL:', searchQuery);
-        
-        // Perform the search automatically - call searchProperties directly
-        // No need to modify chat input - keep chat completely isolated
-        setTimeout(() => {
-            console.log('🚀 Executing search from URL parameter:', searchQuery);
-            console.log('🚀 Current page elements:', {
-                landingContent: document.getElementById('landingContent'),
-                searchResults: document.getElementById('searchResults'),
-                propertyGrid: document.getElementById('propertyGrid')
-            });
-            searchProperties(searchQuery);
-        }, 500); // Reduced delay for smoother experience
-        
-        // Clear the search parameter from URL to prevent re-searching on refresh
-        const newUrl = window.location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
-        console.log('🧹 Cleared search parameter from URL');
-    } else {
-        console.log('❌ No search parameter found in URL');
-    }
-}
+// MOVED TO AFTER searchProperties function to ensure proper function availability
 
 
 
@@ -314,7 +316,7 @@ function updateSearchBoxContent(category) {
             descElement.textContent = staticQuery;
             
             // Update onclick to use static query
-            targetCard.onclick = () => searchProperties(staticQuery);
+            targetCard.onclick = () => searchProperties(staticQuery, false); // Not user input, so add to chat
         }
     }
 }
@@ -546,7 +548,7 @@ async function simulateAIResponse(message) {
         } else {
             // All other messages are treated as property searches
             console.log('🏠 Processing as Property Search:', message);
-            searchProperties(message);
+            searchProperties(message, true); // Mark as user input to avoid duplicate chat messages
         }
     }
 }
@@ -1193,28 +1195,33 @@ function addUserMessage(message) {
 }
 
 // Search properties function - ONLY updates search results section, NEVER touches chat component
-async function searchProperties(query) {
+// Version: v32 - Fixed duplicate chat messages by using isUserInput parameter
+async function searchProperties(query, isUserInput = false) {
     console.log('🚀 searchProperties function called with query:', query);
     console.log('🚀 Function called from:', new Error().stack.split('\n')[2]);
+    console.log('🚀 Current URL:', window.location.href);
+    console.log('🚀 Document ready state:', document.readyState);
+    console.log('🚀 Processing flag:', window.isProcessingSearchParameter);
     
     // Set search as active
     isSearchActive = true;
     
-    // Clear global filter state for new search to prevent mixing with previous queries
-    globalFilterState = {
-        city: null,
-        locality: null,
-        bhk: null,
-        price: null,
-        carpet_area: null,
-        amenities: [],
-        status: null
-    };
+    // Add the query to chat for tracking (only for card queries, not user input)
+    // User input messages are already added by addUserMessage() in handleChatMessage()
+    if (!isUserInput) {
+        addQueryToChat(query);
+    }
     
-    console.log('🧹 Cleared global filter state for new search:', query);
+    // Preserve existing filters unless user explicitly clicks New Query
+    console.log('🔒 Preserving existing filter state for incremental query:', globalFilterState);
     
     // Check if we're on the home page (has search functionality)
-    const isHomePage = document.querySelector('.main-content .search-header');
+    const isHomePage = document.querySelector('.landing-content') && document.querySelector('.search-results');
+    console.log('🔍 Home page check:', {
+        landingContent: !!document.querySelector('.landing-content'),
+        searchResults: !!document.querySelector('.search-results'),
+        isHomePage: isHomePage
+    });
     
     // If not on home page, redirect to home page with search query
     if (!isHomePage) {
@@ -1223,6 +1230,8 @@ async function searchProperties(query) {
         window.location.href = `index.html?search=${encodedQuery}`;
         return;
     }
+    
+    console.log('✅ On home page, proceeding with search');
     
     // Get DOM elements when function is called (in case they weren't available at script load)
     const landingContent = document.getElementById('landingContent');
@@ -1394,7 +1403,7 @@ async function searchProperties(query) {
                     <h3>API Error</h3>
                     <p>Could not connect to NLP search service.</p>
                     <p>Showing sample properties instead.</p>
-                    <button onclick="searchProperties('${query}')" class="retry-btn">Retry</button>
+                    <button onclick="searchProperties('${query}', false)" class="retry-btn">Retry</button>
                 </div>
             `;
         }
@@ -1405,6 +1414,75 @@ async function searchProperties(query) {
     
     // Don't scroll - keep header visible
     // searchResults.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Check for search parameter in URL and perform search if found
+// This function is called after the chat component is fully loaded to ensure all DOM elements are available
+function checkURLSearchParameter() {
+    console.log('🔍 checkURLSearchParameter called');
+    
+    // Prevent multiple executions on the same page load
+    if (window.searchParameterProcessed) {
+        console.log('⚠️ Search parameter already processed, skipping');
+        return;
+    }
+    
+    // Also check if we're in a loop by checking the current URL
+    const currentUrl = window.location.href;
+    if (window.lastProcessedUrl === currentUrl) {
+        console.log('⚠️ Same URL already processed, skipping to prevent loop');
+        return;
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('search');
+    
+    console.log('🔍 URL search params:', window.location.search);
+    console.log('🔍 Extracted search query:', searchQuery);
+    
+    if (searchQuery) {
+        console.log('✅ Found search parameter in URL:', searchQuery);
+        
+        // Mark as processed to prevent loops
+        window.searchParameterProcessed = true;
+        window.lastProcessedUrl = currentUrl;
+        
+        // Perform the search automatically - call searchProperties directly
+        // No need to modify chat input - keep chat completely isolated
+        setTimeout(() => {
+            console.log('🚀 Executing search from URL parameter:', searchQuery);
+            console.log('🚀 Current page elements:', {
+                landingContent: document.getElementById('landingContent'),
+                searchQuery: searchQuery
+            });
+            console.log('🚀 About to call searchProperties function...');
+            try {
+                if (typeof searchProperties === 'function') {
+                    searchProperties(searchQuery, false); // Not user input, so add to chat
+                    console.log('✅ searchProperties function called successfully');
+                } else {
+                    console.error('❌ searchProperties function not found in global scope');
+                    console.log('🔍 Available global functions:', Object.keys(window).filter(key => typeof window[key] === 'function'));
+                }
+            } catch (error) {
+                console.error('❌ Error calling searchProperties:', error);
+            }
+        }, 100); // Reduced delay for smoother experience
+        
+        // Clear the search parameter from URL to prevent re-searching on refresh
+        // Try using replaceState to avoid potential refresh issues
+        const newUrl = window.location.pathname;
+        console.log('🧹 About to clear URL parameter, current URL:', window.location.href);
+        try {
+            window.history.replaceState({}, document.title, newUrl);
+            console.log('🧹 Cleared search parameter from URL, new URL:', window.location.href);
+            console.log('🧹 About to execute searchProperties in 100ms...');
+        } catch (error) {
+            console.error('❌ Error clearing URL parameter:', error);
+        }
+    } else {
+        console.log('❌ No search parameter found in URL');
+    }
 }
 
 // Display properties in the grid
@@ -1447,7 +1525,10 @@ function createPropertyCard(property) {
     }
     
     const projectName = property.project_name || (property.project ? property.project.name : 'Unknown') || property.project || 'Unknown';
-    const status = property.status || 'Available';
+    // Show project-level status on cards
+    const status = (property.project && property.project.project_status)
+        || property.project_status
+        || 'Status unavailable';
     
     // Use actual amenities from data if available, otherwise generate
     let allAmenities;
@@ -1590,6 +1671,11 @@ function updateFiltersFromQuery(query, extractedEntities) {
         const cityValue = extractedEntities.city.charAt(0).toUpperCase() + extractedEntities.city.slice(1);
         if (filters[0]) filters[0].textContent = cityValue;
         newFilters.city = extractedEntities.city.toLowerCase();
+    } else if (extractedEntities && extractedEntities.location) {
+        // Map NLP 'location' to city if city was not provided
+        const cityValue = extractedEntities.location.charAt(0).toUpperCase() + extractedEntities.location.slice(1);
+        if (filters[0]) filters[0].textContent = cityValue;
+        newFilters.city = extractedEntities.location.toLowerCase();
     } else if (queryLower.includes('pune') || queryLower.includes('mumbai') || queryLower.includes('bangalore')) {
         const cityMatch = queryLower.match(/(pune|mumbai|bangalore)/i);
         if (cityMatch && filters[0]) {

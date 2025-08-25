@@ -350,11 +350,14 @@ body {
     text-align: center;
     max-width: 800px;
     margin: 0 auto;
+    margin-top: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: calc(100vh - 200px);
 }
+
+
 
 .hero-section {
     margin-bottom: 60px;
@@ -393,9 +396,9 @@ body {
 
 .suggested-searches {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
-    max-width: 800px;
+    max-width: 1100px;
     margin: 0 auto;
     width: 100%;
 }
@@ -710,6 +713,8 @@ body {
 .main-content {
     margin-left: 320px !important;
 }
+
+
 
 @media (max-width: 1024px) {
     .main-content {

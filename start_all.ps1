@@ -1,4 +1,8 @@
 # Real Estate Application Startup Script
+param(
+    [switch]$NoPrompt
+)
+
 # This script starts both backend and frontend servers
 
 Write-Host "Starting Real Estate Application - All Servers" -ForegroundColor Green
@@ -22,7 +26,7 @@ try {
     Write-Host "✅ FastAPI and Uvicorn are available" -ForegroundColor Green
 } catch {
     Write-Host "❌ Required packages not found! Installing..." -ForegroundColor Red
-    pip install -r requirements.txt
+    python -m pip install --disable-pip-version-check -r "$PSScriptRoot\requirements.txt"
 }
 
 # Check and fix NumPy compatibility issue
@@ -31,7 +35,7 @@ try {
     $numpyVersion = python -c "import numpy; print(numpy.__version__)" 2>$null
     if ($numpyVersion -like "2.*") {
         Write-Host "⚠️  NumPy 2.x detected - downgrading for compatibility..." -ForegroundColor Yellow
-        pip install "numpy<2"
+        python -m pip install --disable-pip-version-check "numpy<2"
         Write-Host "✅ NumPy downgraded for compatibility" -ForegroundColor Green
     } else {
         Write-Host "✅ NumPy version is compatible: $numpyVersion" -ForegroundColor Green
@@ -43,22 +47,25 @@ try {
 Write-Host ""
 Write-Host "Backend: http://localhost:8000" -ForegroundColor Cyan
 Write-Host "Frontend: http://localhost:3000" -ForegroundColor Cyan
+Write-Host "Use -NoPrompt to skip key prompts" -ForegroundColor DarkGray
 Write-Host ""
 
-Write-Host "Press any key to start both servers..." -ForegroundColor Yellow
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+if (-not $NoPrompt) {
+    Write-Host "Press any key to start both servers..." -ForegroundColor Yellow
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
 
 Write-Host ""
 Write-Host "Starting Backend Server..." -ForegroundColor Yellow
 
-# Start backend server in new window
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot\backend'; python main.py" -WindowStyle Normal
+# Start backend server in new window (separate command only, avoid chaining)
+Start-Process powershell -ArgumentList @("-NoLogo", "-NoProfile", "-Command", "cd '$PSScriptRoot\backend'; python main.py") -WindowStyle Normal
 
 Write-Host ""
 Write-Host "Starting Frontend Server..." -ForegroundColor Yellow
 
-# Start frontend server in new window
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot'; python -m http.server 3000" -WindowStyle Normal
+# Start frontend server in new window (separate command only, avoid chaining)
+Start-Process powershell -ArgumentList @("-NoLogo", "-NoProfile", "-Command", "cd '$PSScriptRoot'; python -m http.server 3000") -WindowStyle Normal
 
 Write-Host ""
 Write-Host "Both servers are starting..." -ForegroundColor Green
@@ -68,33 +75,35 @@ Write-Host ""
 Write-Host "Waiting for servers to start..." -ForegroundColor Yellow
 Start-Sleep -Seconds 5
 
-# Test if servers are running
+# Test if servers are running (simple, robust checks)
 $backendRunning = $false
 $frontendRunning = $false
 
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:8000/health" -TimeoutSec 5 -ErrorAction Stop
-    if ($response.StatusCode -eq 200) {
-        $backendRunning = $true
-        Write-Host "✅ Backend server is running on http://localhost:8000" -ForegroundColor Green
-    }
-} catch {
+    $be = Invoke-WebRequest -Uri "http://localhost:8000/health" -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
+    if ($be.StatusCode -eq 200) { $backendRunning = $true }
+} catch {}
+if ($backendRunning) {
+    Write-Host "✅ Backend server is running on http://localhost:8000" -ForegroundColor Green
+} else {
     Write-Host "❌ Backend server not responding yet..." -ForegroundColor Red
 }
 
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:3000" -TimeoutSec 5 -ErrorAction Stop
-    if ($response.StatusCode -eq 200) {
-        $frontendRunning = $true
-        Write-Host "✅ Frontend server is running on http://localhost:3000" -ForegroundColor Green
-    }
-} catch {
+    $fe = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
+    if ($fe.StatusCode -eq 200) { $frontendRunning = $true }
+} catch {}
+if ($frontendRunning) {
+    Write-Host "✅ Frontend server is running on http://localhost:3000" -ForegroundColor Green
+} else {
     Write-Host "❌ Frontend server not responding yet..." -ForegroundColor Red
 }
 
 Write-Host ""
-Write-Host "Press any key to open the application in your browser..." -ForegroundColor Yellow
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+if (-not $NoPrompt) {
+    Write-Host "Press any key to open the application in your browser..." -ForegroundColor Yellow
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
 
 # Open browsers
 if ($frontendRunning) {
@@ -111,4 +120,6 @@ Write-Host ""
 Write-Host "Application startup complete!" -ForegroundColor Green
 Write-Host "Keep the server windows open while using the application." -ForegroundColor Yellow
 Write-Host ""
-Read-Host "Press Enter to exit this startup script"
+if (-not $NoPrompt) {
+    Read-Host "Press Enter to exit this startup script"
+}
