@@ -1,45 +1,129 @@
 {
   "knowledge_base": {
-    "terminology": [
+    "documentation_title": [
       {
-        "question": "what is carpet area",
-        "keywords": ["carpet area", "carpet", "area", "what is carpet", "carpet area meaning", "carpet area definition"],
-        "answer": "<strong>🏠 Carpet Area:</strong><br><br><strong>Definition:</strong> Carpet area is the actual usable area within the walls of your apartment/house where you can lay a carpet.<br><br><strong>What's Included:</strong>• Living room, bedrooms, kitchen, bathrooms<br>• Internal walls and columns<br>• Balcony area (50% of balcony)<br><br><strong>What's NOT Included:</strong>• External walls thickness<br>• Common areas (lobby, stairs, lift)<br>• Terrace, garden, parking<br><br><strong>Formula:</strong> Carpet Area = Built-up Area - (Wall thickness + Common areas)<br><br><strong>Example:</strong> If built-up area is 1000 sq ft, carpet area might be 800-850 sq ft.",
-        "category": "terminology",
+        "question": "what is a sale deed",
+        "keywords": ["sale deed", "deed", "what is sale deed", "sale deed meaning", "property deed"],
+        "answer": "<strong>📄 Sale Deed:</strong><br><br><strong>Definition:</strong> A Sale Deed is the main legal document that transfers ownership from seller to buyer once the sale is complete.<br><br><strong>Purpose:</strong>• Legal proof of property ownership transfer<br>• Required for all property transactions<br>• Must be registered with government<br><br><strong>Key Elements:</strong>• Buyer and seller details<br>• Property description and boundaries<br>• Sale consideration amount<br>• Date of transfer<br>• Signatures of both parties<br><br><strong>Registration:</strong> Must be registered at Sub-Registrar's office within 4 months of execution.",
+        "category": "documentation_title",
         "difficulty": "beginner",
-        "related_topics": ["built up area", "super built up area", "property measurement"]
+        "related_topics": ["title deed", "mother deed", "encumbrance certificate"]
       },
       {
-        "question": "what is built up area",
-        "keywords": ["built up area", "built-up", "builtup", "what is built up", "built up meaning", "built up area definition"],
-        "answer": "<strong>🏗️ Built-up Area:</strong><br><br><strong>Definition:</strong> Built-up area includes carpet area plus the thickness of external walls, internal walls, and common areas.<br><br><strong>What's Included:</strong>• Carpet area (usable space)<br>• External wall thickness<br>• Internal wall thickness<br>• Common areas (lobby, stairs, lift)<br>• Balcony (100% of balcony)<br><br><strong>Formula:</strong> Built-up Area = Carpet Area + Wall thickness + Common areas<br><br><strong>Example:</strong> If carpet area is 800 sq ft, built-up area might be 1000 sq ft.",
-        "category": "terminology",
+        "question": "what is title deed",
+        "keywords": ["title deed", "title", "what is title deed", "title deed meaning", "property title"],
+        "answer": "<strong>🏠 Title Deed:</strong><br><br><strong>Definition:</strong> It shows the seller's legal ownership and ability to transfer property.<br><br><strong>Importance:</strong>• Proves legal ownership<br>• Essential for property transfer<br>• Required for loans and registration<br><br><strong>What to Check:</strong>• Original document availability<br>• Chain of ownership<br>• No encumbrances or liens<br>• Valid and current<br><br><strong>Verification:</strong> Always verify with local municipal records and legal experts.",
+        "category": "documentation_title",
         "difficulty": "beginner",
-        "related_topics": ["carpet area", "super built up area", "property measurement"]
+        "related_topics": ["sale deed", "mother deed", "ownership verification"]
       },
       {
-        "question": "what is super built up area",
-        "keywords": ["super built up area", "super built-up", "super builtup", "what is super built up", "super built up meaning"],
-        "answer": "<strong>🏢 Super Built-up Area:</strong><br><br><strong>Definition:</strong> Super built-up area includes built-up area plus common facilities and amenities.<br><br><strong>What's Included:</strong>• Built-up area<br>• Common facilities (gym, pool, garden)<br>• Corridors and lobbies<br>• Lift and staircases<br>• Parking areas<br>• Clubhouse and amenities<br><br><strong>Formula:</strong> Super Built-up Area = Built-up Area + Common facilities + Amenities<br><br><strong>Example:</strong> If built-up area is 1000 sq ft, super built-up might be 1200-1400 sq ft.<br><br><strong>Note:</strong> This is what developers often quote as the total area.",
-        "category": "terminology",
-        "difficulty": "beginner",
-        "related_topics": ["carpet area", "built up area", "property measurement"]
-      },
-      {
-        "question": "what is bhk",
-        "keywords": ["bhk", "bedroom", "bed room", "what is bhk", "bhk meaning", "bedroom hall kitchen", "bhk definition"],
-        "answer": "<strong>🛏️ BHK (Bedroom, Hall, Kitchen):</strong><br><br><strong>Definition:</strong> BHK is a standard way to describe the layout of residential properties in India.<br><br><strong>Components:</strong>• <strong>B</strong> = Bedroom(s)<br>• <strong>H</strong> = Hall (Living room)<br>• <strong>K</strong> = Kitchen<br><br><strong>Common BHK Types:</strong>• <strong>1 BHK:</strong> 1 Bedroom + 1 Hall + 1 Kitchen<br>• <strong>2 BHK:</strong> 2 Bedrooms + 1 Hall + 1 Kitchen<br>• <strong>3 BHK:</strong> 3 Bedrooms + 1 Hall + 1 Kitchen<br>• <strong>2.5 BHK:</strong> 2 Bedrooms + 1 Hall + 1 Kitchen + 1 Study/Pooja room<br><br><strong>Example:</strong> 2 BHK means you get 2 bedrooms, 1 living room, and 1 kitchen.",
-        "category": "terminology",
-        "difficulty": "beginner",
-        "related_topics": ["property layout", "room configuration", "apartment types"]
-      },
-      {
-        "question": "what is roi in real estate",
-        "keywords": ["roi", "return on investment", "what is roi", "roi meaning", "return on investment real estate", "roi calculation"],
-        "answer": "<strong>💰 ROI (Return on Investment):</strong><br><br><strong>Definition:</strong> ROI measures the profitability of your real estate investment.<br><br><strong>Formula:</strong> ROI = ((Current Value - Purchase Price) / Purchase Price) × 100<br><br><strong>Types of ROI:</strong>• <strong>Rental ROI:</strong> Annual rental income / Property cost<br>• <strong>Appreciation ROI:</strong> Increase in property value over time<br>• <strong>Total ROI:</strong> Rental income + Appreciation<br><br><strong>Example:</strong> If you bought a property for ₹50 lakhs and it's now worth ₹60 lakhs:<br>ROI = ((60 - 50) / 50) × 100 = 20%<br><br><strong>Good ROI Range:</strong> 6-12% annually for rental properties.",
-        "category": "terminology",
+        "question": "what is mother deed",
+        "keywords": ["mother deed", "mother", "what is mother deed", "mother deed meaning", "original deed"],
+        "answer": "<strong>📜 Mother Deed:</strong><br><br><strong>Definition:</strong> The oldest document tracing the property's ownership lineage, vital to establish chain of title.<br><br><strong>Purpose:</strong>• Establishes ownership history<br>• Required for title verification<br>• Essential for legal compliance<br><br><strong>What to Check:</strong>• Original document availability<br>• Complete ownership chain<br>• No missing links<br>• Proper registration<br><br><strong>Importance:</strong> Without mother deed, property title cannot be verified completely.",
+        "category": "documentation_title",
         "difficulty": "intermediate",
-        "related_topics": ["investment", "rental yield", "property appreciation"]
+        "related_topics": ["sale deed", "title deed", "ownership chain"]
+      },
+      {
+        "question": "what is encumbrance certificate",
+        "keywords": ["encumbrance certificate", "ec", "encumbrance", "what is ec", "encumbrance certificate meaning"],
+        "answer": "<strong>🔒 Encumbrance Certificate (EC):</strong><br><br><strong>Definition:</strong> An EC certifies that the property is free from any legal or monetary liabilities such as mortgages or dues.<br><br><strong>Purpose:</strong>• Proves property is free from encumbrances<br>• Required for loans and registration<br>• Essential for title verification<br><br><strong>What it Shows:</strong>• No outstanding mortgages<br>• No pending legal cases<br>• No unpaid taxes or dues<br>• Clean title status<br><br><strong>Validity:</strong> Usually valid for 6 months from issue date.",
+        "category": "documentation_title",
+        "difficulty": "intermediate",
+        "related_topics": ["sale deed", "title verification", "legal clearance"]
+      },
+      {
+        "question": "what is khata certificate",
+        "keywords": ["khata", "khata certificate", "khata extract", "what is khata", "khata meaning"],
+        "answer": "<strong>📋 Khata Certificate/Extract:</strong><br><br><strong>Definition:</strong> A local municipal record recognizing property's existence, required for paying property tax and registering property.<br><br><strong>Purpose:</strong>• Municipal recognition of property<br>• Required for property tax payment<br>• Essential for registration<br><br><strong>What to Check:</strong>• Property details accuracy<br>• Owner name matching<br>• Tax assessment details<br>• No pending dues<br><br><strong>Note:</strong> Khata is different from Khata certificate - both are needed for complete compliance.",
+        "category": "documentation_title",
+        "difficulty": "intermediate",
+        "related_topics": ["municipal records", "property tax", "registration"]
+      }
+    ],
+    "processes_stages": [
+      {
+        "question": "what are the steps in buying property in india",
+        "keywords": ["steps", "buying property", "property purchase process", "how to buy property", "property buying steps"],
+        "answer": "<strong>🏠 Steps in Buying Property in India:</strong><br><br><strong>Step 1: Research & Planning</strong>• Determine budget and requirements<br>• Research locations and property types<br>• Check property prices and trends<br><br><strong>Step 2: Site Visit & Selection</strong>• Visit properties and projects<br>• Compare different options<br>• Check developer reputation<br><br><strong>Step 3: Legal Verification</strong>• Verify property documents<br>• Check title and ownership<br>• Verify approvals and NOCs<br><br><strong>Step 4: Financial Planning</strong>• Arrange down payment<br>• Apply for home loan<br>• Calculate total costs (including taxes)<br><br><strong>Step 5: Agreement & Registration</strong>• Sign agreement to sell<br>• Pay stamp duty and registration<br>• Register sale deed<br><br><strong>Step 6: Possession</strong>• Take property possession<br>• Transfer utilities<br>• Move in or rent out<br><br><strong>Timeline:</strong> 3-6 months for complete process",
+        "category": "processes_stages",
+        "difficulty": "beginner",
+        "related_topics": ["property purchase", "legal verification", "home loan"]
+      },
+      {
+        "question": "what is due diligence in property purchase",
+        "keywords": ["due diligence", "property verification", "legal checks", "what is due diligence", "property due diligence"],
+        "answer": "<strong>🔍 Due Diligence in Property Purchase:</strong><br><br><strong>Definition:</strong> Verifying property's legal status, checking title clearances, approvals, encumbrance, conversions, and liabilities.<br><br><strong>Legal Checks:</strong>• Title verification and ownership chain<br>• Encumbrance certificate<br>• Pending litigation status<br>• Property approvals and NOCs<br><br><strong>Physical Checks:</strong>• Site inspection and boundaries<br>• Construction quality and approvals<br>• Infrastructure and connectivity<br>• Neighborhood development<br><br><strong>Financial Checks:</strong>• Property valuation<br>• Tax payment status<br>• Outstanding dues<br>• Market price analysis<br><br><strong>Importance:</strong> Essential to avoid future legal and financial problems.",
+        "category": "processes_stages",
+        "difficulty": "intermediate",
+        "related_topics": ["legal verification", "title check", "property inspection"]
+      },
+      {
+        "question": "when should a buyer get noc",
+        "keywords": ["noc", "no objection certificate", "when to get noc", "noc requirement", "noc timing"],
+        "answer": "<strong>📋 When to Get NOC (No Objection Certificate):</strong><br><br><strong>Timing:</strong> From relevant authorities before property transfer<br><br><strong>Required NOCs:</strong>• <strong>RERA:</strong> For project compliance<br>• <strong>Society/Builder:</strong> For existing property<br>• <strong>Environmental:</strong> For large projects<br>• <strong>Fire Department:</strong> For high-rise buildings<br>• <strong>Municipal:</strong> For layout approvals<br><br><strong>When to Apply:</strong>• Before signing agreement<br>• During due diligence phase<br>• Before loan application<br>• Before registration<br><br><strong>Importance:</strong> NOCs ensure all approvals are in place and reduce legal risks.",
+        "category": "processes_stages",
+        "difficulty": "intermediate",
+        "related_topics": ["approvals", "legal compliance", "property transfer"]
+      },
+      {
+        "question": "how is stamp duty paid",
+        "keywords": ["stamp duty payment", "how to pay stamp duty", "stamp duty process", "stamp duty payment method"],
+        "answer": "<strong>💳 How is Stamp Duty Paid:</strong><br><br><strong>Payment Methods:</strong>• <strong>Online:</strong> Through state government portals<br>• <strong>Offline:</strong> At designated banks or offices<br>• <strong>Demand Draft:</strong> In favor of government<br><br><strong>Payment Process:</strong>• Calculate stamp duty amount<br>• Choose payment method<br>• Pay before registration<br>• Get payment receipt<br><br><strong>Documents Required:</strong>• Property details<br>• Sale agreement<br>• Buyer and seller details<br>• Property valuation<br><br><strong>Timing:</strong> Must be paid before Sale Deed registration<br><br><strong>Note:</strong> Keep payment receipt for registration process.",
+        "category": "processes_stages",
+        "difficulty": "intermediate",
+        "related_topics": ["stamp duty", "registration", "property tax"]
+      },
+      {
+        "question": "what is property registration",
+        "keywords": ["property registration", "registration process", "what is registration", "deed registration"],
+        "answer": "<strong>📝 Property Registration:</strong><br><br><strong>Definition:</strong> Legal recording of property transfer at the Sub-Registrar's office; makes ownership official.<br><br><strong>Process:</strong>• Submit Sale Deed with stamp duty<br>• Pay registration fee<br>• Present buyer and seller<br>• Get witnesses to sign<br>• Receive registration receipt<br><br><strong>Requirements:</strong>• Original Sale Deed<br>• Stamp duty payment proof<br>• Identity proofs of parties<br>• Two witnesses<br>• Registration fee<br><br><strong>Timeline:</strong> Usually completed same day<br><br><strong>Importance:</strong> Without registration, property transfer is not legally valid.",
+        "category": "processes_stages",
+        "difficulty": "intermediate",
+        "related_topics": ["sale deed", "legal transfer", "ownership"]
+      }
+    ],
+    "fees_taxes_financials": [
+      {
+        "question": "what fees does a buyer pay in addition to property cost",
+        "keywords": ["fees", "additional costs", "buyer fees", "property fees", "extra costs", "additional charges"],
+        "answer": "<strong>💰 Fees Buyers Pay in Addition to Property Cost:</strong><br><br><strong>Government Charges:</strong>• Stamp duty (5-8% of property value)<br>• Registration fee (1% of property value)<br>• Municipal charges and taxes<br><br><strong>Legal & Professional:</strong>• Legal fees for document verification<br>• Notary charges<br>• Property valuation fees<br><br><strong>Financial Charges:</strong>• Home loan processing fees<br>• Loan insurance premium<br>• Bank charges<br><br><strong>Other Charges:</strong>• Brokerage (1-2% of property value)<br>• Maintenance deposits<br>• Society membership fees<br>• Utility connection charges<br><br><strong>Total Additional Cost:</strong> Usually 8-12% of property value",
+        "category": "fees_taxes_financials",
+        "difficulty": "intermediate",
+        "related_topics": ["property costs", "additional charges", "buying expenses"]
+      },
+      {
+        "question": "what is stamp duty",
+        "keywords": ["stamp duty", "what is stamp duty", "stamp duty meaning", "registration charges", "stamp duty calculation"],
+        "answer": "<strong>🖋️ Stamp Duty:</strong><br><br><strong>Definition:</strong> A state-levied tax on property transactions, based on location and property value.<br><br><strong>When Applicable:</strong>• Property purchase<br>• Property sale<br>• Property transfer<br>• Lease agreements<br><br><strong>Rates (Varies by State):</strong>• <strong>Maharashtra:</strong> 5-6% of property value<br>• <strong>Delhi:</strong> 4-6% of property value<br>• <strong>Karnataka:</strong> 5-6% of property value<br>• <strong>Tamil Nadu:</strong> 7-8% of property value<br><br><strong>Calculation:</strong> Stamp Duty = Property Value × State Rate<br><br><strong>Example:</strong> For ₹50 lakh property in Maharashtra:<br>Stamp Duty = 50,00,000 × 0.06 = ₹3,00,000<br><br><strong>Payment:</strong> Must be paid before property registration.",
+        "category": "fees_taxes_financials",
+        "difficulty": "intermediate",
+        "related_topics": ["property tax", "registration charges", "state taxes"]
+      },
+      {
+        "question": "what is registration fee",
+        "keywords": ["registration fee", "what is registration fee", "registration charges", "deed registration fee"],
+        "answer": "<strong>📝 Registration Fee:</strong><br><br><strong>Definition:</strong> A fee (separate from stamp duty) for officially recording the Sale Deed, typically 1% of property value.<br><br><strong>Purpose:</strong>• Official recording of property transfer<br>• Government documentation<br>• Legal proof of ownership<br><br><strong>Calculation:</strong> Usually 1% of property value<br><br><strong>Payment:</strong> Paid along with stamp duty<br><br><strong>Importance:</strong> Without registration, property transfer is not legally valid.",
+        "category": "fees_taxes_financials",
+        "difficulty": "intermediate",
+        "related_topics": ["registration", "legal fees", "property transfer"]
+      },
+      {
+        "question": "what are legal fees",
+        "keywords": ["legal fees", "lawyer charges", "what are legal fees", "legal charges", "lawyer fees"],
+        "answer": "<strong>⚖️ Legal Fees:</strong><br><br><strong>Definition:</strong> Charges paid to lawyers/notaries for verifying documents and preparing Sale Deed.<br><br><strong>Services Included:</strong>• Document verification<br>• Title search<br>• Sale Deed preparation<br>• Legal opinion<br>• Registration assistance<br><br><strong>Typical Charges:</strong>• <strong>Document Verification:</strong> ₹5,000-15,000<br>• <strong>Sale Deed Preparation:</strong> ₹10,000-25,000<br>• <strong>Complete Legal Process:</strong> ₹20,000-50,000<br><br><strong>Factors Affecting Cost:</strong>• Property value<br>• Complexity of documents<br>• Lawyer's experience<br>• Location<br><br><strong>Importance:</strong> Essential for legal compliance and risk mitigation.",
+        "category": "fees_taxes_financials",
+        "difficulty": "intermediate",
+        "related_topics": ["legal services", "documentation", "professional fees"]
+      },
+      {
+        "question": "is brokerage charged to buyer or seller",
+        "keywords": ["brokerage", "broker charges", "who pays brokerage", "brokerage payment", "agent fees"],
+        "answer": "<strong>🤝 Brokerage Charges:</strong><br><br><strong>General Rule:</strong> Generally charged to the buyer (often 1-2%) but negotiable; varies with local custom.<br><br><strong>Typical Arrangements:</strong>• <strong>Buyer Pays:</strong> Most common scenario<br>• <strong>Seller Pays:</strong> In some markets<br>• <strong>Split Payment:</strong> Both parties share<br>• <strong>Negotiated:</strong> Based on market conditions<br><br><strong>Brokerage Rates:</strong>• <strong>Residential:</strong> 1-2% of property value<br>• <strong>Commercial:</strong> 2-3% of property value<br>• <strong>Rental:</strong> 1 month rent<br><br><strong>Factors Affecting:</strong>• Property type and value<br>• Market conditions<br>• Broker's services<br>• Negotiation skills<br><br><strong>Note:</strong> Always clarify brokerage terms before engaging services.",
+        "category": "fees_taxes_financials",
+        "difficulty": "intermediate",
+        "related_topics": ["brokerage", "agent fees", "property transaction"]
       }
     ],
     "legal_regulatory": [
@@ -58,14 +142,6 @@
         "category": "legal_regulatory",
         "difficulty": "intermediate",
         "related_topics": ["home loan", "documentation", "loan application"]
-      },
-      {
-        "question": "what is stamp duty",
-        "keywords": ["stamp duty", "what is stamp duty", "stamp duty meaning", "registration charges", "stamp duty calculation"],
-        "answer": "<strong>🖋️ Stamp Duty:</strong><br><br><strong>Definition:</strong> Stamp duty is a tax levied by state governments on property transactions.<br><br><strong>When Applicable:</strong>• Property purchase<br>• Property sale<br>• Property transfer<br>• Lease agreements<br><br><strong>Rates (Varies by State):</strong>• <strong>Maharashtra:</strong> 5-6% of property value<br>• <strong>Delhi:</strong> 4-6% of property value<br>• <strong>Karnataka:</strong> 5-6% of property value<br>• <strong>Tamil Nadu:</strong> 7-8% of property value<br><br><strong>Calculation:</strong> Stamp Duty = Property Value × State Rate<br><br><strong>Example:</strong> For ₹50 lakh property in Maharashtra:<br>Stamp Duty = 50,00,000 × 0.06 = ₹3,00,000<br><br><strong>Payment:</strong> Must be paid before property registration.",
-        "category": "legal_regulatory",
-        "difficulty": "intermediate",
-        "related_topics": ["property tax", "registration charges", "state taxes"]
       },
       {
         "question": "what is gst in real estate",
@@ -102,6 +178,47 @@
         "related_topics": ["document verification", "legal compliance", "property title"]
       }
     ],
+    "financing_loans": [
+      {
+        "question": "can buyers finance beyond stamp and registration via loan",
+        "keywords": ["finance", "loan", "stamp duty", "registration", "home loan", "financing options"],
+        "answer": "<strong>🏦 Financing Beyond Stamp and Registration:</strong><br><br><strong>General Rule:</strong> Most banks finance up to 80-90% of property cost; balance from buyer.<br><br><strong>What's Financed:</strong>• Property cost<br>• Basic construction costs<br>• Essential amenities<br><br><strong>What's NOT Financed:</strong>• Stamp duty<br>• Registration fees<br>• Legal charges<br>• Brokerage<br>• Maintenance deposits<br><br><strong>Down Payment Requirements:</strong>• <strong>Residential:</strong> 20-30% of property value<br>• <strong>Commercial:</strong> 25-40% of property value<br><br><strong>Alternative Options:</strong>• Personal loans for additional costs<br>• Gold loans<br>• Liquidate investments<br>• Family support<br><br><strong>Note:</strong> Plan for 8-12% additional costs beyond property price.",
+        "category": "financing_loans",
+        "difficulty": "intermediate",
+        "related_topics": ["home loan", "down payment", "financing costs"]
+      },
+      {
+        "question": "what is loan to value ltv",
+        "keywords": ["ltv", "loan to value", "what is ltv", "ltv ratio", "loan ratio", "financing ratio"],
+        "answer": "<strong>📊 Loan-to-Value (LTV) Ratio:</strong><br><br><strong>Definition:</strong> LTV ratio indicates portion of property cost financed by lender (e.g., 80%).<br><br><strong>Formula:</strong> LTV = (Loan Amount / Property Value) × 100<br><br><strong>Example:</strong>• Property Value: ₹50,00,000<br>• Loan Amount: ₹40,00,000<br>• LTV = (40,00,000 / 50,00,000) × 100 = 80%<br><br><strong>Typical LTV Limits:</strong>• <strong>Residential:</strong> 80-90%<br>• <strong>Commercial:</strong> 70-80%<br>• <strong>High-Value Properties:</strong> 60-75%<br><br><strong>Factors Affecting LTV:</strong>• Property type and location<br>• Borrower's income and credit score<br>• Market conditions<br>• Bank's risk assessment<br><br><strong>Importance:</strong> Higher LTV means lower down payment but higher risk.",
+        "category": "financing_loans",
+        "difficulty": "intermediate",
+        "related_topics": ["home loan", "down payment", "loan calculation"]
+      },
+      {
+        "question": "what documents are needed for home loan",
+        "keywords": ["documents", "home loan", "documents needed", "home loan documents", "required documents"],
+        "answer": "<strong>📋 Documents Required for Home Loan:</strong><br><br><strong>Personal Documents:</strong>• PAN Card<br>• Aadhaar Card<br>• Passport size photographs<br>• Address proof (Utility bills, Rental agreement)<br><br><strong>Income Documents:</strong>• Salary slips (last 3 months)<br>• Bank statements (last 6 months)<br>• Form 16 or IT returns (last 2 years)<br>• Employment certificate<br><br><strong>Property Documents:</strong>• Sale deed/Agreement to sell<br>• Property tax receipts<br>• NOC from society/builder<br>• Approved building plan<br>• Encumbrance certificate<br><br><strong>Additional Documents:</strong>• Down payment proof<br>• Property insurance<br>• Legal opinion report<br><br><strong>Note:</strong> Requirements may vary between banks and loan types.",
+        "category": "financing_loans",
+        "difficulty": "intermediate",
+        "related_topics": ["home loan", "documentation", "loan application"]
+      },
+      {
+        "question": "can non residents buy property in india",
+        "keywords": ["non residents", "nri", "pio", "foreign buyers", "overseas buyers", "foreign property purchase"],
+        "answer": "<strong>🌍 Non-Resident Property Purchase in India:</strong><br><br><strong>Eligible Categories:</strong>• <strong>NRIs:</strong> Non-Resident Indians<br>• <strong>PIOs:</strong> Persons of Indian Origin<br>• <strong>OCIs:</strong> Overseas Citizens of India<br><br><strong>Property Types Allowed:</strong>• Residential properties<br>• Commercial properties<br>• Agricultural land (with RBI approval)<br><br><strong>Restrictions:</strong>• Cannot buy agricultural land without RBI approval<br>• Cannot buy plantation property<br>• Cannot buy farm house<br><br><strong>Payment Methods:</strong>• NRE/NRO account transfers<br>• Foreign currency conversion<br>• Gift from relatives in India<br><br><strong>Documentation:</strong>• Passport and visa copies<br>• Overseas address proof<br>• Income proof from abroad<br>• PAN card<br><br><strong>Note:</strong> Consult legal experts for compliance.",
+        "category": "financing_loans",
+        "difficulty": "intermediate",
+        "related_topics": ["nri property", "foreign investment", "legal compliance"]
+      },
+      {
+        "question": "is home loan interest tax deductible",
+        "answer": "<strong>💰 Home Loan Tax Benefits:</strong><br><br><strong>Interest Deduction:</strong> Yes, under Section 24(b) for interest and Section 80C on principal (up to limits).<br><br><strong>Section 24(b) - Interest Deduction:</strong>• <strong>Self-Occupied:</strong> Up to ₹2 lakh per year<br>• <strong>Let-Out:</strong> No limit on interest deduction<br>• <strong>Under Construction:</strong> Interest deduction starts from construction completion<br><br><strong>Section 80C - Principal Repayment:</strong>• Up to ₹1.5 lakh per year<br>• Includes stamp duty and registration<br>• Available only for first-time buyers<br><br><strong>Additional Benefits:</strong>• <strong>Section 80EE:</strong> Additional ₹50,000 for affordable housing<br>• <strong>Section 80EEA:</strong> Additional ₹1.5 lakh for affordable housing<br><br><strong>Conditions:</strong>• Property must be in India<br>• Loan must be from approved financial institutions<br>• Construction must be completed within 5 years<br><br><strong>Note:</strong> Consult tax advisor for specific benefits.",
+        "category": "financing_loans",
+        "difficulty": "intermediate",
+        "related_topics": ["tax benefits", "home loan", "income tax"]
+      }
+    ],
     "investment": [
       {
         "question": "is real estate good investment",
@@ -118,6 +235,48 @@
         "category": "investment",
         "difficulty": "intermediate",
         "related_topics": ["rental income", "investment analysis", "property valuation"]
+      }
+    ],
+    "key_terminology": [
+      {
+        "question": "what is carpet area",
+        "keywords": ["carpet area", "carpet", "area", "what is carpet", "carpet area meaning", "carpet area definition"],
+        "answer": "<strong>🏠 Carpet Area:</strong><br><br><strong>Definition:</strong> Carpet area is the actual usable area within the walls of your apartment/house where you can lay a carpet.<br><br><strong>What's Included:</strong>• Living room, bedrooms, kitchen, bathrooms<br>• Internal walls and columns<br>• Balcony area (50% of balcony)<br><br><strong>What's NOT Included:</strong>• External walls thickness<br>• Common areas (lobby, stairs, lift)<br>• Terrace, garden, parking<br><br><strong>Formula:</strong> Carpet Area = Built-up Area - (Wall thickness + Common areas)<br><br><strong>Example:</strong> If built-up area is 1000 sq ft, carpet area might be 800-850 sq ft.",
+        "category": "key_terminology",
+        "difficulty": "beginner",
+        "related_topics": ["built up area", "super built up area", "property measurement"]
+      },
+      {
+        "question": "what is built up area",
+        "keywords": ["built up area", "built-up", "builtup", "what is built up", "built up meaning", "built up area definition"],
+        "answer": "<strong>🏗️ Built-up Area:</strong><br><br><strong>Definition:</strong> Built-up area includes carpet area plus the thickness of external walls, internal walls, and common areas.<br><br><strong>What's Included:</strong>• Carpet area (usable space)<br>• External wall thickness<br>• Internal wall thickness<br>• Common areas (lobby, stairs, lift)<br>• Balcony (100% of balcony)<br><br><strong>Formula:</strong> Built-up Area = Carpet Area + Wall thickness + Common areas<br><br><strong>Example:</strong> If carpet area is 800 sq ft, built-up area might be 1000 sq ft.",
+        "category": "key_terminology",
+        "difficulty": "beginner",
+        "related_topics": ["carpet area", "super built up area", "property measurement"]
+      },
+      {
+        "question": "what is super built up area",
+        "keywords": ["super built up area", "super built-up", "super builtup", "what is super built up", "super built up meaning"],
+        "answer": "<strong>🏢 Super Built-up Area:</strong><br><br><strong>Definition:</strong> Super built-up area includes built-up area plus common facilities and amenities.<br><br><strong>What's Included:</strong>• Built-up area<br>• Common facilities (gym, pool, garden)<br>• Corridors and lobbies<br>• Lift and staircases<br>• Parking areas<br>• Clubhouse and amenities<br><br><strong>Formula:</strong> Super Built-up Area = Built-up Area + Common facilities + Amenities<br><br><strong>Example:</strong> If built-up area is 1000 sq ft, super built-up might be 1200-1400 sq ft.<br><br><strong>Note:</strong> This is what developers often quote as the total area.",
+        "category": "key_terminology",
+        "difficulty": "beginner",
+        "related_topics": ["carpet area", "built up area", "property measurement"]
+      },
+      {
+        "question": "what is bhk",
+        "keywords": ["bhk", "bedroom", "bed room", "what is bhk", "bhk meaning", "bedroom hall kitchen", "bhk definition"],
+        "answer": "<strong>🛏️ BHK (Bedroom, Hall, Kitchen):</strong><br><br><strong>Definition:</strong> BHK is a standard way to describe the layout of residential properties in India.<br><br><strong>Components:</strong>• <strong>B</strong> = Bedroom(s)<br>• <strong>H</strong> = Hall (Living room)<br>• <strong>K</strong> = Kitchen<br><br><strong>Common BHK Types:</strong>• <strong>1 BHK:</strong> 1 Bedroom + 1 Hall + 1 Kitchen<br>• <strong>2 BHK:</strong> 2 Bedrooms + 1 Hall + 1 Kitchen<br>• <strong>3 BHK:</strong> 3 Bedrooms + 1 Hall + 1 Kitchen<br>• <strong>2.5 BHK:</strong> 2 Bedrooms + 1 Hall + 1 Kitchen + 1 Study/Pooja room<br><br><strong>Example:</strong> 2 BHK means you get 2 bedrooms, 1 living room, and 1 kitchen.",
+        "category": "key_terminology",
+        "difficulty": "beginner",
+        "related_topics": ["property layout", "room configuration", "apartment types"]
+      },
+      {
+        "question": "what is roi in real estate",
+        "keywords": ["roi", "return on investment", "what is roi", "roi meaning", "return on investment real estate", "roi calculation"],
+        "answer": "<strong>💰 ROI (Return on Investment):</strong><br><br><strong>Definition:</strong> ROI measures the profitability of your real estate investment.<br><br><strong>Formula:</strong> ROI = ((Current Value - Purchase Price) / Purchase Price) × 100<br><br><strong>Types of ROI:</strong>• <strong>Rental ROI:</strong> Annual rental income / Property cost<br>• <strong>Appreciation ROI:</strong> Increase in property value over time<br>• <strong>Total ROI:</strong> Rental income + Appreciation<br><br><strong>Example:</strong> If you bought a property for ₹50 lakhs and it's now worth ₹60 lakhs:<br>ROI = ((60 - 50) / 50) × 100 = 20%<br><br><strong>Good ROI Range:</strong> 6-12% annually for rental properties.",
+        "category": "key_terminology",
+        "difficulty": "intermediate",
+        "related_topics": ["investment", "rental yield", "property appreciation"]
       }
     ]
   },
@@ -146,9 +305,29 @@
     "model_version": "1.0.0"
   },
   "category_metadata": {
-    "terminology": {
-      "description": "Real estate terms and definitions",
-      "difficulty_levels": ["beginner", "intermediate", "advanced"],
+    "documentation_title": {
+      "description": "Property documentation and title verification",
+      "difficulty_levels": ["beginner", "intermediate"],
+      "target_audience": ["first-time buyers", "investors", "legal professionals"]
+    },
+    "processes_stages": {
+      "description": "Step-by-step processes and stages in property transactions",
+      "difficulty_levels": ["beginner", "intermediate"],
+      "target_audience": ["first-time buyers", "investors", "professionals"]
+    },
+    "fees_taxes_financials": {
+      "description": "Financial aspects, fees, taxes, and costs in property transactions",
+      "difficulty_levels": ["intermediate", "advanced"],
+      "target_audience": ["buyers", "investors", "financial professionals"]
+    },
+    "financing_loans": {
+      "description": "Home loan and financing options, requirements, and benefits",
+      "difficulty_levels": ["intermediate", "advanced"],
+      "target_audience": ["buyers", "investors", "financial professionals"]
+    },
+    "key_terminology": {
+      "description": "Essential real estate terms, definitions, and measurements",
+      "difficulty_levels": ["beginner", "intermediate"],
       "target_audience": ["first-time buyers", "investors", "professionals"]
     },
     "legal_regulatory": {
