@@ -1,0 +1,227 @@
+{
+  "search_properties": {
+    "intents": {
+      "SEARCH_BY_LOCATION": {
+        "examples": [
+          "I want a house in Mumbai",
+          "Show me properties in Pune",
+          "Find apartments in Bangalore",
+          "Properties in Delhi NCR",
+          "Looking for houses in Chennai",
+          "Flats in Hyderabad",
+          "Villas in Kolkata",
+          "Properties in Ahmedabad",
+          "Houses in Noida",
+          "Apartments in Gurgaon",
+          "Properties in Thane",
+          "Flats in Navi Mumbai",
+          "Houses in Whitefield",
+          "Properties in Hinjewadi",
+          "Apartments in Baner"
+        ],
+        "entities": ["LOCATION", "CITY", "LOCALITY"],
+        "description": "Queries seeking properties in specific locations"
+      },
+      "SEARCH_BY_BHK": {
+        "examples": [
+          "2 BHK apartments",
+          "3 BHK houses",
+          "1 BHK flats",
+          "4 BHK villas",
+          "Show me 2 BHK properties",
+          "Looking for 3 BHK apartments",
+          "1 BHK houses available",
+          "4 BHK properties for sale",
+          "2.5 BHK apartments",
+          "Studio apartments",
+          "Penthouse properties",
+          "Duplex houses",
+          "Triplex apartments",
+          "1 RK properties",
+          "2 BHK with study room"
+        ],
+        "entities": ["BHK", "PROPERTY_TYPE", "ROOM_CONFIGURATION"],
+        "description": "Queries seeking properties with specific bedroom configurations"
+      },
+      "SEARCH_BY_PRICE": {
+        "examples": [
+          "Properties under 50 lakhs",
+          "Houses above 1 crore",
+          "Flats between 30-60 lakhs",
+          "Properties under 1 crore",
+          "Houses above 2 crores",
+          "Flats under 25 lakhs",
+          "Properties between 50-100 lakhs",
+          "Villas above 3 crores",
+          "Apartments under 40 lakhs",
+          "Properties under 75 lakhs",
+          "Houses above 1.5 crores",
+          "Flats between 20-50 lakhs",
+          "Properties under 90 lakhs",
+          "Villas above 5 crores",
+          "Apartments under 60 lakhs"
+        ],
+        "entities": ["PRICE_RANGE", "BUDGET", "COST"],
+        "description": "Queries seeking properties within specific price ranges"
+      },
+      "SEARCH_BY_AMENITIES": {
+        "examples": [
+          "Properties near metro station",
+          "Houses with swimming pool",
+          "Flats near good schools",
+          "Properties near railway station",
+          "Houses with gym",
+          "Flats near hospital",
+          "Properties near airport",
+          "Houses with garden",
+          "Flats near shopping mall",
+          "Properties near park",
+          "Houses with clubhouse",
+          "Flats near temple",
+          "Properties near bus stand",
+          "Houses with playground",
+          "Flats near market"
+        ],
+        "entities": ["AMENITY", "NEARBY_PLACE", "FACILITY"],
+        "description": "Queries seeking properties with specific amenities or near specific places"
+      },
+      "SEARCH_BY_PROPERTY_TYPE": {
+        "examples": [
+          "Show me apartments",
+          "Looking for villas",
+          "Houses for sale",
+          "Studio apartments",
+          "Penthouse properties",
+          "Duplex houses",
+          "Independent houses",
+          "Row houses",
+          "Farm houses",
+          "Beach houses",
+          "Mountain view properties",
+          "Garden apartments",
+          "Luxury villas",
+          "Budget apartments",
+          "Premium properties"
+        ],
+        "entities": ["PROPERTY_TYPE", "PROPERTY_CATEGORY"],
+        "description": "Queries seeking specific types of properties"
+      },
+      "SEARCH_BY_STATUS": {
+        "examples": [
+          "Ready to move properties",
+          "Under construction projects",
+          "New launch properties",
+          "Resale properties",
+          "Ready possession flats",
+          "Under construction apartments",
+          "New projects",
+          "Ready to occupy houses",
+          "Under construction villas",
+          "New property launches",
+          "Ready to move apartments",
+          "Under construction houses",
+          "New residential projects",
+          "Ready possession properties",
+          "Under construction flats"
+        ],
+        "entities": ["PROPERTY_STATUS", "CONSTRUCTION_STATUS"],
+        "description": "Queries seeking properties with specific construction status"
+      }
+    },
+    "entities": {
+      "LOCATION": {
+        "cities": [
+          "Mumbai", "Delhi", "Bangalore", "Pune", "Hyderabad", 
+          "Chennai", "Kolkata", "Ahmedabad", "Noida", "Gurgaon",
+          "Thane", "Navi Mumbai", "Faridabad", "Ghaziabad", "Lucknow"
+        ],
+        "localities": [
+          "Bandra", "Andheri", "Powai", "Whitefield", "Hinjewadi", 
+          "Baner", "Koregaon Park", "Jubilee Hills", "Gachibowli",
+          "Electronic City", "Marathahalli", "Sarjapur", "Bellandur",
+          "Kharadi", "Viman Nagar", "Kalyani Nagar", "Koregaon Park"
+        ],
+        "landmarks": [
+          "Metro Station", "Railway Station", "Airport", "Hospital",
+          "School", "Mall", "Park", "Office", "Market", "Temple",
+          "University", "Shopping Center", "Restaurant", "Bank", "ATM"
+        ]
+      },
+      "BHK": [
+        "1 BHK", "2 BHK", "3 BHK", "4 BHK", "5 BHK", 
+        "1BHK", "2BHK", "3BHK", "4BHK", "5BHK",
+        "1.5 BHK", "2.5 BHK", "3.5 BHK", "Studio", "1 RK"
+      ],
+      "PROPERTY_TYPE": [
+        "Apartment", "House", "Villa", "Flat", "Penthouse", 
+        "Studio", "Duplex", "Triplex", "Independent House", "Row House",
+        "Farm House", "Beach House", "Mountain House", "Garden Apartment"
+      ],
+      "PRICE_RANGE": [
+        "Under 25 Lakhs", "25-50 Lakhs", "50-100 Lakhs", 
+        "1-2 Crores", "2-5 Crores", "Above 5 Crores",
+        "Under 30 Lakhs", "30-60 Lakhs", "60-120 Lakhs",
+        "1.5-3 Crores", "3-7 Crores", "Above 7 Crores"
+      ],
+      "AMENITY": [
+        "Swimming Pool", "Gym", "Clubhouse", "Garden", "Playground",
+        "Security", "Parking", "Lift", "Power Backup", "Water Supply",
+        "CCTV", "24x7 Security", "Children's Park", "Walking Track",
+        "Indoor Games", "Outdoor Sports", "Party Hall", "Guest House"
+      ],
+      "PROPERTY_STATUS": [
+        "Ready to Move", "Under Construction", "New Launch", 
+        "Resale", "Ready to Occupy", "Under Development",
+        "New Project", "Ready Possession", "Under Progress",
+        "New Residential", "Ready to Live", "Under Building"
+      ]
+    },
+    "search_patterns": {
+      "location_based": [
+        "properties in {city}",
+        "houses in {locality}",
+        "flats near {landmark}",
+        "apartments in {city}",
+        "villas in {locality}"
+      ],
+      "bhk_based": [
+        "{bhk} properties",
+        "{bhk} apartments",
+        "{bhk} houses",
+        "{bhk} flats",
+        "{bhk} for sale"
+      ],
+      "price_based": [
+        "properties under {price}",
+        "houses above {price}",
+        "flats between {price_range}",
+        "apartments under {price}",
+        "villas above {price}"
+      ],
+      "amenity_based": [
+        "properties with {amenity}",
+        "houses near {landmark}",
+        "flats with {amenity}",
+        "apartments near {landmark}",
+        "villas with {amenity}"
+      ]
+    }
+  },
+  "training_config": {
+    "model_type": "tfidf_cosine",
+    "min_confidence_threshold": 0.3,
+    "max_features": 1000,
+    "ngram_range": [1, 2],
+    "stop_words": "english",
+    "test_split_ratio": 0.2,
+    "validation_split_ratio": 0.1
+  },
+  "performance_metrics": {
+    "intent_classification_accuracy": 0.0,
+    "entity_extraction_accuracy": 0.0,
+    "overall_accuracy": 0.0,
+    "training_examples_count": 0,
+    "last_training_date": null,
+    "model_version": "1.0.0"
+  }
+}
